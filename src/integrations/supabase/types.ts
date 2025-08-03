@@ -20,6 +20,11 @@ export type Database = {
           avg_exercise_min_per_day: number | null
           body_fat_percentage: number | null
           created_at: string
+          goal_avg_daily_calories: number | null
+          goal_avg_exercise_min_per_day: number | null
+          goal_body_fat_percentage: number | null
+          goal_skin_fold_mm: number | null
+          goal_weight: number | null
           id: string
           notes: string | null
           skin_fold_mm: number | null
@@ -33,6 +38,11 @@ export type Database = {
           avg_exercise_min_per_day?: number | null
           body_fat_percentage?: number | null
           created_at?: string
+          goal_avg_daily_calories?: number | null
+          goal_avg_exercise_min_per_day?: number | null
+          goal_body_fat_percentage?: number | null
+          goal_skin_fold_mm?: number | null
+          goal_weight?: number | null
           id?: string
           notes?: string | null
           skin_fold_mm?: number | null
@@ -46,6 +56,11 @@ export type Database = {
           avg_exercise_min_per_day?: number | null
           body_fat_percentage?: number | null
           created_at?: string
+          goal_avg_daily_calories?: number | null
+          goal_avg_exercise_min_per_day?: number | null
+          goal_body_fat_percentage?: number | null
+          goal_skin_fold_mm?: number | null
+          goal_weight?: number | null
           id?: string
           notes?: string | null
           skin_fold_mm?: number | null
