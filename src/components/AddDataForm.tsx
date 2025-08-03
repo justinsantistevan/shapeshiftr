@@ -32,7 +32,31 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
     avg_exercise_min_per_day: "",
     notes: ""
   });
+  const [frontPhoto, setFrontPhoto] = useState<File | null>(null);
+  const [sidePhoto, setSidePhoto] = useState<File | null>(null);
   const { toast } = useToast();
+
+  const uploadPhoto = async (file: File, photoType: 'front' | 'side'): Promise<string | null> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}/${formData.week_start_date}/${photoType}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('fitness-photos')
+      .upload(fileName, file, { upsert: true });
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('fitness-photos')
+      .getPublicUrl(fileName);
+
+    return publicUrl;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +74,18 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
         return;
       }
 
+      // Upload photos if provided
+      let frontPhotoUrl = null;
+      let sidePhotoUrl = null;
+
+      if (frontPhoto) {
+        frontPhotoUrl = await uploadPhoto(frontPhoto, 'front');
+      }
+
+      if (sidePhoto) {
+        sidePhotoUrl = await uploadPhoto(sidePhoto, 'side');
+      }
+
       // Prepare data for insertion, converting strings to numbers where needed
       const insertData = {
         user_id: user.id,
@@ -59,6 +95,8 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
         skin_fold_mm: formData.skin_fold_mm ? parseFloat(formData.skin_fold_mm) : null,
         avg_daily_calories: formData.avg_daily_calories ? parseInt(formData.avg_daily_calories) : null,
         avg_exercise_min_per_day: formData.avg_exercise_min_per_day ? parseInt(formData.avg_exercise_min_per_day) : null,
+        front_photo_url: frontPhotoUrl,
+        side_photo_url: sidePhotoUrl,
         notes: formData.notes || null
       };
 
@@ -77,7 +115,7 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
       } else {
         toast({
           title: "Success!",
-          description: "Fitness data saved successfully.",
+          description: "Fitness data and photos saved successfully.",
         });
         
         // Reset form
@@ -90,6 +128,8 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
           avg_exercise_min_per_day: "",
           notes: ""
         });
+        setFrontPhoto(null);
+        setSidePhoto(null);
         
         onSuccess();
         onOpenChange(false);
@@ -207,6 +247,52 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                   onChange={(e) => handleInputChange('notes', e.target.value)}
                   className="min-h-[80px]"
                 />
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <Label className="text-base font-medium">Progress Photos</Label>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="front_photo">Front Photo</Label>
+                      <Input
+                        id="front_photo"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          setFrontPhoto(file || null);
+                        }}
+                        className="cursor-pointer"
+                      />
+                      {frontPhoto && (
+                        <p className="text-xs text-muted-foreground">
+                          Selected: {frontPhoto.name}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="side_photo">Side Photo</Label>
+                      <Input
+                        id="side_photo"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          setSidePhoto(file || null);
+                        }}
+                        className="cursor-pointer"
+                      />
+                      {sidePhoto && (
+                        <p className="text-xs text-muted-foreground">
+                          Selected: {sidePhoto.name}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="flex gap-2 pt-4">

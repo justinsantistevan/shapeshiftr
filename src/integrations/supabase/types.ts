@@ -56,8 +56,10 @@ export type Database = {
           avg_exercise_min_per_day: number | null
           body_fat_percentage: number | null
           created_at: string
+          front_photo_url: string | null
           id: string
           notes: string | null
+          side_photo_url: string | null
           skin_fold_mm: number | null
           updated_at: string
           user_id: string
@@ -69,8 +71,10 @@ export type Database = {
           avg_exercise_min_per_day?: number | null
           body_fat_percentage?: number | null
           created_at?: string
+          front_photo_url?: string | null
           id?: string
           notes?: string | null
+          side_photo_url?: string | null
           skin_fold_mm?: number | null
           updated_at?: string
           user_id: string
@@ -82,8 +86,10 @@ export type Database = {
           avg_exercise_min_per_day?: number | null
           body_fat_percentage?: number | null
           created_at?: string
+          front_photo_url?: string | null
           id?: string
           notes?: string | null
+          side_photo_url?: string | null
           skin_fold_mm?: number | null
           updated_at?: string
           user_id?: string
