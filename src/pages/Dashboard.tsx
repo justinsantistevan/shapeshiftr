@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut, Plus, Settings } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InspirationalQuote } from "@/components/InspirationalQuote";
 import { MetricsChart } from "@/components/MetricsChart";
 import { FitnessAffirmations } from "@/components/FitnessAffirmations";
+import { AddDataForm } from "@/components/AddDataForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import shapeshiftrLogo from "@/assets/shapeshiftr-logo.png";
@@ -14,6 +15,7 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onSignOut }: DashboardProps) {
+  const [showAddDataForm, setShowAddDataForm] = useState(false);
   const { toast } = useToast();
 
   const handleSignOut = async () => {
@@ -33,6 +35,14 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     }
   };
 
+  const handleDataAdded = () => {
+    // Refresh data or update UI as needed
+    toast({
+      title: "Data Added",
+      description: "Your fitness data has been successfully recorded.",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -50,7 +60,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
           </div>
           <div className="flex items-center space-x-3">
             <ThemeToggle />
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowAddDataForm(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Add Data
             </Button>
@@ -128,6 +138,12 @@ export function Dashboard({ onSignOut }: DashboardProps) {
           <FitnessAffirmations />
         </section>
       </main>
+
+      <AddDataForm 
+        open={showAddDataForm} 
+        onOpenChange={setShowAddDataForm}
+        onSuccess={handleDataAdded}
+      />
     </div>
   );
 }
