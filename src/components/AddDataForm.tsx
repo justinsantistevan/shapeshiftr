@@ -16,13 +16,20 @@ interface AddDataFormProps {
 
 export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const getWeekStartDate = (date: Date) => {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day; // Subtract days to get to Sunday
+    return new Date(d.setDate(diff)).toISOString().split('T')[0];
+  };
+
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0], // Today's date
+    week_start_date: getWeekStartDate(new Date()),
     weight: "",
     body_fat_percentage: "",
-    muscle_mass: "",
-    workout_duration: "",
-    calories_burned: "",
+    skin_fold_mm: "",
+    avg_daily_calories: "",
+    avg_exercise_min_per_day: "",
     notes: ""
   });
   const { toast } = useToast();
@@ -46,19 +53,19 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
       // Prepare data for insertion, converting strings to numbers where needed
       const insertData = {
         user_id: user.id,
-        date: formData.date,
+        week_start_date: formData.week_start_date,
         weight: formData.weight ? parseFloat(formData.weight) : null,
         body_fat_percentage: formData.body_fat_percentage ? parseFloat(formData.body_fat_percentage) : null,
-        muscle_mass: formData.muscle_mass ? parseFloat(formData.muscle_mass) : null,
-        workout_duration: formData.workout_duration ? parseInt(formData.workout_duration) : null,
-        calories_burned: formData.calories_burned ? parseInt(formData.calories_burned) : null,
+        skin_fold_mm: formData.skin_fold_mm ? parseFloat(formData.skin_fold_mm) : null,
+        avg_daily_calories: formData.avg_daily_calories ? parseInt(formData.avg_daily_calories) : null,
+        avg_exercise_min_per_day: formData.avg_exercise_min_per_day ? parseInt(formData.avg_exercise_min_per_day) : null,
         notes: formData.notes || null
       };
 
       const { error } = await supabase
-        .from('fitness_entries')
+        .from('weekly_fitness_entries')
         .upsert(insertData, { 
-          onConflict: 'user_id,date' 
+          onConflict: 'user_id,week_start_date' 
         });
 
       if (error) {
@@ -75,12 +82,12 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
         
         // Reset form
         setFormData({
-          date: new Date().toISOString().split('T')[0],
+          week_start_date: getWeekStartDate(new Date()),
           weight: "",
           body_fat_percentage: "",
-          muscle_mass: "",
-          workout_duration: "",
-          calories_burned: "",
+          skin_fold_mm: "",
+          avg_daily_calories: "",
+          avg_exercise_min_per_day: "",
           notes: ""
         });
         
@@ -111,7 +118,7 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
         <DialogHeader>
           <DialogTitle>Add Fitness Data</DialogTitle>
           <DialogDescription>
-            Track your fitness metrics for today or a specific date.
+            Track your weekly fitness metrics. One entry per week.
           </DialogDescription>
         </DialogHeader>
         
@@ -119,12 +126,12 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
           <CardContent className="p-0">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="date">Date</Label>
+                <Label htmlFor="week_start_date">Week Starting</Label>
                 <Input
-                  id="date"
+                  id="week_start_date"
                   type="date"
-                  value={formData.date}
-                  onChange={(e) => handleInputChange('date', e.target.value)}
+                  value={formData.week_start_date}
+                  onChange={(e) => handleInputChange('week_start_date', e.target.value)}
                   required
                 />
               </div>
@@ -156,37 +163,37 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="muscle_mass">Muscle Mass (lbs)</Label>
+                <Label htmlFor="skin_fold">Skin Fold (mm)</Label>
                 <Input
-                  id="muscle_mass"
+                  id="skin_fold"
                   type="number"
                   step="0.1"
-                  placeholder="120.0"
-                  value={formData.muscle_mass}
-                  onChange={(e) => handleInputChange('muscle_mass', e.target.value)}
+                  placeholder="8.5"
+                  value={formData.skin_fold_mm}
+                  onChange={(e) => handleInputChange('skin_fold_mm', e.target.value)}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="workout_duration">Workout (min)</Label>
+                  <Label htmlFor="avg_daily_calories">Avg Daily Calories</Label>
                   <Input
-                    id="workout_duration"
+                    id="avg_daily_calories"
                     type="number"
-                    placeholder="60"
-                    value={formData.workout_duration}
-                    onChange={(e) => handleInputChange('workout_duration', e.target.value)}
+                    placeholder="2000"
+                    value={formData.avg_daily_calories}
+                    onChange={(e) => handleInputChange('avg_daily_calories', e.target.value)}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="calories_burned">Calories Burned</Label>
+                  <Label htmlFor="avg_exercise_min">Avg Exercise Min/Day</Label>
                   <Input
-                    id="calories_burned"
+                    id="avg_exercise_min"
                     type="number"
-                    placeholder="300"
-                    value={formData.calories_burned}
-                    onChange={(e) => handleInputChange('calories_burned', e.target.value)}
+                    placeholder="30"
+                    value={formData.avg_exercise_min_per_day}
+                    onChange={(e) => handleInputChange('avg_exercise_min_per_day', e.target.value)}
                   />
                 </div>
               </div>

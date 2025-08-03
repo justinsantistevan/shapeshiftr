@@ -14,45 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
-      fitness_entries: {
+      weekly_fitness_entries: {
         Row: {
+          avg_daily_calories: number | null
+          avg_exercise_min_per_day: number | null
           body_fat_percentage: number | null
-          calories_burned: number | null
           created_at: string
-          date: string
           id: string
-          muscle_mass: number | null
           notes: string | null
+          skin_fold_mm: number | null
           updated_at: string
           user_id: string
+          week_start_date: string
           weight: number | null
-          workout_duration: number | null
         }
         Insert: {
+          avg_daily_calories?: number | null
+          avg_exercise_min_per_day?: number | null
           body_fat_percentage?: number | null
-          calories_burned?: number | null
           created_at?: string
-          date?: string
           id?: string
-          muscle_mass?: number | null
           notes?: string | null
+          skin_fold_mm?: number | null
           updated_at?: string
           user_id: string
+          week_start_date: string
           weight?: number | null
-          workout_duration?: number | null
         }
         Update: {
+          avg_daily_calories?: number | null
+          avg_exercise_min_per_day?: number | null
           body_fat_percentage?: number | null
-          calories_burned?: number | null
           created_at?: string
-          date?: string
           id?: string
-          muscle_mass?: number | null
           notes?: string | null
+          skin_fold_mm?: number | null
           updated_at?: string
           user_id?: string
+          week_start_date?: string
           weight?: number | null
-          workout_duration?: number | null
         }
         Relationships: []
       }
