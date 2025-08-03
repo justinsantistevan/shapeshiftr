@@ -30,11 +30,6 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
     skin_fold_mm: "",
     avg_daily_calories: "",
     avg_exercise_min_per_day: "",
-    goal_weight: "",
-    goal_body_fat_percentage: "",
-    goal_skin_fold_mm: "",
-    goal_avg_daily_calories: "",
-    goal_avg_exercise_min_per_day: "",
     notes: ""
   });
   const { toast } = useToast();
@@ -64,11 +59,6 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
         skin_fold_mm: formData.skin_fold_mm ? parseFloat(formData.skin_fold_mm) : null,
         avg_daily_calories: formData.avg_daily_calories ? parseInt(formData.avg_daily_calories) : null,
         avg_exercise_min_per_day: formData.avg_exercise_min_per_day ? parseInt(formData.avg_exercise_min_per_day) : null,
-        goal_weight: formData.goal_weight ? parseFloat(formData.goal_weight) : null,
-        goal_body_fat_percentage: formData.goal_body_fat_percentage ? parseFloat(formData.goal_body_fat_percentage) : null,
-        goal_skin_fold_mm: formData.goal_skin_fold_mm ? parseFloat(formData.goal_skin_fold_mm) : null,
-        goal_avg_daily_calories: formData.goal_avg_daily_calories ? parseInt(formData.goal_avg_daily_calories) : null,
-        goal_avg_exercise_min_per_day: formData.goal_avg_exercise_min_per_day ? parseInt(formData.goal_avg_exercise_min_per_day) : null,
         notes: formData.notes || null
       };
 
@@ -98,11 +88,6 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
           skin_fold_mm: "",
           avg_daily_calories: "",
           avg_exercise_min_per_day: "",
-          goal_weight: "",
-          goal_body_fat_percentage: "",
-          goal_skin_fold_mm: "",
-          goal_avg_daily_calories: "",
-          goal_avg_exercise_min_per_day: "",
           notes: ""
         });
         
@@ -165,20 +150,6 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="goal_weight">Goal Weight (lbs)</Label>
-                  <Input
-                    id="goal_weight"
-                    type="number"
-                    step="0.1"
-                    placeholder="145.0"
-                    value={formData.goal_weight}
-                    onChange={(e) => handleInputChange('goal_weight', e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
                   <Label htmlFor="body_fat">Body Fat (%)</Label>
                   <Input
                     id="body_fat"
@@ -189,44 +160,18 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                     onChange={(e) => handleInputChange('body_fat_percentage', e.target.value)}
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="goal_body_fat">Goal Body Fat (%)</Label>
-                  <Input
-                    id="goal_body_fat"
-                    type="number"
-                    step="0.1"
-                    placeholder="12.0"
-                    value={formData.goal_body_fat_percentage}
-                    onChange={(e) => handleInputChange('goal_body_fat_percentage', e.target.value)}
-                  />
-                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="skin_fold">Skin Fold (mm)</Label>
-                  <Input
-                    id="skin_fold"
-                    type="number"
-                    step="0.1"
-                    placeholder="8.5"
-                    value={formData.skin_fold_mm}
-                    onChange={(e) => handleInputChange('skin_fold_mm', e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="goal_skin_fold">Goal Skin Fold (mm)</Label>
-                  <Input
-                    id="goal_skin_fold"
-                    type="number"
-                    step="0.1"
-                    placeholder="7.0"
-                    value={formData.goal_skin_fold_mm}
-                    onChange={(e) => handleInputChange('goal_skin_fold_mm', e.target.value)}
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="skin_fold">Skin Fold (mm)</Label>
+                <Input
+                  id="skin_fold"
+                  type="number"
+                  step="0.1"
+                  placeholder="8.5"
+                  value={formData.skin_fold_mm}
+                  onChange={(e) => handleInputChange('skin_fold_mm', e.target.value)}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -242,19 +187,6 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="goal_avg_daily_calories">Goal Daily Calories</Label>
-                  <Input
-                    id="goal_avg_daily_calories"
-                    type="number"
-                    placeholder="1800"
-                    value={formData.goal_avg_daily_calories}
-                    onChange={(e) => handleInputChange('goal_avg_daily_calories', e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
                   <Label htmlFor="avg_exercise_min">Avg Exercise Min/Day</Label>
                   <Input
                     id="avg_exercise_min"
@@ -262,17 +194,6 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                     placeholder="30"
                     value={formData.avg_exercise_min_per_day}
                     onChange={(e) => handleInputChange('avg_exercise_min_per_day', e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="goal_avg_exercise_min">Goal Exercise Min/Day</Label>
-                  <Input
-                    id="goal_avg_exercise_min"
-                    type="number"
-                    placeholder="45"
-                    value={formData.goal_avg_exercise_min_per_day}
-                    onChange={(e) => handleInputChange('goal_avg_exercise_min_per_day', e.target.value)}
                   />
                 </div>
               </div>

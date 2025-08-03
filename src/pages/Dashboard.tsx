@@ -6,6 +6,7 @@ import { InspirationalQuote } from "@/components/InspirationalQuote";
 import { MetricsChart } from "@/components/MetricsChart";
 import { FitnessAffirmations } from "@/components/FitnessAffirmations";
 import { AddDataForm } from "@/components/AddDataForm";
+import { GoalsForm } from "@/components/GoalsForm";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import shapeshiftrLogo from "@/assets/shapeshiftr-logo.png";
@@ -16,6 +17,7 @@ interface DashboardProps {
 
 export function Dashboard({ onSignOut }: DashboardProps) {
   const [showAddDataForm, setShowAddDataForm] = useState(false);
+  const [showGoalsForm, setShowGoalsForm] = useState(false);
   const { toast } = useToast();
 
   const handleSignOut = async () => {
@@ -64,7 +66,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               <Plus className="h-4 w-4 mr-2" />
               Add Data
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowGoalsForm(true)}>
               <Settings className="h-4 w-4 mr-2" />
               Goals
             </Button>
@@ -143,6 +145,11 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         open={showAddDataForm} 
         onOpenChange={setShowAddDataForm}
         onSuccess={handleDataAdded}
+      />
+      
+      <GoalsForm 
+        open={showGoalsForm} 
+        onOpenChange={setShowGoalsForm}
       />
     </div>
   );
