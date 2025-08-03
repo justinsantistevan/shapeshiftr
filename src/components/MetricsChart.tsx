@@ -22,7 +22,7 @@ const METRICS = {
 
 export function MetricsChart() {
   const [primaryMetric, setPrimaryMetric] = useState<string>("weight");
-  const [secondaryMetric, setSecondaryMetric] = useState<string>("");
+  const [secondaryMetric, setSecondaryMetric] = useState<string>("none");
 
   return (
     <Card className="fitness-card col-span-2">
@@ -53,7 +53,7 @@ export function MetricsChart() {
                 <SelectValue placeholder="Select secondary metric" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None</SelectItem>
+                <SelectItem value="none">None</SelectItem>
                 {Object.entries(METRICS)
                   .filter(([key]) => key !== primaryMetric)
                   .map(([key, metric]) => (
@@ -81,7 +81,7 @@ export function MetricsChart() {
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={12}
               />
-              {secondaryMetric && (
+              {secondaryMetric && secondaryMetric !== "none" && (
                 <YAxis 
                   yAxisId="right"
                   orientation="right"
@@ -103,7 +103,7 @@ export function MetricsChart() {
                 radius={[4, 4, 0, 0]}
                 className="animate-chart-bar"
               />
-              {secondaryMetric && (
+              {secondaryMetric && secondaryMetric !== "none" && (
                 <Bar 
                   yAxisId="right"
                   dataKey={secondaryMetric} 
@@ -119,7 +119,7 @@ export function MetricsChart() {
                 strokeDasharray="5 5"
                 strokeWidth={2}
               />
-              {secondaryMetric && (
+              {secondaryMetric && secondaryMetric !== "none" && (
                 <ReferenceLine 
                   yAxisId="right"
                   y={METRICS[secondaryMetric as keyof typeof METRICS]?.goal} 
