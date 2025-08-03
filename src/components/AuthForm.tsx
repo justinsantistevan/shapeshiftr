@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/mockSupabase";
+import { supabase } from "@/integrations/supabase/client";
 import shapeshiftrLogo from "@/assets/shapeshiftr-logo.png";
 
 interface AuthFormProps {

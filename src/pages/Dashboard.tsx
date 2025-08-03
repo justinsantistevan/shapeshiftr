@@ -5,7 +5,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { InspirationalQuote } from "@/components/InspirationalQuote";
 import { MetricsChart } from "@/components/MetricsChart";
 import { FitnessAffirmations } from "@/components/FitnessAffirmations";
-import { supabase } from "@/lib/mockSupabase";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import shapeshiftrLogo from "@/assets/shapeshiftr-logo.png";
 

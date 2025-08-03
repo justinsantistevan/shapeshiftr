@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { AuthForm } from "@/components/AuthForm";
 import { Dashboard } from "@/pages/Dashboard";
-import { supabase } from "@/lib/mockSupabase";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -32,13 +33,14 @@ const Index = () => {
     );
   }
 
+  if (!isAuthenticated) {
+    navigate("/auth");
+    return null;
+  }
+
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      {isAuthenticated ? (
-        <Dashboard onSignOut={() => setIsAuthenticated(false)} />
-      ) : (
-        <AuthForm onAuthSuccess={() => setIsAuthenticated(true)} />
-      )}
+      <Dashboard onSignOut={() => setIsAuthenticated(false)} />
     </ThemeProvider>
   );
 };
