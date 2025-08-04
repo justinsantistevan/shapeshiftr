@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { LogOut, Plus, Settings } from "lucide-react";
+import { LogOut, Plus, Settings, Menu } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InspirationalQuote } from "@/components/InspirationalQuote";
 import { MetricsChart } from "@/components/MetricsChart";
@@ -106,18 +107,21 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Logo and Title */}
+          <div className="flex items-center space-x-2">
             <img 
               src={shapeshiftrLogo} 
               alt="ShapeShiftr" 
-              className="h-10 w-10"
+              className="h-8 w-8 sm:h-10 sm:w-10"
             />
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               ShapeShiftr
             </h1>
           </div>
-          <div className="flex items-center space-x-3">
+          
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-3">
             <ThemeToggle />
             <Button variant="outline" size="sm" onClick={() => setShowAddDataForm(true)}>
               <Plus className="h-4 w-4 mr-2" />
@@ -131,6 +135,46 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden flex items-center space-x-2">
+            <ThemeToggle />
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Menu className="h-4 w-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-64">
+                <div className="flex flex-col space-y-4 mt-8">
+                  <Button 
+                    variant="outline" 
+                    className="justify-start" 
+                    onClick={() => setShowAddDataForm(true)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Data
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="justify-start" 
+                    onClick={() => setShowGoalsForm(true)}
+                  >
+                    <Settings className="h-4 w-4 mr-2" />
+                    Goals
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="justify-start" 
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
