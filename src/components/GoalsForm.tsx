@@ -10,9 +10,10 @@ import { supabase } from "@/integrations/supabase/client";
 interface GoalsFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onGoalsUpdated?: () => void;
 }
 
-export function GoalsForm({ open, onOpenChange }: GoalsFormProps) {
+export function GoalsForm({ open, onOpenChange, onGoalsUpdated }: GoalsFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     goal_weight: "",
@@ -103,6 +104,7 @@ export function GoalsForm({ open, onOpenChange }: GoalsFormProps) {
           title: "Success!",
           description: "Your fitness goals have been saved.",
         });
+        onGoalsUpdated?.(); // Notify parent that goals were updated
         onOpenChange(false);
       }
     } catch (error) {

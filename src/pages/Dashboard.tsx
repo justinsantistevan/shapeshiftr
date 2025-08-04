@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InspirationalQuote } from "@/components/InspirationalQuote";
-import { MetricsChart } from "@/components/MetricsChart";
+import { MetricsChart, MetricsChartRef } from "@/components/MetricsChart";
 import { FitnessAffirmations, FitnessAffirmationsRef } from "@/components/FitnessAffirmations";
 import { AffirmationsManager } from "@/components/AffirmationsManager";
 import { AddDataForm } from "@/components/AddDataForm";
@@ -38,6 +38,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const [fitnessStats, setFitnessStats] = useState<FitnessStats | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const fitnessAffirmationsRef = useRef<FitnessAffirmationsRef>(null);
+  const metricsChartRef = useRef<MetricsChartRef>(null);
   const { toast } = useToast();
 
   const handleSignOut = async () => {
@@ -223,7 +224,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:h-[600px]">
           {/* Chart Section */}
           <div className="lg:col-span-2 animate-slide-up h-full" style={{ animationDelay: "0.2s" }}>
-            <MetricsChart />
+            <MetricsChart ref={metricsChartRef} />
           </div>
 
           {/* Quick Stats */}
@@ -540,6 +541,10 @@ export function Dashboard({ onSignOut }: DashboardProps) {
       <GoalsForm 
         open={showGoalsForm} 
         onOpenChange={setShowGoalsForm}
+        onGoalsUpdated={() => {
+          // Refresh the chart when goals are updated
+          metricsChartRef.current?.refreshGoals();
+        }}
       />
 
       <Dialog open={showAffirmationsManager} onOpenChange={setShowAffirmationsManager}>

@@ -1,9 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { fetchUserGoals, UserGoals, DEFAULT_GOALS } from "@/lib/userGoals";
 
 // Mock data for demonstration - expanded to show more weeks for navigation
 const allMockData = [
@@ -21,18 +22,28 @@ const allMockData = [
 ];
 
 const METRICS = {
-  weight: { label: "Weight (lbs)", color: "#3b82f6", goal: 175 },
-  bodyFat: { label: "Body Fat %", color: "#8b5cf6", goal: 15 },
-  skinFold: { label: "Skin Fold (mm)", color: "#ef4444", goal: 10 },
-  avgCalories: { label: "Avg Daily Calories", color: "#f59e0b", goal: 2000 },
-  avgExercise: { label: "Avg Daily Exercise (min)", color: "#10b981", goal: 60 },
+  weight: { label: "Weight (lbs)", color: "#3b82f6", goalKey: "goal_weight" as keyof UserGoals },
+  bodyFat: { label: "Body Fat %", color: "#8b5cf6", goalKey: "goal_body_fat_percentage" as keyof UserGoals },
+  skinFold: { label: "Skin Fold (mm)", color: "#ef4444", goalKey: "goal_skin_fold_mm" as keyof UserGoals },
+  avgCalories: { label: "Avg Daily Calories", color: "#f59e0b", goalKey: "goal_avg_daily_calories" as keyof UserGoals },
+  avgExercise: { label: "Avg Daily Exercise (min)", color: "#10b981", goalKey: "goal_avg_exercise_min_per_day" as keyof UserGoals },
 };
 
-export function MetricsChart() {
+export interface MetricsChartRef {
+  refreshGoals: () => void;
+}
+
+interface MetricsChartProps {
+  ref?: React.Ref<MetricsChartRef>;
+}
+
+export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((props, ref) => {
   const [primaryMetric, setPrimaryMetric] = useState<string>("weight");
   const [secondaryMetric, setSecondaryMetric] = useState<string>("none");
   const [currentWeekIndex, setCurrentWeekIndex] = useState(allMockData.length - 4); // Start showing the last 4 weeks
   const [isMobile, setIsMobile] = useState(false);
+  const [userGoals, setUserGoals] = useState<UserGoals>(DEFAULT_GOALS);
+  const [isLoadingGoals, setIsLoadingGoals] = useState(true);
   
   // Detect screen size
   useEffect(() => {
@@ -44,6 +55,23 @@ export function MetricsChart() {
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
+
+  // Load user goals
+  const loadGoals = async () => {
+    setIsLoadingGoals(true);
+    const goals = await fetchUserGoals();
+    setUserGoals(goals);
+    setIsLoadingGoals(false);
+  };
+
+  useEffect(() => {
+    loadGoals();
+  }, []);
+
+  // Expose refresh function through ref
+  useImperativeHandle(ref, () => ({
+    refreshGoals: loadGoals
+  }));
   
   const WEEKS_TO_SHOW = 4;
   
@@ -65,6 +93,13 @@ export function MetricsChart() {
     }
   };
   
+  // Helper function to get goal value for a metric
+  const getGoalValue = (metricKey: string): number | null => {
+    const metric = METRICS[metricKey as keyof typeof METRICS];
+    if (!metric) return null;
+    return userGoals[metric.goalKey] ?? null;
+  };
+
   // Font sizes based on screen size
   const xAxisFontSize = isMobile ? 10 : 12; // Larger on PC/tablet
   const yAxisFontSize = 10; // Same for axis values
@@ -209,17 +244,19 @@ export function MetricsChart() {
                   className=""
                 />
               )}
-              <ReferenceLine 
-                yAxisId="left"
-                y={METRICS[primaryMetric as keyof typeof METRICS]?.goal} 
-                stroke={METRICS[primaryMetric as keyof typeof METRICS]?.color} 
-                strokeDasharray="5 5"
-                strokeWidth={2}
-              />
-              {secondaryMetric && secondaryMetric !== "none" && (
+              {getGoalValue(primaryMetric) && (
+                <ReferenceLine 
+                  yAxisId="left"
+                  y={getGoalValue(primaryMetric)} 
+                  stroke={METRICS[primaryMetric as keyof typeof METRICS]?.color} 
+                  strokeDasharray="5 5"
+                  strokeWidth={2}
+                />
+              )}
+              {secondaryMetric && secondaryMetric !== "none" && getGoalValue(secondaryMetric) && (
                 <ReferenceLine 
                   yAxisId="right"
-                  y={METRICS[secondaryMetric as keyof typeof METRICS]?.goal} 
+                  y={getGoalValue(secondaryMetric)} 
                   stroke={METRICS[secondaryMetric as keyof typeof METRICS]?.color} 
                   strokeDasharray="5 5"
                   strokeWidth={2}
@@ -234,4 +271,4 @@ export function MetricsChart() {
       </CardContent>
     </Card>
   );
-}
+});
