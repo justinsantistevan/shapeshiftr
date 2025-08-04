@@ -180,7 +180,7 @@ export function AddDataForm({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="skin_fold">Skin Fold (mm)</Label>
+                <Label htmlFor="skin_fold">Belly Skin Fold (mm)</Label>
                 <Input id="skin_fold" type="number" step="0.1" placeholder="8.5" value={formData.skin_fold_mm} onChange={e => handleInputChange('skin_fold_mm', e.target.value)} />
               </div>
 

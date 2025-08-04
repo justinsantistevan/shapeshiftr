@@ -165,7 +165,7 @@ export function GoalsForm({ open, onOpenChange, onGoalsUpdated }: GoalsFormProps
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="goal_skin_fold">Goal Skin Fold (mm)</Label>
+                <Label htmlFor="goal_skin_fold">Goal Belly Skin Fold (mm)</Label>
                 <Input
                   id="goal_skin_fold"
                   type="number"
