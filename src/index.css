@@ -204,4 +204,18 @@ All colors MUST be HSL.
   .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
   }
+
+  /* Chart tooltip active background customization */
+  .recharts-active-bar {
+    filter: brightness(1.1);
+  }
+
+  .dark .recharts-tooltip-wrapper .recharts-default-tooltip {
+    background-color: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+  }
+
+  .dark .recharts-active-bar {
+    filter: brightness(0.8);
+  }
 }

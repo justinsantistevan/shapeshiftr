@@ -107,6 +107,13 @@ export function MetricsChart() {
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "8px"
                 }}
+                labelStyle={{
+                  color: "hsl(var(--foreground))"
+                }}
+                formatter={(value, name) => {
+                  const metric = METRICS[name as keyof typeof METRICS];
+                  return [value, metric?.label || name];
+                }}
               />
               <Bar 
                 yAxisId="left"
