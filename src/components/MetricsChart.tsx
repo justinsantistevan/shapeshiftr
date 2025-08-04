@@ -42,7 +42,7 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
   const [secondaryMetric, setSecondaryMetric] = useState<string>("none");
   const [currentWeekIndex, setCurrentWeekIndex] = useState(allMockData.length - 4); // Start showing the last 4 weeks
   const [isMobile, setIsMobile] = useState(false);
-  const [userGoals, setUserGoals] = useState<UserGoals>(DEFAULT_GOALS);
+  const [userGoals, setUserGoals] = useState<UserGoals>({});
   const [isLoadingGoals, setIsLoadingGoals] = useState(true);
   
   // Detect screen size

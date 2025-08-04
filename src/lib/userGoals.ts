@@ -20,7 +20,7 @@ export const DEFAULT_GOALS: UserGoals = {
 export async function fetchUserGoals(): Promise<UserGoals> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return DEFAULT_GOALS;
+    if (!user) return {};
 
     const { data: goals, error } = await supabase
       .from('user_goals')
@@ -31,23 +31,23 @@ export async function fetchUserGoals(): Promise<UserGoals> {
       .single();
 
     if (error) {
-      // If no goals found, return defaults
+      // If no goals found, return empty object (no reference lines)
       if (error.code === 'PGRST116') {
-        return DEFAULT_GOALS;
+        return {};
       }
       throw error;
     }
 
-    // Merge user goals with defaults for any missing values
+    // Return only the goals that are actually set (not null)
     return {
-      goal_weight: goals?.goal_weight ?? DEFAULT_GOALS.goal_weight,
-      goal_body_fat_percentage: goals?.goal_body_fat_percentage ?? DEFAULT_GOALS.goal_body_fat_percentage,
-      goal_skin_fold_mm: goals?.goal_skin_fold_mm ?? DEFAULT_GOALS.goal_skin_fold_mm,
-      goal_avg_daily_calories: goals?.goal_avg_daily_calories ?? DEFAULT_GOALS.goal_avg_daily_calories,
-      goal_avg_exercise_min_per_day: goals?.goal_avg_exercise_min_per_day ?? DEFAULT_GOALS.goal_avg_exercise_min_per_day,
+      goal_weight: goals?.goal_weight ?? undefined,
+      goal_body_fat_percentage: goals?.goal_body_fat_percentage ?? undefined,
+      goal_skin_fold_mm: goals?.goal_skin_fold_mm ?? undefined,
+      goal_avg_daily_calories: goals?.goal_avg_daily_calories ?? undefined,
+      goal_avg_exercise_min_per_day: goals?.goal_avg_exercise_min_per_day ?? undefined,
     };
   } catch (error) {
     console.error('Error fetching user goals:', error);
-    return DEFAULT_GOALS;
+    return {}; // Return empty object on error - no reference lines
   }
 }
