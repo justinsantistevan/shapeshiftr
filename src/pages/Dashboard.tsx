@@ -540,7 +540,7 @@ export function Dashboard({
     }} />
 
       <Dialog open={showAffirmationsManager} onOpenChange={setShowAffirmationsManager}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto my-0 py-[35px]">
           <DialogHeader>
             <DialogTitle>Manage Affirmations</DialogTitle>
             <DialogDescription>
