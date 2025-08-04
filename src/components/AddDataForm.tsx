@@ -227,7 +227,7 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="avg_exercise_min">Avg Exercise Min/Day</Label>
+                  <Label htmlFor="avg_exercise_min">Avg Daily Exercise (min)</Label>
                   <Input
                     id="avg_exercise_min"
                     type="number"
