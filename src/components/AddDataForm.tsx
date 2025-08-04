@@ -161,7 +161,7 @@ export function AddDataForm({
         
         <Card className="border-0 shadow-none">
           <CardContent className="p-0">
-            <form onSubmit={handleSubmit} className="space-y-4 px-1.5">
+            <form onSubmit={handleSubmit} className="space-y-4 px-1.5 py-1.5">
               <div className="space-y-2">
                 <Label htmlFor="week_start_date">Week Starting</Label>
                 <Input id="week_start_date" type="date" value={formData.week_start_date} onChange={e => handleInputChange('week_start_date', e.target.value)} required />
