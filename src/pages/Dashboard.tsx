@@ -11,6 +11,7 @@ import { GoalsForm } from "@/components/GoalsForm";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { calculateFitnessStats, formatChange, formatCurrentValue, FitnessStats } from "@/lib/fitnessCalculations";
 import shapeshiftrLogo from "/lovable-uploads/4dd6145c-47f4-42d3-bce6-438e6cb263ae.png";
 
 interface DashboardProps {
@@ -31,6 +32,8 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     after?: { front_photo_url?: string; side_photo_url?: string; week_start_date: string };
   }>({});
   const [selectionStep, setSelectionStep] = useState<'before' | 'after'>('before');
+  const [fitnessStats, setFitnessStats] = useState<FitnessStats | null>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
   const { toast } = useToast();
 
   const handleSignOut = async () => {
@@ -70,12 +73,26 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     }
   };
 
+  const fetchFitnessStats = async () => {
+    setIsLoadingStats(true);
+    try {
+      const stats = await calculateFitnessStats();
+      setFitnessStats(stats);
+    } catch (error) {
+      console.error('Error fetching fitness stats:', error);
+    } finally {
+      setIsLoadingStats(false);
+    }
+  };
+
   useEffect(() => {
     fetchFitnessPhotos();
+    fetchFitnessStats();
   }, []);
 
   const handleDataAdded = () => {
     fetchFitnessPhotos(); // Refresh photos when new data is added
+    fetchFitnessStats(); // Refresh stats when new data is added
     toast({
       title: "Data Added",
       description: "Your fitness data has been successfully recorded.",
@@ -201,40 +218,60 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   <Scale className="h-5 w-5 text-primary mr-2" />
                   <div className="text-sm text-muted-foreground">Current Weight</div>
                 </div>
-                <div className="metric-value">178.1</div>
-                <div className="text-xs text-accent mt-1">↓ 2.4 lbs this month</div>
+                <div className="metric-value">
+                  {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.weight || { current: null, change: null, direction: 'neutral', unit: 'lbs' })}
+                </div>
+                <div className="text-xs text-accent mt-1">
+                  {isLoadingStats ? "" : formatChange(fitnessStats?.weight || { current: null, change: null, direction: 'neutral', unit: 'lbs' })}
+                </div>
               </div>
               <div className="fitness-card p-3 text-center">
                 <div className="flex items-center justify-center mb-2">
                   <Activity className="h-5 w-5 text-primary mr-2" />
                   <div className="text-sm text-muted-foreground">Body Fat</div>
                 </div>
-                <div className="metric-value">17.0%</div>
-                <div className="text-xs text-accent mt-1">↓ 1.2% this month</div>
+                <div className="metric-value">
+                  {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.bodyFat || { current: null, change: null, direction: 'neutral', unit: '%' })}
+                </div>
+                <div className="text-xs text-accent mt-1">
+                  {isLoadingStats ? "" : formatChange(fitnessStats?.bodyFat || { current: null, change: null, direction: 'neutral', unit: '%' })}
+                </div>
               </div>
               <div className="fitness-card p-3 text-center">
                 <div className="flex items-center justify-center mb-2">
                   <Zap className="h-5 w-5 text-primary mr-2" />
                   <div className="text-sm text-muted-foreground">Avg Daily Exercise</div>
                 </div>
-                <div className="metric-value">52</div>
-                <div className="text-xs text-accent mt-1">↑ 7 min this month</div>
+                <div className="metric-value">
+                  {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.exercise || { current: null, change: null, direction: 'neutral', unit: 'min' })}
+                </div>
+                <div className="text-xs text-accent mt-1">
+                  {isLoadingStats ? "" : formatChange(fitnessStats?.exercise || { current: null, change: null, direction: 'neutral', unit: 'min' })}
+                </div>
               </div>
               <div className="fitness-card p-3 text-center">
                 <div className="flex items-center justify-center mb-2">
                   <Ruler className="h-5 w-5 text-primary mr-2" />
                   <div className="text-sm text-muted-foreground">Skin Fold</div>
                 </div>
-                <div className="metric-value">13mm</div>
-                <div className="text-xs text-accent mt-1">↓ 2mm this month</div>
+                <div className="metric-value">
+                  {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.skinFold || { current: null, change: null, direction: 'neutral', unit: 'mm' })}
+                </div>
+                <div className="text-xs text-accent mt-1">
+                  {isLoadingStats ? "" : formatChange(fitnessStats?.skinFold || { current: null, change: null, direction: 'neutral', unit: 'mm' })}
+                </div>
               </div>
               <div className="fitness-card p-3 text-center">
                 <div className="flex items-center justify-center mb-2">
                   <UtensilsCrossed className="h-5 w-5 text-primary mr-2" />
                   <div className="text-sm text-muted-foreground">Avg Daily Calories</div>
                 </div>
-                <div className="metric-value">2,150</div>
-                <div className="text-xs text-accent mt-1">↓ 50 cal this month</div>
+                <div className="metric-value">
+                  {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.calories || { current: null, change: null, direction: 'neutral', unit: 'cal' })}
+                </div>
+                <div className="text-xs text-accent mt-1">
+                  {isLoadingStats ? "" : formatChange(fitnessStats?.calories || { current: null, change: null, direction: 'neutral', unit: 'cal' })}
+                </div>
               </div>
             </div>
           </div>
