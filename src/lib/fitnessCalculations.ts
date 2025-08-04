@@ -57,8 +57,16 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
     if (error) throw error;
     if (!entries || entries.length === 0) return null;
 
-    // Get most recent entry (current values)
-    const currentEntry = entries[0];
+    // Get most recent entry with actual data (current values)
+    const currentEntry = entries.find(entry => 
+      entry.weight !== null || 
+      entry.body_fat_percentage !== null || 
+      entry.skin_fold_mm !== null || 
+      entry.avg_daily_calories !== null || 
+      entry.avg_exercise_min_per_day !== null
+    );
+    
+    if (!currentEntry) return null;
     
     // Find entry from approximately 4 weeks ago for monthly comparison
     const fourWeeksAgo = new Date();
@@ -66,7 +74,13 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
     
     const previousEntry = entries.find(entry => {
       const entryDate = new Date(entry.week_start_date);
-      return entryDate <= fourWeeksAgo;
+      return entryDate <= fourWeeksAgo && (
+        entry.weight !== null || 
+        entry.body_fat_percentage !== null || 
+        entry.skin_fold_mm !== null || 
+        entry.avg_daily_calories !== null || 
+        entry.avg_exercise_min_per_day !== null
+      );
     });
 
     // Calculate trends for each metric
