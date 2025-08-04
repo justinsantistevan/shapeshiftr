@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 // Using the dark background logo for Auth page only
-const shapeshiftrLogo = "/lovable-uploads/526f8836-a02e-4866-84a0-6ce9a1375760.png";
+const shapeshiftrLogo = "/lovable-uploads/23423cdb-b1d6-4ce3-bc5f-57c099414ad5.png";
 
 export function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -114,7 +114,7 @@ export function Auth() {
             <img 
               src={shapeshiftrLogo} 
               alt="ShapeShiftr" 
-              className="h-16 w-16 animate-pulse-glow"
+              className="h-16 w-16 animate-pulse-glow rounded-lg"
             />
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
