@@ -1,12 +1,17 @@
 import { useState } from "react";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 interface AddDataFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -22,10 +27,18 @@ export function AddDataForm({
     const d = new Date(date);
     const day = d.getDay();
     const diff = d.getDate() - day; // Subtract days to get to Sunday
-    return new Date(d.setDate(diff)).toISOString().split('T')[0];
+    const weekStart = new Date(d.setDate(diff));
+    // Format as YYYY-MM-DD to ensure consistency
+    return format(weekStart, 'yyyy-MM-dd');
   };
+  const [selectedWeekStart, setSelectedWeekStart] = useState<Date>(() => {
+    const today = new Date();
+    const day = today.getDay();
+    const diff = today.getDate() - day; // Get to Sunday
+    return new Date(today.setDate(diff));
+  });
+
   const [formData, setFormData] = useState({
-    week_start_date: getWeekStartDate(new Date()),
     weight: "",
     body_fat_percentage: "",
     skin_fold_mm: "",
@@ -46,7 +59,7 @@ export function AddDataForm({
     } = await supabase.auth.getUser();
     if (!user) return null;
     const fileExt = file.name.split('.').pop();
-    const fileName = `${user.id}/${formData.week_start_date}/${photoType}.${fileExt}`;
+    const fileName = `${user.id}/${format(selectedWeekStart, 'yyyy-MM-dd')}/${photoType}.${fileExt}`;
     const {
       error: uploadError
     } = await supabase.storage.from('fitness-photos').upload(fileName, file, {
@@ -93,7 +106,7 @@ export function AddDataForm({
       // Prepare data for insertion, converting strings to numbers where needed
       const insertData = {
         user_id: user.id,
-        week_start_date: formData.week_start_date,
+        week_start_date: format(selectedWeekStart, 'yyyy-MM-dd'),
         weight: formData.weight ? parseFloat(formData.weight) : null,
         body_fat_percentage: formData.body_fat_percentage ? parseFloat(formData.body_fat_percentage) : null,
         skin_fold_mm: formData.skin_fold_mm ? parseFloat(formData.skin_fold_mm) : null,
@@ -121,8 +134,12 @@ export function AddDataForm({
         });
 
         // Reset form
+        const today = new Date();
+        const day = today.getDay();
+        const diff = today.getDate() - day;
+        setSelectedWeekStart(new Date(today.setDate(diff)));
+        
         setFormData({
-          week_start_date: getWeekStartDate(new Date()),
           weight: "",
           body_fat_percentage: "",
           skin_fold_mm: "",
@@ -163,8 +180,51 @@ export function AddDataForm({
           <CardContent className="p-0">
             <form onSubmit={handleSubmit} className="space-y-4 px-1.5 py-1.5">
               <div className="space-y-2">
-                <Label htmlFor="week_start_date">Week Starting</Label>
-                <Input id="week_start_date" type="date" value={formData.week_start_date} onChange={e => handleInputChange('week_start_date', e.target.value)} required />
+                <Label>Week Starting (Sunday)</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !selectedWeekStart && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {selectedWeekStart ? format(selectedWeekStart, "PPP") : "Pick a Sunday"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={selectedWeekStart}
+                      onSelect={(date) => {
+                        if (date) {
+                          // Ensure the selected date is a Sunday
+                          const day = date.getDay();
+                          if (day === 0) {
+                            setSelectedWeekStart(date);
+                          } else {
+                            // If not Sunday, find the previous Sunday
+                            const diff = date.getDate() - day;
+                            const sunday = new Date(date);
+                            sunday.setDate(diff);
+                            setSelectedWeekStart(sunday);
+                          }
+                        }
+                      }}
+                      disabled={(date) => {
+                        // Only allow Sundays
+                        return date.getDay() !== 0;
+                      }}
+                      initialFocus
+                      className="pointer-events-auto"
+                    />
+                  </PopoverContent>
+                </Popover>
+                <p className="text-xs text-muted-foreground">
+                  Only Sundays can be selected as week start dates
+                </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
