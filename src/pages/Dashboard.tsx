@@ -506,6 +506,13 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         <section className="animate-slide-up" style={{ animationDelay: "0.8s" }}>
           <FitnessAffirmations />
         </section>
+
+        {/* Footer */}
+        <footer className="text-center py-8 animate-slide-up" style={{ animationDelay: "1s" }}>
+          <p className="text-sm text-muted-foreground">
+            Designed and built in a single Sunday afternoon using Lovable.
+          </p>
+        </footer>
       </main>
 
       <AddDataForm 
