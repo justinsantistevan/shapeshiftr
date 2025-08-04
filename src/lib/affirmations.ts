@@ -74,22 +74,22 @@ async function createDefaultAffirmations(): Promise<void> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Get the next order position (highest + 1)
-    const { data: lastAffirmation } = await supabase
+    // Check if user already has any affirmations to prevent duplicates
+    const { data: existingAffirmations } = await supabase
       .from('user_affirmations')
-      .select('display_order')
+      .select('id')
       .eq('user_id', user.id)
-      .order('display_order', { ascending: false })
       .limit(1);
 
-    const nextOrder = lastAffirmation && lastAffirmation.length > 0 
-      ? lastAffirmation[0].display_order + 1 
-      : 1;
+    if (existingAffirmations && existingAffirmations.length > 0) {
+      console.log('User already has affirmations, skipping default creation');
+      return;
+    }
 
     const defaultEntries = DEFAULT_AFFIRMATIONS.map((text, index) => ({
       user_id: user.id,
       text,
-      display_order: nextOrder + index
+      display_order: index + 1
     }));
 
     const { error } = await supabase
@@ -97,6 +97,7 @@ async function createDefaultAffirmations(): Promise<void> {
       .insert(defaultEntries);
 
     if (error) throw error;
+    console.log('Successfully created default affirmations for user:', user.id);
   } catch (error) {
     console.error('Error creating default affirmations:', error);
   }
