@@ -180,7 +180,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         <section className="animate-slide-up" style={{ animationDelay: "0.6s" }}>
           <div className="fitness-card p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <h3 className="text-2xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 Progress Photos
               </h3>
               {fitnessPhotos.length > 1 && !isCompareMode && (
