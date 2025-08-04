@@ -179,7 +179,7 @@ export function AddDataForm({
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="py-0">Add Fitness Data</DialogTitle>
+          <DialogTitle className="pt-1">Add Fitness Data</DialogTitle>
           <DialogDescription>
             Track your weekly fitness metrics. One entry per week.
           </DialogDescription>
