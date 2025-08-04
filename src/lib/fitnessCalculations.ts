@@ -103,9 +103,27 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
   }
 }
 
+// Determine if a trend is positive based on the metric type and direction
+function isPositiveTrend(trend: FitnessTrend): boolean {
+  if (trend.direction === 'neutral' || trend.change === null) return false;
+  
+  // Positive trends: weight down, body fat down, skin fold down, calories down, exercise up
+  switch (trend.unit) {
+    case 'lbs':      // weight - down is good
+    case '%':        // body fat - down is good  
+    case 'mm':       // skin fold - down is good
+    case 'cal':      // calories - down is good
+      return trend.direction === 'down';
+    case 'min':      // exercise - up is good
+      return trend.direction === 'up';
+    default:
+      return false;
+  }
+}
+
 // Format the change value for display
-export function formatChange(trend: FitnessTrend): { text: string; direction: 'up' | 'down' | 'neutral' } {
-  if (trend.change === null) return { text: '', direction: 'neutral' };
+export function formatChange(trend: FitnessTrend): { text: string; direction: 'up' | 'down' | 'neutral'; isPositive: boolean } {
+  if (trend.change === null) return { text: '', direction: 'neutral', isPositive: false };
   
   const absChange = Math.abs(trend.change);
   
@@ -132,7 +150,8 @@ export function formatChange(trend: FitnessTrend): { text: string; direction: 'u
   
   return {
     text: `${formattedChange} ${trend.unit} this month`,
-    direction: trend.direction
+    direction: trend.direction,
+    isPositive: isPositiveTrend(trend)
   };
 }
 
