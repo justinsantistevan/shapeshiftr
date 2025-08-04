@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { LogOut, Plus, Settings, Menu, Scale, Activity, Zap, Ruler, UtensilsCrossed, TrendingUp, TrendingDown } from "lucide-react";
+import { LogOut, Plus, Settings, Menu, Scale, Activity, Zap, Ruler, UtensilsCrossed, TrendingUp, TrendingDown, MessageSquare, X } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InspirationalQuote } from "@/components/InspirationalQuote";
 import { MetricsChart } from "@/components/MetricsChart";
 import { FitnessAffirmations } from "@/components/FitnessAffirmations";
+import { AffirmationsManager } from "@/components/AffirmationsManager";
 import { AddDataForm } from "@/components/AddDataForm";
 import { GoalsForm } from "@/components/GoalsForm";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -21,6 +22,7 @@ interface DashboardProps {
 export function Dashboard({ onSignOut }: DashboardProps) {
   const [showAddDataForm, setShowAddDataForm] = useState(false);
   const [showGoalsForm, setShowGoalsForm] = useState(false);
+  const [showAffirmationsManager, setShowAffirmationsManager] = useState(false);
   const [fitnessPhotos, setFitnessPhotos] = useState<Array<{
     front_photo_url?: string;
     side_photo_url?: string;
@@ -148,6 +150,10 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               <Settings className="h-4 w-4 mr-2" />
               Goals
             </Button>
+            <Button variant="outline" size="sm" onClick={() => setShowAffirmationsManager(true)}>
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Affirmations
+            </Button>
             <Button variant="outline" size="sm" onClick={handleSignOut}>
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
@@ -180,6 +186,14 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                   >
                     <Settings className="h-4 w-4 mr-2" />
                     Goals
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="justify-start" 
+                    onClick={() => setShowAffirmationsManager(true)}
+                  >
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Affirmations
                   </Button>
                   <Button 
                     variant="outline" 
@@ -525,6 +539,31 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         open={showGoalsForm} 
         onOpenChange={setShowGoalsForm}
       />
+
+      {showAffirmationsManager && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-background rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-xl font-semibold">Manage Affirmations</h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAffirmationsManager(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
+              <AffirmationsManager 
+                onAffirmationsChange={() => {
+                  // This will trigger a re-render of the FitnessAffirmations component
+                  // since it will fetch fresh data on mount
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
