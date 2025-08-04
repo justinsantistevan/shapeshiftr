@@ -74,7 +74,7 @@ export function MetricsChart() {
     <Card className="fitness-card col-span-2 h-full min-h-[400px] md:min-h-0 flex flex-col">
       <CardHeader className="flex-shrink-0">
         <div className="flex items-center justify-between">
-          <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent leading-normal">
             Progress Metrics
           </CardTitle>
           <div className="flex items-center gap-2">
