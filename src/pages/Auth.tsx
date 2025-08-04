@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import shapeshiftrLogo from "@/assets/shapeshiftr-logo.png";
+// Using the new logo directly
+const shapeshiftrLogo = "/lovable-uploads/34247e90-e2a1-4d19-8186-50bb4dc16ab1.png";
 
 export function Auth() {
   const [isLoading, setIsLoading] = useState(false);
