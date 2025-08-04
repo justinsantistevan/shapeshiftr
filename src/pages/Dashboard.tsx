@@ -274,15 +274,15 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               </div>
               <div className="fitness-card p-3 text-center">
                 <div className="flex items-center justify-center mb-2">
-                  <Zap className="h-5 w-5 text-primary mr-2" />
-                  <div className="text-sm text-muted-foreground">Avg Daily Exercise</div>
+                  <Ruler className="h-5 w-5 text-primary mr-2" />
+                  <div className="text-sm text-muted-foreground">Skin Fold</div>
                 </div>
                 <div className="metric-value">
-                  {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.exercise || { current: null, change: null, direction: 'neutral', unit: 'min' })}
+                  {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.skinFold || { current: null, change: null, direction: 'neutral', unit: 'mm' })}
                 </div>
                 <div className="text-xs mt-1 flex items-center justify-center gap-1">
                   {isLoadingStats ? "" : (() => {
-                    const changeData = formatChange(fitnessStats?.exercise || { current: null, change: null, direction: 'neutral', unit: 'min' });
+                    const changeData = formatChange(fitnessStats?.skinFold || { current: null, change: null, direction: 'neutral', unit: 'mm' });
                     return changeData.text ? (
                       <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-green-600' : 'text-red-500'}`}>
                         {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
@@ -295,15 +295,15 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               </div>
               <div className="fitness-card p-3 text-center">
                 <div className="flex items-center justify-center mb-2">
-                  <Ruler className="h-5 w-5 text-primary mr-2" />
-                  <div className="text-sm text-muted-foreground">Skin Fold</div>
+                  <Zap className="h-5 w-5 text-primary mr-2" />
+                  <div className="text-sm text-muted-foreground">Avg Daily Exercise</div>
                 </div>
                 <div className="metric-value">
-                  {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.skinFold || { current: null, change: null, direction: 'neutral', unit: 'mm' })}
+                  {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.exercise || { current: null, change: null, direction: 'neutral', unit: 'min' })}
                 </div>
                 <div className="text-xs mt-1 flex items-center justify-center gap-1">
                   {isLoadingStats ? "" : (() => {
-                    const changeData = formatChange(fitnessStats?.skinFold || { current: null, change: null, direction: 'neutral', unit: 'mm' });
+                    const changeData = formatChange(fitnessStats?.exercise || { current: null, change: null, direction: 'neutral', unit: 'min' });
                     return changeData.text ? (
                       <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-green-600' : 'text-red-500'}`}>
                         {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}

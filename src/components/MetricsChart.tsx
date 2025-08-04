@@ -24,9 +24,9 @@ const allMockData = [
 const METRICS = {
   weight: { label: "Weight (lbs)", color: "#3b82f6", goalKey: "goal_weight" as keyof UserGoals },
   bodyFat: { label: "Body Fat %", color: "#8b5cf6", goalKey: "goal_body_fat_percentage" as keyof UserGoals },
+  avgExercise: { label: "Avg Daily Exercise (min)", color: "#10b981", goalKey: "goal_avg_exercise_min_per_day" as keyof UserGoals },
   skinFold: { label: "Skin Fold (mm)", color: "#ef4444", goalKey: "goal_skin_fold_mm" as keyof UserGoals },
   avgCalories: { label: "Avg Daily Calories", color: "#f59e0b", goalKey: "goal_avg_daily_calories" as keyof UserGoals },
-  avgExercise: { label: "Avg Daily Exercise (min)", color: "#10b981", goalKey: "goal_avg_exercise_min_per_day" as keyof UserGoals },
 };
 
 export interface MetricsChartRef {
