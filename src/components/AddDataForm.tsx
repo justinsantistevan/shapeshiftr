@@ -38,7 +38,6 @@ export function AddDataForm({
     const diff = today.getDate() - day; // Get to Sunday
     return new Date(today.setDate(diff));
   });
-
   const [formData, setFormData] = useState({
     weight: "",
     body_fat_percentage: "",
@@ -106,17 +105,14 @@ export function AddDataForm({
 
       // Check if entry already exists
       const weekStartFormatted = format(selectedWeekStart, 'yyyy-MM-dd');
-      const { data: existingEntry } = await supabase
-        .from('weekly_fitness_entries')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('week_start_date', weekStartFormatted)
-        .single();
+      const {
+        data: existingEntry
+      } = await supabase.from('weekly_fitness_entries').select('*').eq('user_id', user.id).eq('week_start_date', weekStartFormatted).single();
 
       // Prepare data for insertion/update, only updating fields with new values
       const insertData: any = {
         user_id: user.id,
-        week_start_date: weekStartFormatted,
+        week_start_date: weekStartFormatted
       };
 
       // Only include fields that have new values, preserve existing ones
@@ -126,7 +122,7 @@ export function AddDataForm({
       if (formData.avg_daily_calories) insertData.avg_daily_calories = parseInt(formData.avg_daily_calories);
       if (formData.avg_exercise_min_per_day) insertData.avg_exercise_min_per_day = parseInt(formData.avg_exercise_min_per_day);
       if (formData.notes) insertData.notes = formData.notes;
-      
+
       // Always update photos if new ones are uploaded
       if (frontPhotoUrl) insertData.front_photo_url = frontPhotoUrl;
       if (sidePhotoUrl) insertData.side_photo_url = sidePhotoUrl;
@@ -152,7 +148,6 @@ export function AddDataForm({
         const day = today.getDay();
         const diff = today.getDate() - day;
         setSelectedWeekStart(new Date(today.setDate(diff)));
-        
         setFormData({
           weight: "",
           body_fat_percentage: "",
@@ -184,7 +179,7 @@ export function AddDataForm({
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add Fitness Data</DialogTitle>
+          <DialogTitle className="py-0">Add Fitness Data</DialogTitle>
           <DialogDescription>
             Track your weekly fitness metrics. One entry per week.
           </DialogDescription>
@@ -197,45 +192,32 @@ export function AddDataForm({
                 <Label>Week Starting (Sunday)</Label>
                 <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !selectedWeekStart && "text-muted-foreground"
-                      )}
-                    >
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !selectedWeekStart && "text-muted-foreground")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {selectedWeekStart ? format(selectedWeekStart, "PPP") : "Pick a Sunday"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={selectedWeekStart}
-                      onSelect={(date) => {
-                        if (date) {
-                          // Ensure the selected date is a Sunday
-                          const day = date.getDay();
-                          if (day === 0) {
-                            setSelectedWeekStart(date);
-                            setIsCalendarOpen(false); // Close calendar after selection
-                          } else {
-                            // If not Sunday, find the previous Sunday
-                            const diff = date.getDate() - day;
-                            const sunday = new Date(date);
-                            sunday.setDate(diff);
-                            setSelectedWeekStart(sunday);
-                            setIsCalendarOpen(false); // Close calendar after selection
-                          }
-                        }
-                      }}
-                      disabled={(date) => {
-                        // Only allow Sundays
-                        return date.getDay() !== 0;
-                      }}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
+                    <Calendar mode="single" selected={selectedWeekStart} onSelect={date => {
+                    if (date) {
+                      // Ensure the selected date is a Sunday
+                      const day = date.getDay();
+                      if (day === 0) {
+                        setSelectedWeekStart(date);
+                        setIsCalendarOpen(false); // Close calendar after selection
+                      } else {
+                        // If not Sunday, find the previous Sunday
+                        const diff = date.getDate() - day;
+                        const sunday = new Date(date);
+                        sunday.setDate(diff);
+                        setSelectedWeekStart(sunday);
+                        setIsCalendarOpen(false); // Close calendar after selection
+                      }
+                    }
+                  }} disabled={date => {
+                    // Only allow Sundays
+                    return date.getDay() !== 0;
+                  }} initialFocus className="pointer-events-auto" />
                   </PopoverContent>
                 </Popover>
                 <p className="text-xs text-muted-foreground">
