@@ -1,10 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
-// Mock data for demonstration
-const mockData = [
+// Mock data for demonstration - expanded to show more weeks for navigation
+const allMockData = [
+  { week: "Jun 15", weight: 185.2, bodyFat: 19.8, skinFold: 18, avgCalories: 2350, avgExercise: 35 },
+  { week: "Jun 22", weight: 184.5, bodyFat: 19.5, skinFold: 17, avgCalories: 2300, avgExercise: 38 },
+  { week: "Jun 29", weight: 183.8, bodyFat: 19.2, skinFold: 16, avgCalories: 2280, avgExercise: 40 },
+  { week: "Jul 6", weight: 182.9, bodyFat: 18.9, skinFold: 16, avgCalories: 2250, avgExercise: 42 },
+  { week: "Jul 13", weight: 182.1, bodyFat: 18.6, skinFold: 15, avgCalories: 2230, avgExercise: 43 },
+  { week: "Jul 20", weight: 181.3, bodyFat: 18.4, skinFold: 15, avgCalories: 2220, avgExercise: 44 },
   { week: "Jul 27", weight: 180.5, bodyFat: 18.2, skinFold: 15, avgCalories: 2200, avgExercise: 45 },
   { week: "Aug 3", weight: 179.8, bodyFat: 17.9, skinFold: 14, avgCalories: 2150, avgExercise: 50 },
   { week: "Aug 10", weight: 179.2, bodyFat: 17.6, skinFold: 14, avgCalories: 2100, avgExercise: 55 },
@@ -23,13 +31,58 @@ const METRICS = {
 export function MetricsChart() {
   const [primaryMetric, setPrimaryMetric] = useState<string>("weight");
   const [secondaryMetric, setSecondaryMetric] = useState<string>("none");
+  const [currentWeekIndex, setCurrentWeekIndex] = useState(allMockData.length - 4); // Start showing the last 4 weeks
+  
+  const WEEKS_TO_SHOW = 4;
+  
+  // Get the current data slice to display
+  const currentData = allMockData.slice(currentWeekIndex, currentWeekIndex + WEEKS_TO_SHOW);
+  
+  const canScrollPrev = currentWeekIndex > 0;
+  const canScrollNext = currentWeekIndex < allMockData.length - WEEKS_TO_SHOW;
+  
+  const scrollPrev = () => {
+    if (canScrollPrev) {
+      setCurrentWeekIndex(prev => Math.max(0, prev - 1));
+    }
+  };
+  
+  const scrollNext = () => {
+    if (canScrollNext) {
+      setCurrentWeekIndex(prev => Math.min(allMockData.length - WEEKS_TO_SHOW, prev + 1));
+    }
+  };
 
   return (
     <Card className="fitness-card col-span-2 h-full min-h-[400px] md:min-h-0 flex flex-col">
       <CardHeader className="flex-shrink-0">
-        <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Progress Metrics
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            Progress Metrics
+          </CardTitle>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={scrollPrev}
+              disabled={!canScrollPrev}
+              className="h-8 w-8 p-0"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="sr-only">Previous weeks</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={scrollNext}
+              disabled={!canScrollNext}
+              className="h-8 w-8 p-0"
+            >
+              <ArrowRight className="h-4 w-4" />
+              <span className="sr-only">Next weeks</span>
+            </Button>
+          </div>
+        </div>
         <div className="flex gap-4 mt-4">
           <div className="flex-1">
             <label className="text-sm font-medium">Primary Metric</label>
@@ -69,7 +122,7 @@ export function MetricsChart() {
       <CardContent className="flex-1 flex flex-col">
         <div className="flex-1 min-h-0 chart-container p-4 rounded-lg">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={mockData}>
+            <BarChart data={currentData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis 
                 dataKey="week" 
