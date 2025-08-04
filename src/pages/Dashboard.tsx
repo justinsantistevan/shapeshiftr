@@ -10,7 +10,7 @@ import { GoalsForm } from "@/components/GoalsForm";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import shapeshiftrLogo from "@/assets/shapeshiftr-logo.png";
+import shapeshiftrLogo from "/lovable-uploads/4dd6145c-47f4-42d3-bce6-438e6cb263ae.png";
 
 interface DashboardProps {
   onSignOut: () => void;
