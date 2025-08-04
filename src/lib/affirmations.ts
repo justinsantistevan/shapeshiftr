@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface Affirmation {
   id: string;
   text: string;
+  display_order: number;
   created_at: string;
   updated_at: string;
 }
@@ -25,9 +26,9 @@ export async function fetchUserAffirmations(): Promise<Affirmation[]> {
 
     const { data: affirmations, error } = await supabase
       .from('user_affirmations')
-      .select('id, text, created_at, updated_at')
+      .select('id, text, display_order, created_at, updated_at')
       .eq('user_id', user.id)
-      .order('created_at', { ascending: true });
+      .order('display_order', { ascending: true });
 
     if (error) throw error;
 
@@ -37,9 +38,9 @@ export async function fetchUserAffirmations(): Promise<Affirmation[]> {
       // Fetch again after creating defaults
       const { data: newAffirmations, error: fetchError } = await supabase
         .from('user_affirmations')
-        .select('id, text, created_at, updated_at')
+        .select('id, text, display_order, created_at, updated_at')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: true });
+        .order('display_order', { ascending: true });
       
       if (fetchError) throw fetchError;
       return newAffirmations || [];
@@ -58,9 +59,22 @@ async function createDefaultAffirmations(): Promise<void> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const defaultEntries = DEFAULT_AFFIRMATIONS.map(text => ({
+    // Get the next order position (highest + 1)
+    const { data: lastAffirmation } = await supabase
+      .from('user_affirmations')
+      .select('display_order')
+      .eq('user_id', user.id)
+      .order('display_order', { ascending: false })
+      .limit(1);
+
+    const nextOrder = lastAffirmation && lastAffirmation.length > 0 
+      ? lastAffirmation[0].display_order + 1 
+      : 1;
+
+    const defaultEntries = DEFAULT_AFFIRMATIONS.map((text, index) => ({
       user_id: user.id,
-      text
+      text,
+      display_order: nextOrder + index
     }));
 
     const { error } = await supabase
@@ -79,13 +93,26 @@ export async function addAffirmation(text: string): Promise<Affirmation | null> 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return null;
 
+    // Get the next order position (highest + 1)
+    const { data: lastAffirmation } = await supabase
+      .from('user_affirmations')
+      .select('display_order')
+      .eq('user_id', user.id)
+      .order('display_order', { ascending: false })
+      .limit(1);
+
+    const nextOrder = lastAffirmation && lastAffirmation.length > 0 
+      ? lastAffirmation[0].display_order + 1 
+      : 1;
+
     const { data, error } = await supabase
       .from('user_affirmations')
       .insert({
         user_id: user.id,
-        text: text.trim()
+        text: text.trim(),
+        display_order: nextOrder
       })
-      .select('id, text, created_at, updated_at')
+      .select('id, text, display_order, created_at, updated_at')
       .single();
 
     if (error) throw error;
@@ -124,6 +151,39 @@ export async function deleteAffirmation(id: string): Promise<boolean> {
     return true;
   } catch (error) {
     console.error('Error deleting affirmation:', error);
+    return false;
+  }
+}
+
+// Reorder affirmations
+export async function reorderAffirmations(affirmations: Affirmation[]): Promise<boolean> {
+  try {
+    // Update all affirmations with new order
+    const updates = affirmations.map((affirmation, index) => ({
+      id: affirmation.id,
+      display_order: index + 1
+    }));
+
+    // Use Promise.all to update all affirmations concurrently
+    const updatePromises = updates.map(update =>
+      supabase
+        .from('user_affirmations')
+        .update({ display_order: update.display_order })
+        .eq('id', update.id)
+    );
+
+    const results = await Promise.all(updatePromises);
+    
+    // Check if any updates failed
+    const hasError = results.some(result => result.error);
+    if (hasError) {
+      console.error('Some affirmation reorder updates failed');
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error reordering affirmations:', error);
     return false;
   }
 }

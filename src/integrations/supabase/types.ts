@@ -17,6 +17,7 @@ export type Database = {
       user_affirmations: {
         Row: {
           created_at: string
+          display_order: number | null
           id: string
           text: string
           updated_at: string
@@ -24,6 +25,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          display_order?: number | null
           id?: string
           text: string
           updated_at?: string
@@ -31,6 +33,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          display_order?: number | null
           id?: string
           text?: string
           updated_at?: string
