@@ -14,7 +14,7 @@ const AFFIRMATIONS = [
 export function FitnessAffirmations() {
   return (
     <Card className="fitness-card p-6">
-      <h3 className="text-xl font-semibold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+      <h3 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
         Daily Affirmations
       </h3>
       <div className="space-y-3">
