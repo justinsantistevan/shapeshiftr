@@ -135,7 +135,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             <img 
               src={shapeshiftrLogo} 
               alt="ShapeShiftr" 
-              className="h-10 w-10 sm:h-12 sm:w-12"
+              className="h-8 w-8 sm:h-9 sm:w-9"
             />
             <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               ShapeShiftr
