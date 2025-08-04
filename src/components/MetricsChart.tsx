@@ -77,7 +77,9 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
       } else {
         const formattedData: WeeklyEntry[] = data.map(entry => {
           // Ensure we're showing the Sunday date (week start date)
-          const weekStartDate = new Date(entry.week_start_date);
+          // Parse the date as local date to avoid timezone issues
+          const [year, month, day] = entry.week_start_date.split('-').map(Number);
+          const weekStartDate = new Date(year, month - 1, day);
           return {
             week: format(weekStartDate, 'M/d'),
             weight: entry.weight,

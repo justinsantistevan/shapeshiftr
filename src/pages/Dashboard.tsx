@@ -394,7 +394,11 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                           </div>
                         </div>
                         <p className="text-center text-sm text-muted-foreground mt-2">
-                          Week of {new Date(entry.week_start_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })}
+                          Week of {(() => {
+                            const [year, month, day] = entry.week_start_date.split('-').map(Number);
+                            const date = new Date(year, month - 1, day);
+                            return date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
+                          })()}
                         </p>
                       </CarouselItem>
                     ))}
@@ -503,7 +507,11 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                           </div>
                         </div>
                         <p className="text-center text-xs text-muted-foreground mt-1">
-                          Week of {new Date(entry.week_start_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })}
+                          Week of {(() => {
+                            const [year, month, day] = entry.week_start_date.split('-').map(Number);
+                            const date = new Date(year, month - 1, day);
+                            return date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
+                          })()}
                         </p>
                       </div>
                     ))}
