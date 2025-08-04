@@ -173,7 +173,7 @@ export function MetricsChart() {
                 dataKey={primaryMetric} 
                 fill={METRICS[primaryMetric as keyof typeof METRICS]?.color}
                 radius={[4, 4, 0, 0]}
-                className="animate-chart-bar"
+                className=""
               />
               {secondaryMetric && secondaryMetric !== "none" && (
                 <Bar 
@@ -181,7 +181,7 @@ export function MetricsChart() {
                   dataKey={secondaryMetric} 
                   fill={METRICS[secondaryMetric as keyof typeof METRICS]?.color}
                   radius={[4, 4, 0, 0]}
-                  className="animate-chart-bar"
+                  className=""
                 />
               )}
               <ReferenceLine 
