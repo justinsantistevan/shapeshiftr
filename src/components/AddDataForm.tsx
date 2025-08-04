@@ -104,19 +104,32 @@ export function AddDataForm({
         sidePhotoUrl = await uploadPhoto(sidePhoto, 'side');
       }
 
-      // Prepare data for insertion, converting strings to numbers where needed
-      const insertData = {
+      // Check if entry already exists
+      const weekStartFormatted = format(selectedWeekStart, 'yyyy-MM-dd');
+      const { data: existingEntry } = await supabase
+        .from('weekly_fitness_entries')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('week_start_date', weekStartFormatted)
+        .single();
+
+      // Prepare data for insertion/update, only updating fields with new values
+      const insertData: any = {
         user_id: user.id,
-        week_start_date: format(selectedWeekStart, 'yyyy-MM-dd'),
-        weight: formData.weight ? parseFloat(formData.weight) : null,
-        body_fat_percentage: formData.body_fat_percentage ? parseFloat(formData.body_fat_percentage) : null,
-        skin_fold_mm: formData.skin_fold_mm ? parseFloat(formData.skin_fold_mm) : null,
-        avg_daily_calories: formData.avg_daily_calories ? parseInt(formData.avg_daily_calories) : null,
-        avg_exercise_min_per_day: formData.avg_exercise_min_per_day ? parseInt(formData.avg_exercise_min_per_day) : null,
-        front_photo_url: frontPhotoUrl,
-        side_photo_url: sidePhotoUrl,
-        notes: formData.notes || null
+        week_start_date: weekStartFormatted,
       };
+
+      // Only include fields that have new values, preserve existing ones
+      if (formData.weight) insertData.weight = parseFloat(formData.weight);
+      if (formData.body_fat_percentage) insertData.body_fat_percentage = parseFloat(formData.body_fat_percentage);
+      if (formData.skin_fold_mm) insertData.skin_fold_mm = parseFloat(formData.skin_fold_mm);
+      if (formData.avg_daily_calories) insertData.avg_daily_calories = parseInt(formData.avg_daily_calories);
+      if (formData.avg_exercise_min_per_day) insertData.avg_exercise_min_per_day = parseInt(formData.avg_exercise_min_per_day);
+      if (formData.notes) insertData.notes = formData.notes;
+      
+      // Always update photos if new ones are uploaded
+      if (frontPhotoUrl) insertData.front_photo_url = frontPhotoUrl;
+      if (sidePhotoUrl) insertData.side_photo_url = sidePhotoUrl;
       const {
         error
       } = await supabase.from('weekly_fitness_entries').upsert(insertData, {
