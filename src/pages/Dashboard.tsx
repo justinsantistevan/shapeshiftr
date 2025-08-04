@@ -167,7 +167,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                             <img
                               src={entry.front_photo_url}
                               alt={`Front view - ${entry.week_start_date}`}
-                              className="w-full h-64 object-cover rounded-lg"
+                              className="w-full aspect-[9/16] object-cover rounded-lg"
                             />
                           )}
                         </div>
@@ -177,7 +177,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                             <img
                               src={entry.side_photo_url}
                               alt={`Side view - ${entry.week_start_date}`}
-                              className="w-full h-64 object-cover rounded-lg"
+                              className="w-full aspect-[9/16] object-cover rounded-lg"
                             />
                           )}
                         </div>
