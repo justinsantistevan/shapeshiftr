@@ -10,7 +10,7 @@ import { FitnessAffirmations, FitnessAffirmationsRef } from "@/components/Fitnes
 import { AffirmationsManager } from "@/components/AffirmationsManager";
 import { AddDataForm } from "@/components/AddDataForm";
 import { GoalsForm } from "@/components/GoalsForm";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, CarouselApi } from "@/components/ui/carousel";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { calculateFitnessStats, formatChange, formatCurrentValue, FitnessStats } from "@/lib/fitnessCalculations";
@@ -37,6 +37,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const [selectionStep, setSelectionStep] = useState<'before' | 'after'>('before');
   const [fitnessStats, setFitnessStats] = useState<FitnessStats | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const fitnessAffirmationsRef = useRef<FitnessAffirmationsRef>(null);
   const metricsChartRef = useRef<MetricsChartRef>(null);
   const { toast } = useToast();
@@ -69,7 +70,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         .eq('user_id', user.id)
         .not('front_photo_url', 'is', null)
         .not('side_photo_url', 'is', null)
-        .order('week_start_date', { ascending: false });
+        .order('week_start_date', { ascending: true });
 
       if (error) throw error;
       setFitnessPhotos(data || []);
@@ -94,6 +95,14 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     fetchFitnessPhotos();
     fetchFitnessStats();
   }, []);
+
+  // Set carousel to show most recent photos when data is loaded
+  useEffect(() => {
+    if (carouselApi && fitnessPhotos.length > 0) {
+      // Go to the last photo (most recent)
+      carouselApi.scrollTo(fitnessPhotos.length - 1);
+    }
+  }, [carouselApi, fitnessPhotos]);
 
   const handleDataAdded = () => {
     fetchFitnessPhotos(); // Refresh photos when new data is added
@@ -359,7 +368,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             </div>
             {fitnessPhotos.length > 0 ? (
               !isCompareMode ? (
-                <Carousel className="w-full max-w-4xl mx-auto">
+                <Carousel setApi={setCarouselApi} className="w-full max-w-4xl mx-auto">
                   <CarouselContent>
                     {fitnessPhotos.map((entry, index) => (
                       <CarouselItem key={index}>
