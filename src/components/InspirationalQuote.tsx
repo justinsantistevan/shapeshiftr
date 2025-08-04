@@ -68,21 +68,21 @@ export function InspirationalQuote() {
   return (
     <Card className="fitness-card p-6 text-center relative overflow-hidden">
       <div className="absolute inset-0 hero-gradient opacity-5"></div>
-      <div className="relative z-10">
-        <blockquote className="text-lg font-medium text-foreground mb-2 italic">
+      <div className="relative z-10 pr-12">
+        <blockquote className="text-lg font-medium text-foreground mb-2 italic min-h-[3rem] flex items-center justify-center">
           "{currentQuote.text}"
         </blockquote>
         <p className="text-sm text-muted-foreground">— {currentQuote.author}</p>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={refreshQuote}
-          className="absolute top-4 right-4 h-8 w-8 p-0"
-          disabled={isRefreshing}
-        >
-          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-        </Button>
       </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={refreshQuote}
+        className="absolute top-2 right-2 h-8 w-8 p-0 z-20"
+        disabled={isRefreshing}
+      >
+        <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+      </Button>
     </Card>
   );
 }
