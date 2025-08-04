@@ -7,8 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-// Using the new logo directly
-const shapeshiftrLogo = "/lovable-uploads/34247e90-e2a1-4d19-8186-50bb4dc16ab1.png";
+// Using the dark background logo for Auth page only
+const shapeshiftrLogo = "/lovable-uploads/526f8836-a02e-4866-84a0-6ce9a1375760.png";
 
 export function Auth() {
   const [isLoading, setIsLoading] = useState(false);
