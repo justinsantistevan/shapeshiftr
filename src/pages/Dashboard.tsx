@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { LogOut, Plus, Settings, Menu, Scale, Activity, Zap, Ruler, UtensilsCrossed } from "lucide-react";
+import { LogOut, Plus, Settings, Menu, Scale, Activity, Zap, Ruler, UtensilsCrossed, TrendingUp, TrendingDown } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InspirationalQuote } from "@/components/InspirationalQuote";
@@ -221,8 +221,17 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <div className="metric-value">
                   {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.weight || { current: null, change: null, direction: 'neutral', unit: 'lbs' })}
                 </div>
-                <div className="text-xs text-accent mt-1">
-                  {isLoadingStats ? "" : formatChange(fitnessStats?.weight || { current: null, change: null, direction: 'neutral', unit: 'lbs' })}
+                <div className="text-xs text-accent mt-1 flex items-center justify-center gap-1">
+                  {isLoadingStats ? "" : (() => {
+                    const changeData = formatChange(fitnessStats?.weight || { current: null, change: null, direction: 'neutral', unit: 'lbs' });
+                    return changeData.text ? (
+                      <>
+                        {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
+                        {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
+                        <span>{changeData.text}</span>
+                      </>
+                    ) : null;
+                  })()}
                 </div>
               </div>
               <div className="fitness-card p-3 text-center">
@@ -233,8 +242,17 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <div className="metric-value">
                   {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.bodyFat || { current: null, change: null, direction: 'neutral', unit: '%' })}
                 </div>
-                <div className="text-xs text-accent mt-1">
-                  {isLoadingStats ? "" : formatChange(fitnessStats?.bodyFat || { current: null, change: null, direction: 'neutral', unit: '%' })}
+                <div className="text-xs text-accent mt-1 flex items-center justify-center gap-1">
+                  {isLoadingStats ? "" : (() => {
+                    const changeData = formatChange(fitnessStats?.bodyFat || { current: null, change: null, direction: 'neutral', unit: '%' });
+                    return changeData.text ? (
+                      <>
+                        {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
+                        {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
+                        <span>{changeData.text}</span>
+                      </>
+                    ) : null;
+                  })()}
                 </div>
               </div>
               <div className="fitness-card p-3 text-center">
@@ -245,8 +263,17 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <div className="metric-value">
                   {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.exercise || { current: null, change: null, direction: 'neutral', unit: 'min' })}
                 </div>
-                <div className="text-xs text-accent mt-1">
-                  {isLoadingStats ? "" : formatChange(fitnessStats?.exercise || { current: null, change: null, direction: 'neutral', unit: 'min' })}
+                <div className="text-xs text-accent mt-1 flex items-center justify-center gap-1">
+                  {isLoadingStats ? "" : (() => {
+                    const changeData = formatChange(fitnessStats?.exercise || { current: null, change: null, direction: 'neutral', unit: 'min' });
+                    return changeData.text ? (
+                      <>
+                        {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
+                        {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
+                        <span>{changeData.text}</span>
+                      </>
+                    ) : null;
+                  })()}
                 </div>
               </div>
               <div className="fitness-card p-3 text-center">
@@ -257,8 +284,17 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <div className="metric-value">
                   {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.skinFold || { current: null, change: null, direction: 'neutral', unit: 'mm' })}
                 </div>
-                <div className="text-xs text-accent mt-1">
-                  {isLoadingStats ? "" : formatChange(fitnessStats?.skinFold || { current: null, change: null, direction: 'neutral', unit: 'mm' })}
+                <div className="text-xs text-accent mt-1 flex items-center justify-center gap-1">
+                  {isLoadingStats ? "" : (() => {
+                    const changeData = formatChange(fitnessStats?.skinFold || { current: null, change: null, direction: 'neutral', unit: 'mm' });
+                    return changeData.text ? (
+                      <>
+                        {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
+                        {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
+                        <span>{changeData.text}</span>
+                      </>
+                    ) : null;
+                  })()}
                 </div>
               </div>
               <div className="fitness-card p-3 text-center">
@@ -269,8 +305,17 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                 <div className="metric-value">
                   {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.calories || { current: null, change: null, direction: 'neutral', unit: 'cal' })}
                 </div>
-                <div className="text-xs text-accent mt-1">
-                  {isLoadingStats ? "" : formatChange(fitnessStats?.calories || { current: null, change: null, direction: 'neutral', unit: 'cal' })}
+                <div className="text-xs text-accent mt-1 flex items-center justify-center gap-1">
+                  {isLoadingStats ? "" : (() => {
+                    const changeData = formatChange(fitnessStats?.calories || { current: null, change: null, direction: 'neutral', unit: 'cal' });
+                    return changeData.text ? (
+                      <>
+                        {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
+                        {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
+                        <span>{changeData.text}</span>
+                      </>
+                    ) : null;
+                  })()}
                 </div>
               </div>
             </div>

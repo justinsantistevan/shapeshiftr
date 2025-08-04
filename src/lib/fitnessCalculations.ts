@@ -104,10 +104,9 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
 }
 
 // Format the change value for display
-export function formatChange(trend: FitnessTrend): string {
-  if (trend.change === null) return '';
+export function formatChange(trend: FitnessTrend): { text: string; direction: 'up' | 'down' | 'neutral' } {
+  if (trend.change === null) return { text: '', direction: 'neutral' };
   
-  const arrow = trend.direction === 'up' ? '↑' : trend.direction === 'down' ? '↓' : '';
   const absChange = Math.abs(trend.change);
   
   let formattedChange: string;
@@ -131,7 +130,10 @@ export function formatChange(trend: FitnessTrend): string {
       formattedChange = absChange.toString();
   }
   
-  return `${arrow} ${formattedChange} ${trend.unit} this month`;
+  return {
+    text: `${formattedChange} ${trend.unit} this month`,
+    direction: trend.direction
+  };
 }
 
 // Format the current value for display
