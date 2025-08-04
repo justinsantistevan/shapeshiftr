@@ -115,7 +115,7 @@ export function MetricsChart() {
               <ReferenceLine 
                 yAxisId="left"
                 y={METRICS[primaryMetric as keyof typeof METRICS]?.goal} 
-                stroke="hsl(var(--accent))" 
+                stroke={METRICS[primaryMetric as keyof typeof METRICS]?.color} 
                 strokeDasharray="5 5"
                 strokeWidth={2}
               />
@@ -123,7 +123,7 @@ export function MetricsChart() {
                 <ReferenceLine 
                   yAxisId="right"
                   y={METRICS[secondaryMetric as keyof typeof METRICS]?.goal} 
-                  stroke="hsl(var(--accent))" 
+                  stroke={METRICS[secondaryMetric as keyof typeof METRICS]?.color} 
                   strokeDasharray="5 5"
                   strokeWidth={2}
                 />
