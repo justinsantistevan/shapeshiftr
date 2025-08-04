@@ -105,10 +105,8 @@ export function Dashboard({
     // Add event listeners for custom events from child components
     const handleOpenAddData = () => setShowAddDataForm(true);
     const handleOpenAffirmations = () => setShowAffirmationsManager(true);
-
     window.addEventListener('openAddData', handleOpenAddData);
     window.addEventListener('openAffirmations', handleOpenAffirmations);
-
     return () => {
       window.removeEventListener('openAddData', handleOpenAddData);
       window.removeEventListener('openAffirmations', handleOpenAffirmations);
@@ -523,10 +521,7 @@ export function Dashboard({
         <section className="animate-slide-up" style={{
         animationDelay: "0.8s"
       }}>
-          <FitnessAffirmations 
-            ref={fitnessAffirmationsRef} 
-            onOpenAffirmations={() => setShowAffirmationsManager(true)}
-          />
+          <FitnessAffirmations ref={fitnessAffirmationsRef} onOpenAffirmations={() => setShowAffirmationsManager(true)} />
         </section>
 
         {/* Footer */}
