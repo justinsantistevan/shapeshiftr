@@ -242,7 +242,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               !isCompareMode ? (
                 <Carousel className="w-full max-w-4xl mx-auto">
                   <CarouselContent>
-                    {fitnessPhotos.map((entry, index) => (
+                    {[...fitnessPhotos].reverse().map((entry, index) => (
                       <CarouselItem key={index}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
