@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { LogOut, Plus, Settings, Menu, Scale, Activity, Zap, Ruler, UtensilsCrossed, TrendingUp, TrendingDown, MessageSquare, X } from "lucide-react";
+import { LogOut, Plus, Settings, Menu, Scale, Activity, Zap, Ruler, UtensilsCrossed, TrendingUp, TrendingDown, MessageSquare } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InspirationalQuote } from "@/components/InspirationalQuote";
 import { MetricsChart } from "@/components/MetricsChart";
@@ -540,30 +541,19 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         onOpenChange={setShowGoalsForm}
       />
 
-      {showAffirmationsManager && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-background rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b">
-              <h2 className="text-xl font-semibold">Manage Affirmations</h2>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAffirmationsManager(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
-              <AffirmationsManager 
-                onAffirmationsChange={() => {
-                  // This will trigger a re-render of the FitnessAffirmations component
-                  // since it will fetch fresh data on mount
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      <Dialog open={showAffirmationsManager} onOpenChange={setShowAffirmationsManager}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Manage Affirmations</DialogTitle>
+          </DialogHeader>
+          <AffirmationsManager 
+            onAffirmationsChange={() => {
+              // This will trigger a re-render of the FitnessAffirmations component
+              // since it will fetch fresh data on mount
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

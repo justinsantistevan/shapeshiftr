@@ -116,19 +116,15 @@ export function AffirmationsManager({ onAffirmationsChange }: AffirmationsManage
   };
 
   return (
-    <Card className="fitness-card">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent leading-normal">
-            Manage Affirmations
-          </CardTitle>
-          <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-            <DialogTrigger asChild>
-              <Button size="sm" className="gap-2">
-                <Plus className="h-4 w-4" />
-                Add New
-              </Button>
-            </DialogTrigger>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+          <DialogTrigger asChild>
+            <Button size="sm" className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add New
+            </Button>
+          </DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Add New Affirmation</DialogTitle>
@@ -157,11 +153,9 @@ export function AffirmationsManager({ onAffirmationsChange }: AffirmationsManage
                 </div>
               </div>
             </DialogContent>
-          </Dialog>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
+        </Dialog>
+      </div>
+      <div className="space-y-3">
           {affirmations.map((affirmation) => (
             <div 
               key={affirmation.id}
@@ -230,9 +224,8 @@ export function AffirmationsManager({ onAffirmationsChange }: AffirmationsManage
             <p className="text-center text-muted-foreground py-8">
               No affirmations yet. Add your first one above!
             </p>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+        )}
+      </div>
+    </div>
   );
 }
