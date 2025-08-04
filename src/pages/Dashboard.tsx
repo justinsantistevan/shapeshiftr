@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut, Plus, Settings } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -7,6 +7,7 @@ import { MetricsChart } from "@/components/MetricsChart";
 import { FitnessAffirmations } from "@/components/FitnessAffirmations";
 import { AddDataForm } from "@/components/AddDataForm";
 import { GoalsForm } from "@/components/GoalsForm";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import shapeshiftrLogo from "@/assets/shapeshiftr-logo.png";
@@ -18,6 +19,11 @@ interface DashboardProps {
 export function Dashboard({ onSignOut }: DashboardProps) {
   const [showAddDataForm, setShowAddDataForm] = useState(false);
   const [showGoalsForm, setShowGoalsForm] = useState(false);
+  const [fitnessPhotos, setFitnessPhotos] = useState<Array<{
+    front_photo_url?: string;
+    side_photo_url?: string;
+    week_start_date: string;
+  }>>([]);
   const { toast } = useToast();
 
   const handleSignOut = async () => {
@@ -37,8 +43,32 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     }
   };
 
+  const fetchFitnessPhotos = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('weekly_fitness_entries')
+        .select('front_photo_url, side_photo_url, week_start_date')
+        .eq('user_id', user.id)
+        .not('front_photo_url', 'is', null)
+        .not('side_photo_url', 'is', null)
+        .order('week_start_date', { ascending: false });
+
+      if (error) throw error;
+      setFitnessPhotos(data || []);
+    } catch (error) {
+      console.error('Error fetching fitness photos:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchFitnessPhotos();
+  }, []);
+
   const handleDataAdded = () => {
-    // Refresh data or update UI as needed
+    fetchFitnessPhotos(); // Refresh photos when new data is added
     toast({
       title: "Data Added",
       description: "Your fitness data has been successfully recorded.",
@@ -125,13 +155,51 @@ export function Dashboard({ onSignOut }: DashboardProps) {
             <h3 className="text-xl font-semibold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Progress Photos
             </h3>
-            <div className="text-center text-muted-foreground py-12">
-              <p>Photo carousel will be implemented once you start uploading weekly progress photos.</p>
-              <Button variant="outline" className="mt-4">
-                <Plus className="h-4 w-4 mr-2" />
-                Upload Photos
-              </Button>
-            </div>
+            {fitnessPhotos.length > 0 ? (
+              <Carousel className="w-full max-w-4xl mx-auto">
+                <CarouselContent>
+                  {fitnessPhotos.map((entry, index) => (
+                    <CarouselItem key={index}>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-medium text-center">Front View</h4>
+                          {entry.front_photo_url && (
+                            <img
+                              src={entry.front_photo_url}
+                              alt={`Front view - ${entry.week_start_date}`}
+                              className="w-full h-64 object-cover rounded-lg"
+                            />
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-medium text-center">Side View</h4>
+                          {entry.side_photo_url && (
+                            <img
+                              src={entry.side_photo_url}
+                              alt={`Side view - ${entry.week_start_date}`}
+                              className="w-full h-64 object-cover rounded-lg"
+                            />
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-center text-sm text-muted-foreground mt-2">
+                        Week of {new Date(entry.week_start_date).toLocaleDateString()}
+                      </p>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious />
+                <CarouselNext />
+              </Carousel>
+            ) : (
+              <div className="text-center text-muted-foreground py-12">
+                <p>Upload your first progress photos to see them here!</p>
+                <Button variant="outline" className="mt-4" onClick={() => setShowAddDataForm(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Photos
+                </Button>
+              </div>
+            )}
           </div>
         </section>
 
