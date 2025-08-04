@@ -80,6 +80,12 @@ export function MetricsChart() {
                 yAxisId="left"
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={12}
+                label={{ 
+                  value: METRICS[primaryMetric as keyof typeof METRICS]?.label, 
+                  angle: -90, 
+                  position: 'insideLeft',
+                  style: { textAnchor: 'middle', fill: 'hsl(var(--muted-foreground))' }
+                }}
               />
               {secondaryMetric && secondaryMetric !== "none" && (
                 <YAxis 
@@ -87,6 +93,12 @@ export function MetricsChart() {
                   orientation="right"
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={12}
+                  label={{ 
+                    value: METRICS[secondaryMetric as keyof typeof METRICS]?.label, 
+                    angle: 90, 
+                    position: 'insideRight',
+                    style: { textAnchor: 'middle', fill: 'hsl(var(--muted-foreground))' }
+                  }}
                 />
               )}
               <Tooltip 
