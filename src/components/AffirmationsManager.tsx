@@ -119,7 +119,7 @@ export function AffirmationsManager({ onAffirmationsChange }: AffirmationsManage
     <Card className="fitness-card">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent leading-normal">
             Manage Affirmations
           </CardTitle>
           <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
