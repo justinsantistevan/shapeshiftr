@@ -190,12 +190,14 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Chart Section */}
           <div className="lg:col-span-2 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-            <MetricsChart />
+            <div className="h-full">
+              <MetricsChart />
+            </div>
           </div>
 
           {/* Quick Stats */}
-          <div className="space-y-4 animate-slide-up" style={{ animationDelay: "0.4s" }}>
-            <div className="grid grid-cols-1 gap-3">
+          <div className="space-y-4 animate-slide-up flex flex-col h-full" style={{ animationDelay: "0.4s" }}>
+            <div className="grid grid-cols-1 gap-3 flex-1">
               <div className="fitness-card p-3 text-center">
                 <div className="flex items-center justify-center mb-2">
                   <Scale className="h-5 w-5 text-primary mr-2" />
