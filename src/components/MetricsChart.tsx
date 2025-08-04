@@ -15,9 +15,9 @@ const mockData = [
 const METRICS = {
   weight: { label: "Weight (lbs)", color: "#3b82f6", goal: 175 },
   bodyFat: { label: "Body Fat %", color: "#8b5cf6", goal: 15 },
-  skinFold: { label: "Skin Fold (mm)", color: "#10b981", goal: 10 },
+  skinFold: { label: "Skin Fold (mm)", color: "#ef4444", goal: 10 },
   avgCalories: { label: "Avg Calories/Week", color: "#f59e0b", goal: 2000 },
-  avgExercise: { label: "Avg Exercise Min/Day", color: "#ef4444", goal: 60 },
+  avgExercise: { label: "Avg Exercise Min/Day", color: "#10b981", goal: 60 },
 };
 
 export function MetricsChart() {
