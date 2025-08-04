@@ -25,7 +25,7 @@ export function MetricsChart() {
   const [secondaryMetric, setSecondaryMetric] = useState<string>("none");
 
   return (
-    <Card className="fitness-card col-span-2 h-full flex flex-col">
+    <Card className="fitness-card col-span-2 h-full md:h-auto min-h-[400px] md:min-h-0 flex flex-col">
       <CardHeader className="flex-shrink-0">
         <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           Progress Metrics
@@ -74,12 +74,12 @@ export function MetricsChart() {
               <XAxis 
                 dataKey="week" 
                 stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
+                fontSize={10}
               />
               <YAxis 
                 yAxisId="left"
                 stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
+                fontSize={10}
                 label={{ 
                   value: METRICS[primaryMetric as keyof typeof METRICS]?.label, 
                   angle: -90, 
@@ -92,7 +92,7 @@ export function MetricsChart() {
                   yAxisId="right"
                   orientation="right"
                   stroke="hsl(var(--muted-foreground))"
-                  fontSize={12}
+                  fontSize={10}
                   label={{ 
                     value: METRICS[secondaryMetric as keyof typeof METRICS]?.label, 
                     angle: 90, 
