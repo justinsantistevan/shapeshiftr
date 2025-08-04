@@ -47,7 +47,7 @@ export function MetricsChart() {
             </Select>
           </div>
           <div className="flex-1">
-            <label className="text-sm font-medium">Secondary Metric (Optional)</label>
+            <label className="text-sm font-medium">Secondary Metric</label>
             <Select value={secondaryMetric} onValueChange={setSecondaryMetric}>
               <SelectTrigger>
                 <SelectValue placeholder="Select secondary metric" />
