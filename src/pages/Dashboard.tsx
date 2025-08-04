@@ -361,7 +361,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
               !isCompareMode ? (
                 <Carousel className="w-full max-w-4xl mx-auto">
                   <CarouselContent>
-                    {[...fitnessPhotos].reverse().map((entry, index) => (
+                    {fitnessPhotos.map((entry, index) => (
                       <CarouselItem key={index}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
@@ -386,7 +386,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                           </div>
                         </div>
                         <p className="text-center text-sm text-muted-foreground mt-2">
-                          Week of {new Date(entry.week_start_date).toLocaleDateString()}
+                          Week of {new Date(entry.week_start_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })}
                         </p>
                       </CarouselItem>
                     ))}
@@ -495,7 +495,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
                           </div>
                         </div>
                         <p className="text-center text-xs text-muted-foreground mt-1">
-                          {new Date(entry.week_start_date).toLocaleDateString()}
+                          Week of {new Date(entry.week_start_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })}
                         </p>
                       </div>
                     ))}

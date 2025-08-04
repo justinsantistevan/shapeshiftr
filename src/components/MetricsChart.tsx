@@ -75,14 +75,18 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
         console.error('Error fetching fitness data:', error);
         setFitnessData([]);
       } else {
-        const formattedData: WeeklyEntry[] = data.map(entry => ({
-          week: format(new Date(entry.week_start_date), 'MMM d'),
-          weight: entry.weight,
-          bodyFat: entry.body_fat_percentage,
-          skinFold: entry.skin_fold_mm,
-          avgCalories: entry.avg_daily_calories,
-          avgExercise: entry.avg_exercise_min_per_day,
-        }));
+        const formattedData: WeeklyEntry[] = data.map(entry => {
+          // Ensure we're showing the Sunday date (week start date)
+          const weekStartDate = new Date(entry.week_start_date);
+          return {
+            week: format(weekStartDate, 'M/d'),
+            weight: entry.weight,
+            bodyFat: entry.body_fat_percentage,
+            skinFold: entry.skin_fold_mm,
+            avgCalories: entry.avg_daily_calories,
+            avgExercise: entry.avg_exercise_min_per_day,
+          };
+        });
         setFitnessData(formattedData);
         // Set initial week index to show the last 4 weeks
         setCurrentWeekIndex(Math.max(0, formattedData.length - 4));
