@@ -186,13 +186,13 @@ export function AddDataForm({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="avg_daily_calories">Avg Daily Calories</Label>
-                  <Input id="avg_daily_calories" type="number" placeholder="2000" value={formData.avg_daily_calories} onChange={e => handleInputChange('avg_daily_calories', e.target.value)} />
+                  <Label htmlFor="avg_exercise_min">Avg Exercise Min/Day</Label>
+                  <Input id="avg_exercise_min" type="number" placeholder="30" value={formData.avg_exercise_min_per_day} onChange={e => handleInputChange('avg_exercise_min_per_day', e.target.value)} />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="avg_exercise_min">Avg Exercise Min/Day</Label>
-                  <Input id="avg_exercise_min" type="number" placeholder="30" value={formData.avg_exercise_min_per_day} onChange={e => handleInputChange('avg_exercise_min_per_day', e.target.value)} />
+                  <Label htmlFor="avg_daily_calories">Avg Daily Calories</Label>
+                  <Input id="avg_daily_calories" type="number" placeholder="2000" value={formData.avg_daily_calories} onChange={e => handleInputChange('avg_daily_calories', e.target.value)} />
                 </div>
               </div>
 

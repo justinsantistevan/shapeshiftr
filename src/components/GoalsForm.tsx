@@ -178,17 +178,6 @@ export function GoalsForm({ open, onOpenChange, onGoalsUpdated }: GoalsFormProps
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="goal_avg_daily_calories">Goal Daily Calories</Label>
-                  <Input
-                    id="goal_avg_daily_calories"
-                    type="number"
-                    placeholder="1800"
-                    value={formData.goal_avg_daily_calories}
-                    onChange={(e) => handleInputChange('goal_avg_daily_calories', e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="goal_avg_exercise_min">Goal Exercise Min/Day</Label>
                   <Input
                     id="goal_avg_exercise_min"
@@ -196,6 +185,17 @@ export function GoalsForm({ open, onOpenChange, onGoalsUpdated }: GoalsFormProps
                     placeholder="45"
                     value={formData.goal_avg_exercise_min_per_day}
                     onChange={(e) => handleInputChange('goal_avg_exercise_min_per_day', e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="goal_avg_daily_calories">Goal Daily Calories</Label>
+                  <Input
+                    id="goal_avg_daily_calories"
+                    type="number"
+                    placeholder="1800"
+                    value={formData.goal_avg_daily_calories}
+                    onChange={(e) => handleInputChange('goal_avg_daily_calories', e.target.value)}
                   />
                 </div>
               </div>
