@@ -24,6 +24,12 @@ export function Dashboard({ onSignOut }: DashboardProps) {
     side_photo_url?: string;
     week_start_date: string;
   }>>([]);
+  const [isCompareMode, setIsCompareMode] = useState(false);
+  const [selectedPhotos, setSelectedPhotos] = useState<{
+    before?: { front_photo_url?: string; side_photo_url?: string; week_start_date: string };
+    after?: { front_photo_url?: string; side_photo_url?: string; week_start_date: string };
+  }>({});
+  const [selectionStep, setSelectionStep] = useState<'before' | 'after'>('before');
   const { toast } = useToast();
 
   const handleSignOut = async () => {
@@ -73,6 +79,27 @@ export function Dashboard({ onSignOut }: DashboardProps) {
       title: "Data Added",
       description: "Your fitness data has been successfully recorded.",
     });
+  };
+
+  const handleCompareMode = () => {
+    setIsCompareMode(true);
+    setSelectionStep('before');
+    setSelectedPhotos({});
+  };
+
+  const handlePhotoSelect = (photo: { front_photo_url?: string; side_photo_url?: string; week_start_date: string }) => {
+    if (selectionStep === 'before') {
+      setSelectedPhotos({ before: photo });
+      setSelectionStep('after');
+    } else {
+      setSelectedPhotos(prev => ({ ...prev, after: photo }));
+    }
+  };
+
+  const handleResetComparison = () => {
+    setIsCompareMode(false);
+    setSelectedPhotos({});
+    setSelectionStep('before');
   };
 
   return (
@@ -152,45 +179,171 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         {/* Progress Photos Section */}
         <section className="animate-slide-up" style={{ animationDelay: "0.6s" }}>
           <div className="fitness-card p-6">
-            <h3 className="text-xl font-semibold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Progress Photos
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                Progress Photos
+              </h3>
+              {fitnessPhotos.length > 1 && !isCompareMode && (
+                <Button variant="outline" size="sm" onClick={handleCompareMode}>
+                  Compare
+                </Button>
+              )}
+              {isCompareMode && (
+                <Button variant="outline" size="sm" onClick={handleResetComparison}>
+                  Back to Gallery
+                </Button>
+              )}
+            </div>
             {fitnessPhotos.length > 0 ? (
-              <Carousel className="w-full max-w-4xl mx-auto">
-                <CarouselContent>
-                  {fitnessPhotos.map((entry, index) => (
-                    <CarouselItem key={index}>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              !isCompareMode ? (
+                <Carousel className="w-full max-w-4xl mx-auto">
+                  <CarouselContent>
+                    {fitnessPhotos.map((entry, index) => (
+                      <CarouselItem key={index}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-medium text-center">Front View</h4>
+                            {entry.front_photo_url && (
+                              <img
+                                src={entry.front_photo_url}
+                                alt={`Front view - ${entry.week_start_date}`}
+                                className="w-full aspect-[9/16] object-cover rounded-lg"
+                              />
+                            )}
+                          </div>
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-medium text-center">Side View</h4>
+                            {entry.side_photo_url && (
+                              <img
+                                src={entry.side_photo_url}
+                                alt={`Side view - ${entry.week_start_date}`}
+                                className="w-full aspect-[9/16] object-cover rounded-lg"
+                              />
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-center text-sm text-muted-foreground mt-2">
+                          Week of {new Date(entry.week_start_date).toLocaleDateString()}
+                        </p>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </Carousel>
+              ) : selectedPhotos.before && selectedPhotos.after ? (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Before Photos */}
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-semibold text-center text-primary">Before</h4>
+                      <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <h4 className="text-sm font-medium text-center">Front View</h4>
-                          {entry.front_photo_url && (
+                          <h5 className="text-sm font-medium text-center">Front View</h5>
+                          {selectedPhotos.before.front_photo_url && (
                             <img
-                              src={entry.front_photo_url}
-                              alt={`Front view - ${entry.week_start_date}`}
+                              src={selectedPhotos.before.front_photo_url}
+                              alt={`Before front - ${selectedPhotos.before.week_start_date}`}
                               className="w-full aspect-[9/16] object-cover rounded-lg"
                             />
                           )}
                         </div>
                         <div className="space-y-2">
-                          <h4 className="text-sm font-medium text-center">Side View</h4>
-                          {entry.side_photo_url && (
+                          <h5 className="text-sm font-medium text-center">Side View</h5>
+                          {selectedPhotos.before.side_photo_url && (
                             <img
-                              src={entry.side_photo_url}
-                              alt={`Side view - ${entry.week_start_date}`}
+                              src={selectedPhotos.before.side_photo_url}
+                              alt={`Before side - ${selectedPhotos.before.week_start_date}`}
                               className="w-full aspect-[9/16] object-cover rounded-lg"
                             />
                           )}
                         </div>
                       </div>
-                      <p className="text-center text-sm text-muted-foreground mt-2">
-                        Week of {new Date(entry.week_start_date).toLocaleDateString()}
+                      <p className="text-center text-sm text-muted-foreground">
+                        {new Date(selectedPhotos.before.week_start_date).toLocaleDateString()}
                       </p>
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-              </Carousel>
+                    </div>
+
+                    {/* After Photos */}
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-semibold text-center text-secondary">After</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <h5 className="text-sm font-medium text-center">Front View</h5>
+                          {selectedPhotos.after.front_photo_url && (
+                            <img
+                              src={selectedPhotos.after.front_photo_url}
+                              alt={`After front - ${selectedPhotos.after.week_start_date}`}
+                              className="w-full aspect-[9/16] object-cover rounded-lg"
+                            />
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <h5 className="text-sm font-medium text-center">Side View</h5>
+                          {selectedPhotos.after.side_photo_url && (
+                            <img
+                              src={selectedPhotos.after.side_photo_url}
+                              alt={`After side - ${selectedPhotos.after.week_start_date}`}
+                              className="w-full aspect-[9/16] object-cover rounded-lg"
+                            />
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-center text-sm text-muted-foreground">
+                        {new Date(selectedPhotos.after.week_start_date).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="text-center text-lg font-medium">
+                    Select your {selectionStep} photo
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {fitnessPhotos.map((entry, index) => (
+                      <div 
+                        key={index} 
+                        className={`cursor-pointer border-2 rounded-lg p-2 transition-all hover:border-primary ${
+                          selectedPhotos.before === entry ? 'border-primary bg-primary/10' : 'border-border'
+                        }`}
+                        onClick={() => handlePhotoSelect(entry)}
+                      >
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="space-y-1">
+                            <h5 className="text-xs font-medium text-center">Front</h5>
+                            {entry.front_photo_url && (
+                              <img
+                                src={entry.front_photo_url}
+                                alt={`Front - ${entry.week_start_date}`}
+                                className="w-full aspect-[9/16] object-cover rounded"
+                              />
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                            <h5 className="text-xs font-medium text-center">Side</h5>
+                            {entry.side_photo_url && (
+                              <img
+                                src={entry.side_photo_url}
+                                alt={`Side - ${entry.week_start_date}`}
+                                className="w-full aspect-[9/16] object-cover rounded"
+                              />
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-center text-xs text-muted-foreground mt-1">
+                          {new Date(entry.week_start_date).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  {selectedPhotos.before && (
+                    <div className="text-center text-sm text-muted-foreground">
+                      Before photo selected. Now select your after photo.
+                    </div>
+                  )}
+                </div>
+              )
             ) : (
               <div className="text-center text-muted-foreground py-12">
                 <p>Upload your first progress photos to see them here!</p>
