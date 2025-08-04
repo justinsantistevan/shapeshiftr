@@ -5,21 +5,17 @@ import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { fetchUserGoals, UserGoals, DEFAULT_GOALS } from "@/lib/userGoals";
+import { supabase } from "@/integrations/supabase/client";
+import { format } from "date-fns";
 
-// Mock data for demonstration - expanded to show more weeks for navigation
-const allMockData = [
-  { week: "Jun 15", weight: 185.2, bodyFat: 19.8, skinFold: 18, avgCalories: 2350, avgExercise: 35 },
-  { week: "Jun 22", weight: 184.5, bodyFat: 19.5, skinFold: 17, avgCalories: 2300, avgExercise: 38 },
-  { week: "Jun 29", weight: 183.8, bodyFat: 19.2, skinFold: 16, avgCalories: 2280, avgExercise: 40 },
-  { week: "Jul 6", weight: 182.9, bodyFat: 18.9, skinFold: 16, avgCalories: 2250, avgExercise: 42 },
-  { week: "Jul 13", weight: 182.1, bodyFat: 18.6, skinFold: 15, avgCalories: 2230, avgExercise: 43 },
-  { week: "Jul 20", weight: 181.3, bodyFat: 18.4, skinFold: 15, avgCalories: 2220, avgExercise: 44 },
-  { week: "Jul 27", weight: 180.5, bodyFat: 18.2, skinFold: 15, avgCalories: 2200, avgExercise: 45 },
-  { week: "Aug 3", weight: 179.8, bodyFat: 17.9, skinFold: 14, avgCalories: 2150, avgExercise: 50 },
-  { week: "Aug 10", weight: 179.2, bodyFat: 17.6, skinFold: 14, avgCalories: 2100, avgExercise: 55 },
-  { week: "Aug 17", weight: 178.7, bodyFat: 17.3, skinFold: 13, avgCalories: 2080, avgExercise: 52 },
-  { week: "Aug 24", weight: 178.1, bodyFat: 17.0, skinFold: 13, avgCalories: 2050, avgExercise: 58 },
-];
+interface WeeklyEntry {
+  week: string;
+  weight: number | null;
+  bodyFat: number | null;
+  skinFold: number | null;
+  avgCalories: number | null;
+  avgExercise: number | null;
+}
 
 const METRICS = {
   weight: { label: "Weight (lbs)", color: "#3b82f6", goalKey: "goal_weight" as keyof UserGoals },
@@ -40,10 +36,12 @@ interface MetricsChartProps {
 export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((props, ref) => {
   const [primaryMetric, setPrimaryMetric] = useState<string>("weight");
   const [secondaryMetric, setSecondaryMetric] = useState<string>("none");
-  const [currentWeekIndex, setCurrentWeekIndex] = useState(allMockData.length - 4); // Start showing the last 4 weeks
+  const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [userGoals, setUserGoals] = useState<UserGoals>({});
   const [isLoadingGoals, setIsLoadingGoals] = useState(true);
+  const [fitnessData, setFitnessData] = useState<WeeklyEntry[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   
   // Detect screen size
   useEffect(() => {
@@ -64,22 +62,59 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
     setIsLoadingGoals(false);
   };
 
+  // Load fitness data from Supabase
+  const loadFitnessData = async () => {
+    setIsLoadingData(true);
+    try {
+      const { data, error } = await supabase
+        .from('weekly_fitness_entries')
+        .select('*')
+        .order('week_start_date', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching fitness data:', error);
+        setFitnessData([]);
+      } else {
+        const formattedData: WeeklyEntry[] = data.map(entry => ({
+          week: format(new Date(entry.week_start_date), 'MMM d'),
+          weight: entry.weight,
+          bodyFat: entry.body_fat_percentage,
+          skinFold: entry.skin_fold_mm,
+          avgCalories: entry.avg_daily_calories,
+          avgExercise: entry.avg_exercise_min_per_day,
+        }));
+        setFitnessData(formattedData);
+        // Set initial week index to show the last 4 weeks
+        setCurrentWeekIndex(Math.max(0, formattedData.length - 4));
+      }
+    } catch (error) {
+      console.error('Error loading fitness data:', error);
+      setFitnessData([]);
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
+
   useEffect(() => {
     loadGoals();
+    loadFitnessData();
   }, []);
 
   // Expose refresh function through ref
   useImperativeHandle(ref, () => ({
-    refreshGoals: loadGoals
+    refreshGoals: () => {
+      loadGoals();
+      loadFitnessData();
+    }
   }));
   
   const WEEKS_TO_SHOW = 4;
   
   // Get the current data slice to display
-  const currentData = allMockData.slice(currentWeekIndex, currentWeekIndex + WEEKS_TO_SHOW);
+  const currentData = fitnessData.slice(currentWeekIndex, currentWeekIndex + WEEKS_TO_SHOW);
   
   const canScrollPrev = currentWeekIndex > 0;
-  const canScrollNext = currentWeekIndex < allMockData.length - WEEKS_TO_SHOW;
+  const canScrollNext = currentWeekIndex < fitnessData.length - WEEKS_TO_SHOW;
   
   const scrollPrev = () => {
     if (canScrollPrev) {
@@ -89,7 +124,7 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
   
   const scrollNext = () => {
     if (canScrollNext) {
-      setCurrentWeekIndex(prev => Math.min(allMockData.length - WEEKS_TO_SHOW, prev + 1));
+      setCurrentWeekIndex(prev => Math.min(fitnessData.length - WEEKS_TO_SHOW, prev + 1));
     }
   };
   
@@ -172,8 +207,20 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
-        <div className="flex-1 min-h-0 chart-container p-4 rounded-lg">
-          <ResponsiveContainer width="100%" height="100%">
+        {isLoadingData ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : fitnessData.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center text-muted-foreground">
+              <p className="text-lg font-medium mb-2">No data yet!</p>
+              <p className="text-sm">Start tracking your progress by adding your first weekly entry.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 min-h-0 chart-container p-4 rounded-lg">
+            <ResponsiveContainer width="100%" height="100%">
             <BarChart data={currentData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis 
@@ -264,10 +311,13 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
               )}
             </BarChart>
           </ResponsiveContainer>
-        </div>
-        <div className="mt-4 text-xs text-muted-foreground text-center flex-shrink-0">
-          Dashed lines represent your goals for each metric
-        </div>
+          </div>
+        )}
+        {fitnessData.length > 0 && (
+          <div className="mt-4 text-xs text-muted-foreground text-center flex-shrink-0">
+            Dashed lines represent your goals for each metric
+          </div>
+        )}
       </CardContent>
     </Card>
   );
