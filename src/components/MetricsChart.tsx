@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
@@ -32,6 +32,18 @@ export function MetricsChart() {
   const [primaryMetric, setPrimaryMetric] = useState<string>("weight");
   const [secondaryMetric, setSecondaryMetric] = useState<string>("none");
   const [currentWeekIndex, setCurrentWeekIndex] = useState(allMockData.length - 4); // Start showing the last 4 weeks
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Detect screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
   
   const WEEKS_TO_SHOW = 4;
   
@@ -52,6 +64,11 @@ export function MetricsChart() {
       setCurrentWeekIndex(prev => Math.min(allMockData.length - WEEKS_TO_SHOW, prev + 1));
     }
   };
+  
+  // Font sizes based on screen size
+  const xAxisFontSize = isMobile ? 10 : 12; // Larger on PC/tablet
+  const yAxisFontSize = 10; // Same for axis values
+  const yLabelFontSize = isMobile ? 10 : 12; // Smaller on mobile for y-axis labels
 
   return (
     <Card className="fitness-card col-span-2 h-full min-h-[400px] md:min-h-0 flex flex-col">
@@ -127,17 +144,21 @@ export function MetricsChart() {
               <XAxis 
                 dataKey="week" 
                 stroke="hsl(var(--muted-foreground))"
-                fontSize={10}
+                fontSize={xAxisFontSize}
               />
               <YAxis 
                 yAxisId="left"
                 stroke="hsl(var(--muted-foreground))"
-                fontSize={10}
+                fontSize={yAxisFontSize}
                 label={{ 
                   value: METRICS[primaryMetric as keyof typeof METRICS]?.label, 
                   angle: -90, 
                   position: 'insideLeft',
-                  style: { textAnchor: 'middle', fill: 'hsl(var(--muted-foreground))' }
+                  style: { 
+                    textAnchor: 'middle', 
+                    fill: 'hsl(var(--muted-foreground))', 
+                    fontSize: yLabelFontSize 
+                  }
                 }}
               />
               {secondaryMetric && secondaryMetric !== "none" && (
@@ -145,12 +166,16 @@ export function MetricsChart() {
                   yAxisId="right"
                   orientation="right"
                   stroke="hsl(var(--muted-foreground))"
-                  fontSize={10}
+                  fontSize={yAxisFontSize}
                   label={{ 
                     value: METRICS[secondaryMetric as keyof typeof METRICS]?.label, 
                     angle: 90, 
                     position: 'insideRight',
-                    style: { textAnchor: 'middle', fill: 'hsl(var(--muted-foreground))' }
+                    style: { 
+                      textAnchor: 'middle', 
+                      fill: 'hsl(var(--muted-foreground))', 
+                      fontSize: yLabelFontSize 
+                    }
                   }}
                 />
               )}
