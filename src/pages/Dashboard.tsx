@@ -101,6 +101,18 @@ export function Dashboard({
   useEffect(() => {
     fetchFitnessPhotos();
     fetchFitnessStats();
+
+    // Add event listeners for custom events from child components
+    const handleOpenAddData = () => setShowAddDataForm(true);
+    const handleOpenAffirmations = () => setShowAffirmationsManager(true);
+
+    window.addEventListener('openAddData', handleOpenAddData);
+    window.addEventListener('openAffirmations', handleOpenAffirmations);
+
+    return () => {
+      window.removeEventListener('openAddData', handleOpenAddData);
+      window.removeEventListener('openAffirmations', handleOpenAffirmations);
+    };
   }, []);
 
   // Set carousel to show most recent photos when data is loaded
@@ -511,7 +523,10 @@ export function Dashboard({
         <section className="animate-slide-up" style={{
         animationDelay: "0.8s"
       }}>
-          <FitnessAffirmations ref={fitnessAffirmationsRef} />
+          <FitnessAffirmations 
+            ref={fitnessAffirmationsRef} 
+            onOpenAffirmations={() => setShowAffirmationsManager(true)}
+          />
         </section>
 
         {/* Footer */}

@@ -220,8 +220,19 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
         ) : fitnessData.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center text-muted-foreground">
-              <p className="text-lg font-medium mb-2">No data yet!</p>
-              <p className="text-sm">Start tracking your progress by adding your first weekly entry.</p>
+              <p className="text-muted-foreground mb-4">
+                Start tracking your progress by adding your first weekly entry.
+              </p>
+              <Button 
+                onClick={() => {
+                  // This will be handled by the parent Dashboard component
+                  const event = new CustomEvent('openAddData');
+                  window.dispatchEvent(event);
+                }}
+                className="w-full sm:w-auto"
+              >
+                Add Data
+              </Button>
             </div>
           </div>
         ) : (

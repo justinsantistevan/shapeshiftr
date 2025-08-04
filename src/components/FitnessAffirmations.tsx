@@ -1,5 +1,6 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 import { fetchUserAffirmations, Affirmation } from "@/lib/affirmations";
 
@@ -8,10 +9,10 @@ export interface FitnessAffirmationsRef {
 }
 
 interface FitnessAffirmationsProps {
-  ref?: React.Ref<FitnessAffirmationsRef>;
+  onOpenAffirmations?: () => void;
 }
 
-export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAffirmationsProps>((props, ref) => {
+export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAffirmationsProps>(({ onOpenAffirmations }, ref) => {
   const [affirmations, setAffirmations] = useState<Affirmation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -53,25 +54,34 @@ export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAff
       <h3 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
         Daily Affirmations
       </h3>
-      <div className="space-y-3">
-        {affirmations.map((affirmation, index) => (
-          <div 
-            key={affirmation.id} 
-            className="flex items-start space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors animate-slide-up"
-            style={{ animationDelay: `${index * 0.1}s` }}
-          >
-            <CheckCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
-            <p className="text-sm font-medium text-foreground leading-relaxed">
-              {affirmation.text}
-            </p>
-          </div>
-        ))}
-        {affirmations.length === 0 && (
-          <p className="text-center text-muted-foreground py-4">
-            No affirmations yet. Add some in your settings!
+      {affirmations.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground mb-4">
+            Add your own personal affirmations to see them here!
           </p>
-        )}
-      </div>
+          <Button 
+            onClick={onOpenAffirmations}
+            className="w-full sm:w-auto"
+          >
+            Add Affirmations
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {affirmations.map((affirmation, index) => (
+            <div 
+              key={affirmation.id} 
+              className="flex items-start space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors animate-slide-up"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <CheckCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
+              <p className="text-sm font-medium text-foreground leading-relaxed">
+                {affirmation.text}
+              </p>
+            </div>
+          ))}
+        </div>
+      )}
     </Card>
   );
 });

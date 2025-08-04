@@ -42,26 +42,8 @@ export async function fetchUserAffirmations(): Promise<Affirmation[]> {
 
     console.log('Found affirmations:', affirmations?.length || 0);
 
-    // If user has no affirmations, create defaults
-    if (!affirmations || affirmations.length === 0) {
-      console.log('No affirmations found, creating defaults for user:', user.id);
-      await createDefaultAffirmations();
-      // Fetch again after creating defaults
-      const { data: newAffirmations, error: fetchError } = await supabase
-        .from('user_affirmations')
-        .select('id, text, display_order, created_at, updated_at')
-        .eq('user_id', user.id)
-        .order('display_order', { ascending: true });
-      
-      if (fetchError) {
-        console.error('Error fetching new affirmations:', fetchError);
-        throw fetchError;
-      }
-      console.log('Created default affirmations:', newAffirmations?.length || 0);
-      return newAffirmations || [];
-    }
-
-    return affirmations;
+    // Return empty array if no affirmations - don't create defaults
+    return affirmations || [];
   } catch (error) {
     console.error('Error in fetchUserAffirmations:', error);
     return [];
