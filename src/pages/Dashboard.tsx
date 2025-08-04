@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { LogOut, Plus, Settings, Menu, Scale, Activity, Zap, Ruler, UtensilsCrossed, TrendingUp, TrendingDown, MessageSquare } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InspirationalQuote } from "@/components/InspirationalQuote";
 import { MetricsChart } from "@/components/MetricsChart";
-import { FitnessAffirmations } from "@/components/FitnessAffirmations";
+import { FitnessAffirmations, FitnessAffirmationsRef } from "@/components/FitnessAffirmations";
 import { AffirmationsManager } from "@/components/AffirmationsManager";
 import { AddDataForm } from "@/components/AddDataForm";
 import { GoalsForm } from "@/components/GoalsForm";
@@ -37,6 +37,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
   const [selectionStep, setSelectionStep] = useState<'before' | 'after'>('before');
   const [fitnessStats, setFitnessStats] = useState<FitnessStats | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const fitnessAffirmationsRef = useRef<FitnessAffirmationsRef>(null);
   const { toast } = useToast();
 
   const handleSignOut = async () => {
@@ -519,7 +520,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
 
         {/* Affirmations */}
         <section className="animate-slide-up" style={{ animationDelay: "0.8s" }}>
-          <FitnessAffirmations />
+          <FitnessAffirmations ref={fitnessAffirmationsRef} />
         </section>
 
         {/* Footer */}
@@ -545,11 +546,14 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Manage Affirmations</DialogTitle>
+            <DialogDescription>
+              Add, edit, or delete your personal affirmations to keep you motivated on your fitness journey.
+            </DialogDescription>
           </DialogHeader>
           <AffirmationsManager 
             onAffirmationsChange={() => {
-              // This will trigger a re-render of the FitnessAffirmations component
-              // since it will fetch fresh data on mount
+              // Refresh the affirmations display at the bottom of the page
+              fitnessAffirmationsRef.current?.refreshAffirmations();
             }}
           />
         </DialogContent>

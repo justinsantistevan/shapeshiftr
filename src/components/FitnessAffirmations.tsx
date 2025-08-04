@@ -1,15 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Card } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
 import { fetchUserAffirmations, Affirmation } from "@/lib/affirmations";
 
-export function FitnessAffirmations() {
+export interface FitnessAffirmationsRef {
+  refreshAffirmations: () => void;
+}
+
+interface FitnessAffirmationsProps {
+  ref?: React.Ref<FitnessAffirmationsRef>;
+}
+
+export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAffirmationsProps>((props, ref) => {
   const [affirmations, setAffirmations] = useState<Affirmation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    loadAffirmations();
-  }, []);
 
   const loadAffirmations = async () => {
     setIsLoading(true);
@@ -17,6 +21,14 @@ export function FitnessAffirmations() {
     setAffirmations(data);
     setIsLoading(false);
   };
+
+  useImperativeHandle(ref, () => ({
+    refreshAffirmations: loadAffirmations
+  }));
+
+  useEffect(() => {
+    loadAffirmations();
+  }, []);
 
   if (isLoading) {
     return (
@@ -62,4 +74,4 @@ export function FitnessAffirmations() {
       </div>
     </Card>
   );
-}
+});
