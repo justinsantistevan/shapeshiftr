@@ -68,8 +68,7 @@ export function Dashboard({ onSignOut }: DashboardProps) {
         .from('weekly_fitness_entries')
         .select('front_photo_url, side_photo_url, week_start_date')
         .eq('user_id', user.id)
-        .not('front_photo_url', 'is', null)
-        .not('side_photo_url', 'is', null)
+        .or('front_photo_url.not.is.null,side_photo_url.not.is.null')
         .order('week_start_date', { ascending: true });
 
       if (error) throw error;
