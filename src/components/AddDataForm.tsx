@@ -23,6 +23,7 @@ export function AddDataForm({
   onSuccess
 }: AddDataFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const getWeekStartDate = (date: Date) => {
     const d = new Date(date);
     const day = d.getDay();
@@ -181,7 +182,7 @@ export function AddDataForm({
             <form onSubmit={handleSubmit} className="space-y-4 px-1.5 py-1.5">
               <div className="space-y-2">
                 <Label>Week Starting (Sunday)</Label>
-                <Popover>
+                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -204,12 +205,14 @@ export function AddDataForm({
                           const day = date.getDay();
                           if (day === 0) {
                             setSelectedWeekStart(date);
+                            setIsCalendarOpen(false); // Close calendar after selection
                           } else {
                             // If not Sunday, find the previous Sunday
                             const diff = date.getDate() - day;
                             const sunday = new Date(date);
                             sunday.setDate(diff);
                             setSelectedWeekStart(sunday);
+                            setIsCalendarOpen(false); // Close calendar after selection
                           }
                         }
                       }}
