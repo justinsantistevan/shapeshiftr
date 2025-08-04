@@ -22,7 +22,12 @@ const DEFAULT_AFFIRMATIONS = [
 export async function fetchUserAffirmations(): Promise<Affirmation[]> {
   try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    if (!user) {
+      console.log('No authenticated user found');
+      return [];
+    }
+
+    console.log('Fetching affirmations for user:', user.id);
 
     const { data: affirmations, error } = await supabase
       .from('user_affirmations')
@@ -30,10 +35,16 @@ export async function fetchUserAffirmations(): Promise<Affirmation[]> {
       .eq('user_id', user.id)
       .order('display_order', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching user affirmations:', error);
+      throw error;
+    }
+
+    console.log('Found affirmations:', affirmations?.length || 0);
 
     // If user has no affirmations, create defaults
     if (!affirmations || affirmations.length === 0) {
+      console.log('No affirmations found, creating defaults for user:', user.id);
       await createDefaultAffirmations();
       // Fetch again after creating defaults
       const { data: newAffirmations, error: fetchError } = await supabase
@@ -42,13 +53,17 @@ export async function fetchUserAffirmations(): Promise<Affirmation[]> {
         .eq('user_id', user.id)
         .order('display_order', { ascending: true });
       
-      if (fetchError) throw fetchError;
+      if (fetchError) {
+        console.error('Error fetching new affirmations:', fetchError);
+        throw fetchError;
+      }
+      console.log('Created default affirmations:', newAffirmations?.length || 0);
       return newAffirmations || [];
     }
 
     return affirmations;
   } catch (error) {
-    console.error('Error fetching affirmations:', error);
+    console.error('Error in fetchUserAffirmations:', error);
     return [];
   }
 }
