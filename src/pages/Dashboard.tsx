@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { LogOut, Plus, Settings, Menu } from "lucide-react";
+import { LogOut, Plus, Settings, Menu, Scale, Activity, Zap, Ruler, UtensilsCrossed } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { InspirationalQuote } from "@/components/InspirationalQuote";
@@ -195,26 +195,46 @@ export function Dashboard({ onSignOut }: DashboardProps) {
 
           {/* Quick Stats */}
           <div className="space-y-4 animate-slide-up" style={{ animationDelay: "0.4s" }}>
-            <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
-              <div className="fitness-card p-4 text-center">
+            <div className="grid grid-cols-1 gap-3">
+              <div className="fitness-card p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Scale className="h-5 w-5 text-primary mr-2" />
+                  <div className="text-sm text-muted-foreground">Current Weight</div>
+                </div>
                 <div className="metric-value">178.1</div>
-                <div className="text-sm text-muted-foreground">Current Weight</div>
                 <div className="text-xs text-accent mt-1">↓ 2.4 lbs this month</div>
               </div>
-              <div className="fitness-card p-4 text-center">
+              <div className="fitness-card p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Activity className="h-5 w-5 text-primary mr-2" />
+                  <div className="text-sm text-muted-foreground">Body Fat</div>
+                </div>
                 <div className="metric-value">17.0%</div>
-                <div className="text-sm text-muted-foreground">Body Fat</div>
                 <div className="text-xs text-accent mt-1">↓ 1.2% this month</div>
               </div>
-              <div className="fitness-card p-4 text-center">
+              <div className="fitness-card p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Zap className="h-5 w-5 text-primary mr-2" />
+                  <div className="text-sm text-muted-foreground">Avg Daily Exercise</div>
+                </div>
                 <div className="metric-value">52</div>
-                <div className="text-sm text-muted-foreground">Avg Exercise Min/Day</div>
                 <div className="text-xs text-accent mt-1">↑ 7 min this month</div>
               </div>
-              <div className="fitness-card p-4 text-center">
+              <div className="fitness-card p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Ruler className="h-5 w-5 text-primary mr-2" />
+                  <div className="text-sm text-muted-foreground">Skin Fold</div>
+                </div>
                 <div className="metric-value">13mm</div>
-                <div className="text-sm text-muted-foreground">Skin Fold</div>
                 <div className="text-xs text-accent mt-1">↓ 2mm this month</div>
+              </div>
+              <div className="fitness-card p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <UtensilsCrossed className="h-5 w-5 text-primary mr-2" />
+                  <div className="text-sm text-muted-foreground">Avg Daily Calories</div>
+                </div>
+                <div className="metric-value">2,150</div>
+                <div className="text-xs text-accent mt-1">↓ 50 cal this month</div>
               </div>
             </div>
           </div>
