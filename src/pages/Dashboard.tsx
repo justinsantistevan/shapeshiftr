@@ -113,6 +113,7 @@ export function Dashboard({
   const handleDataAdded = () => {
     fetchFitnessPhotos(); // Refresh photos when new data is added
     fetchFitnessStats(); // Refresh stats when new data is added
+    metricsChartRef.current?.refreshGoals(); // Refresh chart data when new data is added
     toast({
       title: "Data Added",
       description: "Your fitness data has been successfully recorded."
