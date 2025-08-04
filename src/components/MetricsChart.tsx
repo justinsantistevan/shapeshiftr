@@ -25,8 +25,8 @@ export function MetricsChart() {
   const [secondaryMetric, setSecondaryMetric] = useState<string>("none");
 
   return (
-    <Card className="fitness-card col-span-2">
-      <CardHeader>
+    <Card className="fitness-card col-span-2 h-full flex flex-col">
+      <CardHeader className="flex-shrink-0">
         <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           Progress Metrics
         </CardTitle>
@@ -66,8 +66,8 @@ export function MetricsChart() {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="h-80 chart-container p-4 rounded-lg">
+      <CardContent className="flex-1 flex flex-col">
+        <div className="flex-1 min-h-0 chart-container p-4 rounded-lg">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={mockData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -143,7 +143,7 @@ export function MetricsChart() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="mt-4 text-xs text-muted-foreground text-center">
+        <div className="mt-4 text-xs text-muted-foreground text-center flex-shrink-0">
           Dashed lines represent your goals for each metric
         </div>
       </CardContent>
