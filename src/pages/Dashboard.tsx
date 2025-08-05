@@ -305,7 +305,7 @@ export function Dashboard({
               <div className="fitness-card p-3 text-center">
                 <div className="flex items-center justify-center mb-2">
                   <Ruler className="h-5 w-5 text-primary mr-2" />
-                  <div className="text-sm text-muted-foreground">Belly Skin Fold</div>
+                  <div className="text-sm text-muted-foreground">Belly Skinfold</div>
                 </div>
                 <div className="metric-value">
                   {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.skinFold || {

@@ -20,7 +20,7 @@ interface WeeklyEntry {
 const METRICS = {
   weight: { label: "Weight (lbs)", color: "#3b82f6", goalKey: "goal_weight" as keyof UserGoals },
   bodyFat: { label: "Body Fat %", color: "#8b5cf6", goalKey: "goal_body_fat_percentage" as keyof UserGoals },
-  skinFold: { label: "Belly Skin Fold (mm)", color: "#ef4444", goalKey: "goal_skin_fold_mm" as keyof UserGoals },
+  skinFold: { label: "Belly Skinfold (mm)", color: "#ef4444", goalKey: "goal_skin_fold_mm" as keyof UserGoals },
   avgExercise: { label: "Avg Daily Exercise (min)", color: "#10b981", goalKey: "goal_avg_exercise_min_per_day" as keyof UserGoals },
   avgCalories: { label: "Avg Daily Calories", color: "#f59e0b", goalKey: "goal_avg_daily_calories" as keyof UserGoals },
 };
@@ -249,6 +249,16 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
                 yAxisId="left"
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={yAxisFontSize}
+                domain={(() => {
+                  const dataValues = currentData.map(d => d[primaryMetric as keyof WeeklyEntry]).filter(v => v !== null) as number[];
+                  const goalValue = getGoalValue(primaryMetric);
+                  const allValues = goalValue ? [...dataValues, goalValue] : dataValues;
+                  if (allValues.length === 0) return ['dataMin', 'dataMax'];
+                  const min = Math.min(...allValues);
+                  const max = Math.max(...allValues);
+                  const padding = (max - min) * 0.1 || 1;
+                  return [Math.max(0, min - padding), max + padding];
+                })()}
                 label={{ 
                   value: METRICS[primaryMetric as keyof typeof METRICS]?.label, 
                   angle: -90, 
@@ -266,6 +276,16 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
                   orientation="right"
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={yAxisFontSize}
+                  domain={(() => {
+                    const dataValues = currentData.map(d => d[secondaryMetric as keyof WeeklyEntry]).filter(v => v !== null) as number[];
+                    const goalValue = getGoalValue(secondaryMetric);
+                    const allValues = goalValue ? [...dataValues, goalValue] : dataValues;
+                    if (allValues.length === 0) return ['dataMin', 'dataMax'];
+                    const min = Math.min(...allValues);
+                    const max = Math.max(...allValues);
+                    const padding = (max - min) * 0.1 || 1;
+                    return [Math.max(0, min - padding), max + padding];
+                  })()}
                   label={{ 
                     value: METRICS[secondaryMetric as keyof typeof METRICS]?.label, 
                     angle: 90, 

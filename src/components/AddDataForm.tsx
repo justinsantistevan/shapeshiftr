@@ -228,18 +228,18 @@ export function AddDataForm({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="weight">Weight (lbs)</Label>
-                  <Input id="weight" type="number" step="0.1" placeholder="150.5" value={formData.weight} onChange={e => handleInputChange('weight', e.target.value)} />
+                  <Input id="weight" type="number" step="0.1" placeholder="150.0" value={formData.weight} onChange={e => handleInputChange('weight', e.target.value)} />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="body_fat">Body Fat (%)</Label>
-                  <Input id="body_fat" type="number" step="0.1" placeholder="15.5" value={formData.body_fat_percentage} onChange={e => handleInputChange('body_fat_percentage', e.target.value)} />
+                  <Input id="body_fat" type="number" step="0.1" placeholder="20.0" value={formData.body_fat_percentage} onChange={e => handleInputChange('body_fat_percentage', e.target.value)} />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="skin_fold">Belly Skin Fold (mm)</Label>
-                <Input id="skin_fold" type="number" step="0.1" placeholder="8.5" value={formData.skin_fold_mm} onChange={e => handleInputChange('skin_fold_mm', e.target.value)} />
+                <Label htmlFor="skin_fold">Belly Skinfold (mm)</Label>
+                <Input id="skin_fold" type="number" step="0.1" placeholder="18.0" value={formData.skin_fold_mm} onChange={e => handleInputChange('skin_fold_mm', e.target.value)} />
               </div>
 
               <div className="grid grid-cols-2 gap-4">

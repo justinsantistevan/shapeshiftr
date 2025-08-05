@@ -107,7 +107,7 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
 function isPositiveTrend(trend: FitnessTrend): boolean {
   if (trend.direction === 'neutral' || trend.change === null) return false;
   
-  // Positive trends: weight down, body fat down, belly skin fold down, calories down, exercise up
+  // Positive trends: weight down, body fat down, belly skinfold down, calories down, exercise up
   switch (trend.unit) {
     case 'lbs':      // weight - down is good
     case '%':        // body fat - down is good  
