@@ -249,16 +249,6 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
                 yAxisId="left"
                 stroke="hsl(var(--muted-foreground))"
                 fontSize={yAxisFontSize}
-                domain={(() => {
-                  const dataValues = currentData.map(d => d[primaryMetric as keyof WeeklyEntry]).filter(v => v !== null) as number[];
-                  const goalValue = getGoalValue(primaryMetric);
-                  if (goalValue && dataValues.length > 0) {
-                    const dataMax = Math.max(...dataValues);
-                    const dataMin = Math.min(...dataValues);
-                    return [0, Math.max(dataMax, goalValue) * 1.1];
-                  }
-                  return [0, 'dataMax'];
-                })()}
                 label={{ 
                   value: METRICS[primaryMetric as keyof typeof METRICS]?.label, 
                   angle: -90, 
@@ -276,16 +266,6 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
                   orientation="right"
                   stroke="hsl(var(--muted-foreground))"
                   fontSize={yAxisFontSize}
-                  domain={(() => {
-                    const dataValues = currentData.map(d => d[secondaryMetric as keyof WeeklyEntry]).filter(v => v !== null) as number[];
-                    const goalValue = getGoalValue(secondaryMetric);
-                    if (goalValue && dataValues.length > 0) {
-                      const dataMax = Math.max(...dataValues);
-                      const dataMin = Math.min(...dataValues);
-                      return [0, Math.max(dataMax, goalValue) * 1.1];
-                    }
-                    return [0, 'dataMax'];
-                  })()}
                   label={{ 
                     value: METRICS[secondaryMetric as keyof typeof METRICS]?.label, 
                     angle: 90, 
