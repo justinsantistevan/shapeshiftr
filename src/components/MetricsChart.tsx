@@ -252,12 +252,12 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
                 domain={(() => {
                   const dataValues = currentData.map(d => d[primaryMetric as keyof WeeklyEntry]).filter(v => v !== null) as number[];
                   const goalValue = getGoalValue(primaryMetric);
-                  const allValues = goalValue ? [...dataValues, goalValue] : dataValues;
-                  if (allValues.length === 0) return ['dataMin', 'dataMax'];
-                  const min = Math.min(...allValues);
-                  const max = Math.max(...allValues);
-                  const padding = (max - min) * 0.1 || 1;
-                  return [Math.max(0, min - padding), max + padding];
+                  if (goalValue && dataValues.length > 0) {
+                    const dataMax = Math.max(...dataValues);
+                    const dataMin = Math.min(...dataValues);
+                    return [0, Math.max(dataMax, goalValue) * 1.1];
+                  }
+                  return [0, 'dataMax'];
                 })()}
                 label={{ 
                   value: METRICS[primaryMetric as keyof typeof METRICS]?.label, 
@@ -279,12 +279,12 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
                   domain={(() => {
                     const dataValues = currentData.map(d => d[secondaryMetric as keyof WeeklyEntry]).filter(v => v !== null) as number[];
                     const goalValue = getGoalValue(secondaryMetric);
-                    const allValues = goalValue ? [...dataValues, goalValue] : dataValues;
-                    if (allValues.length === 0) return ['dataMin', 'dataMax'];
-                    const min = Math.min(...allValues);
-                    const max = Math.max(...allValues);
-                    const padding = (max - min) * 0.1 || 1;
-                    return [Math.max(0, min - padding), max + padding];
+                    if (goalValue && dataValues.length > 0) {
+                      const dataMax = Math.max(...dataValues);
+                      const dataMin = Math.min(...dataValues);
+                      return [0, Math.max(dataMax, goalValue) * 1.1];
+                    }
+                    return [0, 'dataMax'];
                   })()}
                   label={{ 
                     value: METRICS[secondaryMetric as keyof typeof METRICS]?.label, 
