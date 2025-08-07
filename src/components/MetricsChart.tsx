@@ -280,7 +280,7 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
               )}
               <Tooltip 
                 contentStyle={{
-                  backgroundColor: document.documentElement.classList.contains('dark') ? "#A9A9A9" : "#f8fafc",
+                  backgroundColor: document.documentElement.classList.contains('dark') ? "#1f2937" : "#f8fafc",
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "8px"
                 }}
