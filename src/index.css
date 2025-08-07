@@ -216,6 +216,6 @@ All colors MUST be HSL.
   }
 
   .dark .recharts-active-bar {
-    filter: brightness(1.5);
+    filter: brightness(0.8);
   }
 }
