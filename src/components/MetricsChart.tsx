@@ -179,7 +179,13 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
         <div className="flex gap-4 mt-4">
           <div className="flex-1">
             <label className="text-sm font-medium">Primary Metric</label>
-            <Select value={primaryMetric} onValueChange={setPrimaryMetric}>
+            <Select value={primaryMetric} onValueChange={(value) => {
+              setPrimaryMetric(value);
+              // If secondary metric is the same as the new primary, reset it to "none"
+              if (secondaryMetric === value) {
+                setSecondaryMetric("none");
+              }
+            }}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
