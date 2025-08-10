@@ -116,8 +116,10 @@ export function Dashboard({
   // Set carousel to show most recent photos when data is loaded
   useEffect(() => {
     if (carouselApi && fitnessPhotos.length > 0) {
-      // Go to the last photo (most recent)
-      carouselApi.scrollTo(fitnessPhotos.length - 1);
+      // Use setTimeout to ensure carousel is ready after state update
+      setTimeout(() => {
+        carouselApi.scrollTo(fitnessPhotos.length - 1);
+      }, 100);
     }
   }, [carouselApi, fitnessPhotos]);
   const handleDataAdded = () => {
