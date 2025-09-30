@@ -14,6 +14,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { calculateFitnessStats, formatChange, formatCurrentValue, FitnessStats } from "@/lib/fitnessCalculations";
+import { fetchUserGoals, UserGoals } from "@/lib/userGoals";
 import shapeshiftrLogo from "/lovable-uploads/d1025a10-8e0c-4dc2-90f2-289110e6f482.png";
 interface DashboardProps {
   onSignOut: () => void;
@@ -45,6 +46,7 @@ export function Dashboard({
   const [selectionStep, setSelectionStep] = useState<'before' | 'after'>('before');
   const [fitnessStats, setFitnessStats] = useState<FitnessStats | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
+  const [userGoals, setUserGoals] = useState<UserGoals>({});
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const fitnessAffirmationsRef = useRef<FitnessAffirmationsRef>(null);
   const metricsChartRef = useRef<MetricsChartRef>(null);
@@ -98,9 +100,19 @@ export function Dashboard({
       setIsLoadingStats(false);
     }
   };
+
+  const fetchGoals = async () => {
+    try {
+      const goals = await fetchUserGoals();
+      setUserGoals(goals);
+    } catch (error) {
+      console.error('Error fetching user goals:', error);
+    }
+  };
   useEffect(() => {
     fetchFitnessPhotos();
     fetchFitnessStats();
+    fetchGoals();
 
     // Add event listeners for custom events from child components
     const handleOpenAddData = () => setShowAddDataForm(true);
@@ -125,10 +137,20 @@ export function Dashboard({
   const handleDataAdded = () => {
     fetchFitnessPhotos(); // Refresh photos when new data is added
     fetchFitnessStats(); // Refresh stats when new data is added
+    fetchGoals(); // Refresh goals when new data is added
     metricsChartRef.current?.refreshGoals(); // Refresh chart data when new data is added
     toast({
       title: "Data Added",
       description: "Your fitness data has been successfully recorded."
+    });
+  };
+
+  const handleGoalsUpdated = () => {
+    fetchGoals(); // Refresh goals when updated
+    metricsChartRef.current?.refreshGoals(); // Refresh chart data when goals are updated
+    toast({
+      title: "Goals Updated",
+      description: "Your fitness goals have been successfully saved."
     });
   };
   const handleCompareMode = () => {
@@ -259,6 +281,11 @@ export function Dashboard({
                   unit: 'lbs'
                 })}
                 </div>
+                {userGoals.goal_weight && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Goal: {userGoals.goal_weight} lbs
+                  </div>
+                )}
                 <div className="text-xs mt-1 flex items-center justify-center gap-1">
                   {isLoadingStats ? "" : (() => {
                   const changeData = formatChange(fitnessStats?.weight || {
@@ -288,6 +315,11 @@ export function Dashboard({
                   unit: '%'
                 })}
                 </div>
+                {userGoals.goal_body_fat_percentage && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Goal: {userGoals.goal_body_fat_percentage}%
+                  </div>
+                )}
                 <div className="text-xs mt-1 flex items-center justify-center gap-1">
                   {isLoadingStats ? "" : (() => {
                   const changeData = formatChange(fitnessStats?.bodyFat || {
@@ -317,6 +349,11 @@ export function Dashboard({
                   unit: 'mm'
                 })}
                 </div>
+                {userGoals.goal_skin_fold_mm && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Goal: {userGoals.goal_skin_fold_mm}mm
+                  </div>
+                )}
                 <div className="text-xs mt-1 flex items-center justify-center gap-1">
                   {isLoadingStats ? "" : (() => {
                   const changeData = formatChange(fitnessStats?.skinFold || {
@@ -346,6 +383,11 @@ export function Dashboard({
                   unit: 'min'
                 })}
                 </div>
+                {userGoals.goal_avg_exercise_min_per_day && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Goal: {userGoals.goal_avg_exercise_min_per_day} min
+                  </div>
+                )}
                 <div className="text-xs mt-1 flex items-center justify-center gap-1">
                   {isLoadingStats ? "" : (() => {
                   const changeData = formatChange(fitnessStats?.exercise || {
@@ -375,6 +417,11 @@ export function Dashboard({
                   unit: 'cal'
                 })}
                 </div>
+                {userGoals.goal_avg_daily_calories && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Goal: {userGoals.goal_avg_daily_calories.toLocaleString()} cal
+                  </div>
+                )}
                 <div className="text-xs mt-1 flex items-center justify-center gap-1">
                   {isLoadingStats ? "" : (() => {
                   const changeData = formatChange(fitnessStats?.calories || {
@@ -536,10 +583,7 @@ export function Dashboard({
 
       <AddDataForm open={showAddDataForm} onOpenChange={setShowAddDataForm} onSuccess={handleDataAdded} />
       
-      <GoalsForm open={showGoalsForm} onOpenChange={setShowGoalsForm} onGoalsUpdated={() => {
-      // Refresh the chart when goals are updated
-      metricsChartRef.current?.refreshGoals();
-    }} />
+      <GoalsForm open={showGoalsForm} onOpenChange={setShowGoalsForm} onGoalsUpdated={handleGoalsUpdated} />
 
       <Dialog open={showAffirmationsManager} onOpenChange={setShowAffirmationsManager}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto my-0 py-[35px]">
