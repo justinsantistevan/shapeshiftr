@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import LiquidEther from "@/components/LiquidEther";
 // Using the dark background logo for Auth page only
 const shapeshiftrLogo = "/lovable-uploads/23423cdb-b1d6-4ce3-bc5f-57c099414ad5.png";
 
@@ -107,8 +108,21 @@ export function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 hero-gradient">
-      <Card className="w-full max-w-md fitness-card shadow-strong">
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Liquid Ether Background */}
+      <div className="absolute inset-0 z-0">
+        <LiquidEther
+          colors={['#5227FF', '#FF9FFC', '#B19EEF']}
+          mouseForce={20}
+          cursorSize={100}
+          autoDemo={true}
+          autoSpeed={0.3}
+          autoIntensity={1.8}
+          resolution={0.5}
+        />
+      </div>
+      
+      <Card className="w-full max-w-md fitness-card shadow-strong relative z-10">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <img 
