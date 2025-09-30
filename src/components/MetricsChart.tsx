@@ -3,10 +3,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, BarChart3, Table as TableIcon, Scale, Activity, Ruler, Zap, UtensilsCrossed } from "lucide-react";
 import { fetchUserGoals, UserGoals, DEFAULT_GOALS } from "@/lib/userGoals";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface WeeklyEntry {
   week: string;
@@ -18,11 +20,11 @@ interface WeeklyEntry {
 }
 
 const METRICS = {
-  weight: { label: "Weight (lbs)", color: "#3b82f6", goalKey: "goal_weight" as keyof UserGoals },
-  bodyFat: { label: "Body Fat %", color: "#8b5cf6", goalKey: "goal_body_fat_percentage" as keyof UserGoals },
-  skinFold: { label: "Belly Skinfold (mm)", color: "#ef4444", goalKey: "goal_skin_fold_mm" as keyof UserGoals },
-  avgExercise: { label: "Avg Daily Exercise (min)", color: "#10b981", goalKey: "goal_avg_exercise_min_per_day" as keyof UserGoals },
-  avgCalories: { label: "Avg Daily Calories", color: "#f59e0b", goalKey: "goal_avg_daily_calories" as keyof UserGoals },
+  weight: { label: "Weight", unit: "lbs", color: "#3b82f6", goalKey: "goal_weight" as keyof UserGoals, icon: Scale },
+  bodyFat: { label: "Body Fat", unit: "%", color: "#8b5cf6", goalKey: "goal_body_fat_percentage" as keyof UserGoals, icon: Activity },
+  skinFold: { label: "Belly Skinfold", unit: "mm", color: "#ef4444", goalKey: "goal_skin_fold_mm" as keyof UserGoals, icon: Ruler },
+  avgExercise: { label: "Avg Daily Exercise", unit: "min", color: "#10b981", goalKey: "goal_avg_exercise_min_per_day" as keyof UserGoals, icon: Zap },
+  avgCalories: { label: "Avg Daily Calories", unit: "cal", color: "#f59e0b", goalKey: "goal_avg_daily_calories" as keyof UserGoals, icon: UtensilsCrossed },
 };
 
 export interface MetricsChartRef {
@@ -42,6 +44,7 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
   const [isLoadingGoals, setIsLoadingGoals] = useState(true);
   const [fitnessData, setFitnessData] = useState<WeeklyEntry[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
+  const [viewMode, setViewMode] = useState<'chart' | 'table'>('chart');
   
   // Detect screen size
   useEffect(() => {
@@ -146,6 +149,26 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
   const yAxisFontSize = 10; // Same for axis values
   const yLabelFontSize = isMobile ? 10 : 12; // Smaller on mobile for y-axis labels
 
+  // Helper to format table cell values
+  const formatTableValue = (value: number | null, metricKey: string): string => {
+    if (value === null) return '--';
+    const metric = METRICS[metricKey as keyof typeof METRICS];
+    if (!metric) return '--';
+    
+    switch (metric.unit) {
+      case 'lbs':
+      case '%':
+        return value.toFixed(1);
+      case 'min':
+      case 'mm':
+        return Math.round(value).toString();
+      case 'cal':
+        return value.toLocaleString();
+      default:
+        return value.toString();
+    }
+  };
+
   return (
     <Card className="fitness-card col-span-2 h-full min-h-[400px] md:min-h-0 flex flex-col">
       <CardHeader className="flex-shrink-0">
@@ -157,66 +180,90 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
             <Button
               variant="outline"
               size="sm"
-              onClick={scrollPrev}
-              disabled={!canScrollPrev}
-              className="h-8 w-8 p-0"
+              onClick={() => setViewMode(viewMode === 'chart' ? 'table' : 'chart')}
+              className="h-8 px-3"
             >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="sr-only">Previous weeks</span>
+              {viewMode === 'chart' ? (
+                <>
+                  <TableIcon className="h-4 w-4 mr-2" />
+                  Table
+                </>
+              ) : (
+                <>
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Chart
+                </>
+              )}
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={scrollNext}
-              disabled={!canScrollNext}
-              className="h-8 w-8 p-0"
-            >
-              <ArrowRight className="h-4 w-4" />
-              <span className="sr-only">Next weeks</span>
-            </Button>
+            {viewMode === 'chart' && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={scrollPrev}
+                  disabled={!canScrollPrev}
+                  className="h-8 w-8 p-0"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="sr-only">Previous weeks</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={scrollNext}
+                  disabled={!canScrollNext}
+                  className="h-8 w-8 p-0"
+                >
+                  <ArrowRight className="h-4 w-4" />
+                  <span className="sr-only">Next weeks</span>
+                </Button>
+              </>
+            )}
           </div>
         </div>
-        <div className="flex gap-4 mt-4">
-          <div className="flex-1">
-            <label className="text-sm font-medium">Primary Metric</label>
-            <Select value={primaryMetric} onValueChange={(value) => {
-              setPrimaryMetric(value);
-              // If secondary metric is the same as the new primary, reset it to "none"
-              if (secondaryMetric === value) {
-                setSecondaryMetric("none");
-              }
-            }}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(METRICS).map(([key, metric]) => (
-                  <SelectItem key={key} value={key}>
-                    {metric.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex-1">
-            <label className="text-sm font-medium">Secondary Metric</label>
-            <Select value={secondaryMetric} onValueChange={setSecondaryMetric}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select secondary metric" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">None</SelectItem>
-                {Object.entries(METRICS)
-                  .filter(([key]) => key !== primaryMetric)
-                  .map(([key, metric]) => (
+        {viewMode === 'chart' && (
+          <div className="flex gap-4 mt-4">
+            <div className="flex-1">
+              <label className="text-sm font-medium">Primary Metric</label>
+              <Select value={primaryMetric} onValueChange={(value) => {
+                setPrimaryMetric(value);
+                // If secondary metric is the same as the new primary, reset it to "none"
+                if (secondaryMetric === value) {
+                  setSecondaryMetric("none");
+                }
+              }}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(METRICS).map(([key, metric]) => (
                     <SelectItem key={key} value={key}>
                       {metric.label}
                     </SelectItem>
                   ))}
-              </SelectContent>
-            </Select>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex-1">
+              <label className="text-sm font-medium">Secondary Metric</label>
+              <Select value={secondaryMetric} onValueChange={setSecondaryMetric}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select secondary metric" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {Object.entries(METRICS)
+                    .filter(([key]) => key !== primaryMetric)
+                    .map(([key, metric]) => (
+                      <SelectItem key={key} value={key}>
+                        {metric.label}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
+        )}
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
         {isLoadingData ? (
@@ -240,6 +287,56 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
                 Add Data
               </Button>
             </div>
+          </div>
+        ) : viewMode === 'table' ? (
+          <div className="flex-1 min-h-0">
+            <ScrollArea className="h-full">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[120px]">Week</TableHead>
+                    {Object.entries(METRICS).map(([key, metric]) => {
+                      const Icon = metric.icon;
+                      return (
+                        <TableHead key={key} className="text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <Icon className="h-4 w-4" />
+                            <span>{metric.label}</span>
+                          </div>
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...fitnessData].reverse().map((entry, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">{entry.week}</TableCell>
+                      <TableCell className="text-center">
+                        {formatTableValue(entry.weight, 'weight')}
+                        {entry.weight !== null && ' lbs'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {formatTableValue(entry.bodyFat, 'bodyFat')}
+                        {entry.bodyFat !== null && '%'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {formatTableValue(entry.skinFold, 'skinFold')}
+                        {entry.skinFold !== null && ' mm'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {formatTableValue(entry.avgExercise, 'avgExercise')}
+                        {entry.avgExercise !== null && ' min'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {formatTableValue(entry.avgCalories, 'avgCalories')}
+                        {entry.avgCalories !== null && ' cal'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
           </div>
         ) : (
           <div className="flex-1 min-h-0 chart-container p-4 rounded-lg">
@@ -293,9 +390,9 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
                 labelStyle={{
                   color: "hsl(var(--foreground))"
                 }}
-                formatter={(value, name) => {
+                  formatter={(value, name) => {
                   const metric = METRICS[name as keyof typeof METRICS];
-                  return [value, metric?.label || name];
+                  return [value, `${metric?.label || name} (${metric?.unit})`];
                 }}
               />
               <Bar 
@@ -336,7 +433,7 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
           </ResponsiveContainer>
           </div>
         )}
-        {fitnessData.length > 0 && (
+        {fitnessData.length > 0 && viewMode === 'chart' && (
           <div className="mt-4 text-xs text-muted-foreground text-center flex-shrink-0">
             Dashed lines represent your goals for each metric
           </div>
