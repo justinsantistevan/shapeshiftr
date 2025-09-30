@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, BarChart3, Table as TableIcon, Scale, Activity, 
 import { fetchUserGoals, UserGoals, DEFAULT_GOALS } from "@/lib/userGoals";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface WeeklyEntry {
@@ -288,46 +289,26 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
             </div>
           </div>
         ) : viewMode === 'table' ? (
-          <div className="flex-1 min-h-0 chart-container p-4 rounded-lg">
-            <div className="grid h-full min-h-0 grid-rows-[auto,1fr]">
-              {/* Fixed header */}
-              <table className="table-fixed w-full">
-                <colgroup>
-                  <col style={{ width: '120px' }} />
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                  <col />
-                </colgroup>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Week</TableHead>
-                    {Object.entries(METRICS).map(([key, metric]) => {
-                      const Icon = metric.icon;
-                      return (
-                        <TableHead key={key} className="text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <Icon className="h-4 w-4" />
-                            <span>{metric.label}</span>
-                          </div>
-                        </TableHead>
-                      );
-                    })}
-                  </TableRow>
-                </TableHeader>
-              </table>
-              {/* Scrollable body */}
-              <div className="h-full overflow-y-auto [scrollbar-gutter:stable] pr-2">
-                <table className="table-fixed w-full">
-                  <colgroup>
-                    <col style={{ width: '120px' }} />
-                    <col />
-                    <col />
-                    <col />
-                    <col />
-                    <col />
-                  </colgroup>
+          <div className="flex-1 min-h-0 relative">
+            <div className="absolute inset-0">
+              <ScrollArea className="h-full w-full">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[120px] sticky top-0 bg-background z-10">Week</TableHead>
+                      {Object.entries(METRICS).map(([key, metric]) => {
+                        const Icon = metric.icon;
+                        return (
+                          <TableHead key={key} className="text-center sticky top-0 bg-background z-10">
+                            <div className="flex items-center justify-center gap-2">
+                              <Icon className="h-4 w-4" />
+                              <span>{metric.label}</span>
+                            </div>
+                          </TableHead>
+                        );
+                      })}
+                    </TableRow>
+                  </TableHeader>
                   <TableBody>
                     {[...fitnessData].reverse().map((entry, index) => (
                       <TableRow key={index}>
@@ -355,8 +336,8 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
                       </TableRow>
                     ))}
                   </TableBody>
-                </table>
-              </div>
+                </Table>
+              </ScrollArea>
             </div>
           </div>
         ) : (
