@@ -255,7 +255,7 @@ export function Dashboard({
         </section>
 
         {/* Metrics Dashboard */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:h-[600px]">
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Chart Section */}
           <div className="lg:col-span-2 animate-slide-up h-full" style={{
           animationDelay: "0.2s"
