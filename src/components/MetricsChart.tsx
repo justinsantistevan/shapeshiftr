@@ -265,7 +265,7 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
           </div>
         )}
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col">
+      <CardContent className="flex-1 flex flex-col min-h-0">
         {isLoadingData ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -289,17 +289,17 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
             </div>
           </div>
         ) : viewMode === 'table' ? (
-          <div className="flex-1 min-h-0 overflow-hidden">
-            <ScrollArea className="h-full w-full">
-              <div className="pr-4">
+          <div className="flex-1 min-h-0 relative">
+            <div className="absolute inset-0">
+              <ScrollArea className="h-full w-full">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[120px]">Week</TableHead>
+                      <TableHead className="w-[120px] sticky top-0 bg-background z-10">Week</TableHead>
                       {Object.entries(METRICS).map(([key, metric]) => {
                         const Icon = metric.icon;
                         return (
-                          <TableHead key={key} className="text-center">
+                          <TableHead key={key} className="text-center sticky top-0 bg-background z-10">
                             <div className="flex items-center justify-center gap-2">
                               <Icon className="h-4 w-4" />
                               <span>{metric.label}</span>
@@ -337,8 +337,8 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
                     ))}
                   </TableBody>
                 </Table>
-              </div>
-            </ScrollArea>
+              </ScrollArea>
+            </div>
           </div>
         ) : (
           <div className="flex-1 min-h-0 chart-container p-4 rounded-lg">
