@@ -289,56 +289,58 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
             </div>
           </div>
         ) : viewMode === 'table' ? (
-          <div className="flex-1 min-h-0 relative">
-            <div className="absolute inset-0">
-              <ScrollArea className="h-full w-full">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[120px] sticky top-0 bg-background z-10">Week</TableHead>
-                      {Object.entries(METRICS).map(([key, metric]) => {
-                        const Icon = metric.icon;
-                        return (
-                          <TableHead key={key} className="text-center sticky top-0 bg-background z-10">
-                            <div className="flex items-center justify-center gap-2">
-                              <Icon className="h-4 w-4" />
-                              <span>{metric.label}</span>
-                            </div>
-                          </TableHead>
-                        );
-                      })}
+          <div className="flex-1 min-h-0 flex flex-col">
+            {/* Fixed header */}
+            <Table className="table-fixed w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[120px]">Week</TableHead>
+                  {Object.entries(METRICS).map(([key, metric]) => {
+                    const Icon = metric.icon;
+                    return (
+                      <TableHead key={key} className="text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <Icon className="h-4 w-4" />
+                          <span>{metric.label}</span>
+                        </div>
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              </TableHeader>
+            </Table>
+            {/* Scrollable body */}
+            <ScrollArea className="flex-1 w-full">
+              <Table className="table-fixed w-full">
+                <TableBody>
+                  {[...fitnessData].reverse().map((entry, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="w-[120px] font-medium">{entry.week}</TableCell>
+                      <TableCell className="text-center">
+                        {formatTableValue(entry.weight, 'weight')}
+                        {entry.weight !== null && ' lbs'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {formatTableValue(entry.bodyFat, 'bodyFat')}
+                        {entry.bodyFat !== null && '%'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {formatTableValue(entry.skinFold, 'skinFold')}
+                        {entry.skinFold !== null && ' mm'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {formatTableValue(entry.avgExercise, 'avgExercise')}
+                        {entry.avgExercise !== null && ' min'}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {formatTableValue(entry.avgCalories, 'avgCalories')}
+                        {entry.avgCalories !== null && ' cal'}
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {[...fitnessData].reverse().map((entry, index) => (
-                      <TableRow key={index}>
-                        <TableCell className="font-medium">{entry.week}</TableCell>
-                        <TableCell className="text-center">
-                          {formatTableValue(entry.weight, 'weight')}
-                          {entry.weight !== null && ' lbs'}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {formatTableValue(entry.bodyFat, 'bodyFat')}
-                          {entry.bodyFat !== null && '%'}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {formatTableValue(entry.skinFold, 'skinFold')}
-                          {entry.skinFold !== null && ' mm'}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {formatTableValue(entry.avgExercise, 'avgExercise')}
-                          {entry.avgExercise !== null && ' min'}
-                        </TableCell>
-                        <TableCell className="text-center">
-                          {formatTableValue(entry.avgCalories, 'avgCalories')}
-                          {entry.avgCalories !== null && ' cal'}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            </div>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
           </div>
         ) : (
           <div className="flex-1 min-h-0 chart-container p-4 rounded-lg">
