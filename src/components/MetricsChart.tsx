@@ -289,53 +289,55 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
             </div>
           </div>
         ) : viewMode === 'table' ? (
-          <div className="flex-1 min-h-0">
-            <ScrollArea className="h-full">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[120px]">Week</TableHead>
-                    {Object.entries(METRICS).map(([key, metric]) => {
-                      const Icon = metric.icon;
-                      return (
-                        <TableHead key={key} className="text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <Icon className="h-4 w-4" />
-                            <span>{metric.label}</span>
-                          </div>
-                        </TableHead>
-                      );
-                    })}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {[...fitnessData].reverse().map((entry, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">{entry.week}</TableCell>
-                      <TableCell className="text-center">
-                        {formatTableValue(entry.weight, 'weight')}
-                        {entry.weight !== null && ' lbs'}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {formatTableValue(entry.bodyFat, 'bodyFat')}
-                        {entry.bodyFat !== null && '%'}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {formatTableValue(entry.skinFold, 'skinFold')}
-                        {entry.skinFold !== null && ' mm'}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {formatTableValue(entry.avgExercise, 'avgExercise')}
-                        {entry.avgExercise !== null && ' min'}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {formatTableValue(entry.avgCalories, 'avgCalories')}
-                        {entry.avgCalories !== null && ' cal'}
-                      </TableCell>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <ScrollArea className="h-full w-full">
+              <div className="pr-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[120px]">Week</TableHead>
+                      {Object.entries(METRICS).map(([key, metric]) => {
+                        const Icon = metric.icon;
+                        return (
+                          <TableHead key={key} className="text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <Icon className="h-4 w-4" />
+                              <span>{metric.label}</span>
+                            </div>
+                          </TableHead>
+                        );
+                      })}
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {[...fitnessData].reverse().map((entry, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{entry.week}</TableCell>
+                        <TableCell className="text-center">
+                          {formatTableValue(entry.weight, 'weight')}
+                          {entry.weight !== null && ' lbs'}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {formatTableValue(entry.bodyFat, 'bodyFat')}
+                          {entry.bodyFat !== null && '%'}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {formatTableValue(entry.skinFold, 'skinFold')}
+                          {entry.skinFold !== null && ' mm'}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {formatTableValue(entry.avgExercise, 'avgExercise')}
+                          {entry.avgExercise !== null && ' min'}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          {formatTableValue(entry.avgCalories, 'avgCalories')}
+                          {entry.avgCalories !== null && ' cal'}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </ScrollArea>
           </div>
         ) : (
