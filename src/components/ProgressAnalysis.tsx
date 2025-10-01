@@ -1,19 +1,29 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles, RefreshCw } from "lucide-react";
+import { Sparkles, RefreshCw, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { FitnessStats } from "@/lib/fitnessCalculations";
 import { UserGoals } from "@/lib/userGoals";
 import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
+import { Separator } from "./ui/separator";
 
 interface ProgressAnalysisProps {
   stats: FitnessStats | null;
   goals: UserGoals;
 }
 
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
   const [analysis, setAnalysis] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [userMessage, setUserMessage] = useState("");
+  const [isChatLoading, setIsChatLoading] = useState(false);
 
   const fetchAnalysis = async () => {
     if (!stats) return;
@@ -42,6 +52,59 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
   useEffect(() => {
     fetchAnalysis();
   }, [stats, goals]);
+
+  const sendMessage = async () => {
+    if (!userMessage.trim() || isChatLoading) return;
+
+    const newUserMessage: ChatMessage = {
+      role: 'user',
+      content: userMessage
+    };
+
+    setChatMessages(prev => [...prev, newUserMessage]);
+    setUserMessage("");
+    setIsChatLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('chat-coach', {
+        body: { 
+          message: userMessage,
+          stats,
+          goals,
+          conversationHistory: chatMessages
+        }
+      });
+
+      if (error) throw error;
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      const assistantMessage: ChatMessage = {
+        role: 'assistant',
+        content: data.reply
+      };
+
+      setChatMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Error in chat:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorResponse: ChatMessage = {
+        role: 'assistant',
+        content: `Sorry, I encountered an error: ${errorMessage}`
+      };
+      setChatMessages(prev => [...prev, errorResponse]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
 
   return (
     <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
@@ -73,6 +136,53 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
             {analysis || "Loading your personalized progress analysis..."}
           </p>
         )}
+
+        <Separator className="my-6" />
+
+        <div className="space-y-4">
+          <h4 className="text-md font-semibold flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" />
+            Ask Coach
+          </h4>
+
+          {chatMessages.length > 0 && (
+            <div className="space-y-3 max-h-64 overflow-y-auto">
+              {chatMessages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`p-3 rounded-lg ${
+                    msg.role === 'user'
+                      ? 'bg-primary/10 ml-4'
+                      : 'bg-muted mr-4'
+                  }`}
+                >
+                  <p className="text-sm leading-relaxed">
+                    {msg.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <Textarea
+              placeholder="Ask your fitness coach anything..."
+              value={userMessage}
+              onChange={(e) => setUserMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              disabled={isChatLoading}
+              className="min-h-[60px]"
+            />
+            <Button
+              onClick={sendMessage}
+              disabled={!userMessage.trim() || isChatLoading}
+              size="icon"
+              className="h-[60px] w-[60px]"
+            >
+              <Send className={`h-4 w-4 ${isChatLoading ? 'animate-pulse' : ''}`} />
+            </Button>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
