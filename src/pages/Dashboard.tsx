@@ -101,7 +101,6 @@ export function Dashboard({
       setIsLoadingStats(false);
     }
   };
-
   const fetchGoals = async () => {
     try {
       const goals = await fetchUserGoals();
@@ -145,7 +144,6 @@ export function Dashboard({
       description: "Your fitness data has been successfully recorded."
     });
   };
-
   const handleGoalsUpdated = () => {
     fetchGoals(); // Refresh goals when updated
     metricsChartRef.current?.refreshGoals(); // Refresh chart data when goals are updated
@@ -282,11 +280,9 @@ export function Dashboard({
                   unit: 'lbs'
                 })}
                 </div>
-                {userGoals.goal_weight && (
-                  <div className="text-xs text-muted-foreground mt-1">
+                {userGoals.goal_weight && <div className="text-xs text-muted-foreground mt-1">
                     Goal: {userGoals.goal_weight} lbs
-                  </div>
-                )}
+                  </div>}
                 <div className="text-xs mt-1 flex items-center justify-center gap-1">
                   {isLoadingStats ? "" : (() => {
                   const changeData = formatChange(fitnessStats?.weight || {
@@ -316,11 +312,9 @@ export function Dashboard({
                   unit: '%'
                 })}
                 </div>
-                {userGoals.goal_body_fat_percentage && (
-                  <div className="text-xs text-muted-foreground mt-1">
+                {userGoals.goal_body_fat_percentage && <div className="text-xs text-muted-foreground mt-1">
                     Goal: {userGoals.goal_body_fat_percentage}%
-                  </div>
-                )}
+                  </div>}
                 <div className="text-xs mt-1 flex items-center justify-center gap-1">
                   {isLoadingStats ? "" : (() => {
                   const changeData = formatChange(fitnessStats?.bodyFat || {
@@ -350,11 +344,9 @@ export function Dashboard({
                   unit: 'mm'
                 })}
                 </div>
-                {userGoals.goal_skin_fold_mm && (
-                  <div className="text-xs text-muted-foreground mt-1">
+                {userGoals.goal_skin_fold_mm && <div className="text-xs text-muted-foreground mt-1">
                     Goal: {userGoals.goal_skin_fold_mm}mm
-                  </div>
-                )}
+                  </div>}
                 <div className="text-xs mt-1 flex items-center justify-center gap-1">
                   {isLoadingStats ? "" : (() => {
                   const changeData = formatChange(fitnessStats?.skinFold || {
@@ -384,11 +376,9 @@ export function Dashboard({
                   unit: 'min'
                 })}
                 </div>
-                {userGoals.goal_avg_exercise_min_per_day && (
-                  <div className="text-xs text-muted-foreground mt-1">
+                {userGoals.goal_avg_exercise_min_per_day && <div className="text-xs text-muted-foreground mt-1">
                     Goal: {userGoals.goal_avg_exercise_min_per_day} min
-                  </div>
-                )}
+                  </div>}
                 <div className="text-xs mt-1 flex items-center justify-center gap-1">
                   {isLoadingStats ? "" : (() => {
                   const changeData = formatChange(fitnessStats?.exercise || {
@@ -418,11 +408,9 @@ export function Dashboard({
                   unit: 'cal'
                 })}
                 </div>
-                {userGoals.goal_avg_daily_calories && (
-                  <div className="text-xs text-muted-foreground mt-1">
+                {userGoals.goal_avg_daily_calories && <div className="text-xs text-muted-foreground mt-1">
                     Goal: {userGoals.goal_avg_daily_calories.toLocaleString()} cal
-                  </div>
-                )}
+                  </div>}
                 <div className="text-xs mt-1 flex items-center justify-center gap-1">
                   {isLoadingStats ? "" : (() => {
                   const changeData = formatChange(fitnessStats?.calories || {
@@ -444,7 +432,9 @@ export function Dashboard({
         </section>
 
         {/* Progress Analysis Section */}
-        <section className="animate-slide-up" style={{ animationDelay: "0.5s" }}>
+        <section className="animate-slide-up" style={{
+        animationDelay: "0.5s"
+      }}>
           <ProgressAnalysis stats={fitnessStats} goals={userGoals} />
         </section>
 
@@ -599,9 +589,7 @@ export function Dashboard({
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto my-0 py-[35px]">
           <DialogHeader>
             <DialogTitle>Manage Affirmations</DialogTitle>
-            <DialogDescription>
-              Add, edit, or delete your personal affirmations to keep you motivated on your fitness journey.
-            </DialogDescription>
+            <DialogDescription>Add, edit, reorder, or delete your personal affirmations to keep you motivated on your fitness journey.</DialogDescription>
           </DialogHeader>
           <AffirmationsManager onAffirmationsChange={() => {
           // Refresh the affirmations display at the bottom of the page
