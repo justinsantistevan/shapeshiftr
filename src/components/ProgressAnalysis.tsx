@@ -148,9 +148,9 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
             <div className="h-4 bg-muted animate-pulse rounded w-4/6" />
           </div>
         ) : (
-          <p className="text-base leading-relaxed text-muted-foreground">
-            {analysis || "Loading your personalized progress analysis..."}
-          </p>
+          <div className="text-base leading-relaxed text-muted-foreground prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-strong:text-foreground">
+            <ReactMarkdown>{analysis || "Loading your personalized progress analysis..."}</ReactMarkdown>
+          </div>
         )}
 
         <Separator className="my-6" />
