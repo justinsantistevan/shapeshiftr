@@ -185,7 +185,7 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
                         : 'bg-muted mr-4'
                     }`}
                   >
-                    <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-strong:text-foreground">
+                    <div className="text-base leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-strong:text-foreground">
                       <ReactMarkdown>{msg.content}</ReactMarkdown>
                     </div>
                   </div>
@@ -207,7 +207,7 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
               onChange={(e) => setUserMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               disabled={isChatLoading}
-              className="min-h-[60px]"
+              className="min-h-[60px] text-base"
             />
             <Button
               onClick={sendMessage}
