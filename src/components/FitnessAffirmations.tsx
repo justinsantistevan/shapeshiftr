@@ -28,7 +28,7 @@ export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAff
   }, []);
   if (isLoading) {
     return <Card className="fitness-card p-6">
-        <h3 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent leading-normal">
+        <h3 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           Fitness Affirmations
         </h3>
         <div className="space-y-3">
@@ -40,7 +40,7 @@ export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAff
       </Card>;
   }
   return <Card className="fitness-card p-6">
-      <h3 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent leading-normal">
+      <h3 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
         Fitness Affirmations
       </h3>
       {affirmations.length === 0 ? <div className="text-center py-8">
