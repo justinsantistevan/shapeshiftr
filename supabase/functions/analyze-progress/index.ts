@@ -1,7 +1,8 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+const openAIApiKey = Deno.env.get('OPENAI_API_KEY'); // legacy (unused)
+const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -19,10 +20,10 @@ serve(async (req) => {
     console.log('Analyzing progress with stats:', stats);
     console.log('User goals:', goals);
 
-    if (!openAIApiKey) {
-      console.error('OPENAI_API_KEY is not configured');
+    if (!lovableApiKey) {
+      console.error('LOVABLE_API_KEY is not configured');
       return new Response(JSON.stringify({ 
-        error: 'OpenAI API key is not configured. Please add it in Supabase secrets.' 
+        error: 'AI gateway key is not configured. Please contact support.' 
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -57,30 +58,29 @@ ${goals.goal_avg_exercise_min_per_day ? `- Target Exercise: ${goals.goal_avg_exe
 
 Provide a brief, encouraging analysis of my progress.`;
 
-    console.log('Calling OpenAI API...');
+    console.log('Calling Lovable AI Gateway...');
     
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${lovableApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini-2025-08-07',
+        model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
-        ],
-        max_completion_tokens: 300,
+        ]
       }),
     });
 
-    console.log('OpenAI response status:', response.status);
+    console.log('AI Gateway response status:', response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error response:', errorText);
-      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
+      console.error('AI Gateway error response:', errorText);
+      throw new Error(`AI Gateway error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
