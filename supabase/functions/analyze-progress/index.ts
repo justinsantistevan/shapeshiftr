@@ -40,7 +40,7 @@ serve(async (req) => {
 - Put more focus on the metrics that could use the most help, such as those that are moving away from the goal or are stagnant
 - Be encouraging yet realistic
 - Keep your response concise (3-4 sentences max)
-- Contextualize the timeline of your analysis, for example "In the last month..." or "Over the previous 4 weeks"
+- Contextualize the timeline of your analysis, for example "In the last month..." or "Over the previous 4 weeks" or "This month"
 
 Focus on the trends and how they relate to the user's goals. Be specific about numbers when relevant.`;
 
