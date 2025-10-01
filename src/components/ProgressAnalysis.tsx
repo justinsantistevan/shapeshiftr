@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Sparkles, RefreshCw, Send } from "lucide-react";
+import { Sparkles, RefreshCw, Send, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { FitnessStats } from "@/lib/fitnessCalculations";
 import { UserGoals } from "@/lib/userGoals";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Separator } from "./ui/separator";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface ProgressAnalysisProps {
   stats: FitnessStats | null;
@@ -24,6 +25,7 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [userMessage, setUserMessage] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const fetchAnalysis = async () => {
     if (!stats) return;
@@ -52,6 +54,10 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
   useEffect(() => {
     fetchAnalysis();
   }, [stats, goals]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages, isChatLoading]);
 
   const sendMessage = async () => {
     if (!userMessage.trim() || isChatLoading) return;
@@ -106,6 +112,10 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
     }
   };
 
+  const clearChat = () => {
+    setChatMessages([]);
+  };
+
   return (
     <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
       <CardContent className="pt-6">
@@ -140,28 +150,49 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
         <Separator className="my-6" />
 
         <div className="space-y-4">
-          <h4 className="text-md font-semibold flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            Ask Coach
-          </h4>
-
-          {chatMessages.length > 0 && (
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {chatMessages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`p-3 rounded-lg ${
-                    msg.role === 'user'
-                      ? 'bg-primary/10 ml-4'
-                      : 'bg-muted mr-4'
-                  }`}
-                >
-                  <p className="text-sm leading-relaxed">
-                    {msg.content}
-                  </p>
-                </div>
-              ))}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <h3 className="text-lg font-semibold">Ask Coach</h3>
             </div>
+            {chatMessages.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearChat}
+                className="h-8 w-8 p-0"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          {(chatMessages.length > 0 || isChatLoading) && (
+            <ScrollArea className="h-64 pr-4">
+              <div className="space-y-3">
+                {chatMessages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={`p-3 rounded-lg ${
+                      msg.role === 'user'
+                        ? 'bg-primary/10 ml-4'
+                        : 'bg-muted mr-4'
+                    }`}
+                  >
+                    <p className="text-sm leading-relaxed">
+                      {msg.content}
+                    </p>
+                  </div>
+                ))}
+                {isChatLoading && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-muted mr-4">
+                    <Sparkles className="h-4 w-4 text-primary animate-spin" />
+                    <p className="text-sm text-muted-foreground">Coach is thinking...</p>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
           )}
 
           <div className="flex gap-2">
