@@ -487,41 +487,45 @@ export function Dashboard({
                   <CarouselPrevious />
                   <CarouselNext />
                 </Carousel> : selectedPhotos.before && selectedPhotos.after ? <div className="space-y-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Before Photos */}
-                    <div className="space-y-4">
-                      <h4 className="text-lg font-semibold text-center text-primary">Before</h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <h5 className="text-sm font-medium text-center">Front View</h5>
-                          {selectedPhotos.before.front_photo_url && <img src={selectedPhotos.before.front_photo_url} alt={`Before front - ${selectedPhotos.before.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
-                        </div>
-                        <div className="space-y-2">
-                          <h5 className="text-sm font-medium text-center">Side View</h5>
-                          {selectedPhotos.before.side_photo_url && <img src={selectedPhotos.before.side_photo_url} alt={`Before side - ${selectedPhotos.before.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
-                        </div>
+                  {/* Front Views Comparison */}
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-center">Front View Comparison</h4>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <h5 className="text-sm font-medium text-center text-primary">Before</h5>
+                        {selectedPhotos.before.front_photo_url && <img src={selectedPhotos.before.front_photo_url} alt={`Before front - ${selectedPhotos.before.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                        <p className="text-center text-xs text-muted-foreground">
+                          {new Date(selectedPhotos.before.week_start_date).toLocaleDateString()}
+                        </p>
                       </div>
-                      <p className="text-center text-sm text-muted-foreground">
-                        {new Date(selectedPhotos.before.week_start_date).toLocaleDateString()}
-                      </p>
+                      <div className="space-y-2">
+                        <h5 className="text-sm font-medium text-center text-secondary">After</h5>
+                        {selectedPhotos.after.front_photo_url && <img src={selectedPhotos.after.front_photo_url} alt={`After front - ${selectedPhotos.after.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                        <p className="text-center text-xs text-muted-foreground">
+                          {new Date(selectedPhotos.after.week_start_date).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
+                  </div>
 
-                    {/* After Photos */}
-                    <div className="space-y-4">
-                      <h4 className="text-lg font-semibold text-center text-secondary">After</h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <h5 className="text-sm font-medium text-center">Front View</h5>
-                          {selectedPhotos.after.front_photo_url && <img src={selectedPhotos.after.front_photo_url} alt={`After front - ${selectedPhotos.after.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
-                        </div>
-                        <div className="space-y-2">
-                          <h5 className="text-sm font-medium text-center">Side View</h5>
-                          {selectedPhotos.after.side_photo_url && <img src={selectedPhotos.after.side_photo_url} alt={`After side - ${selectedPhotos.after.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
-                        </div>
+                  {/* Side Views Comparison */}
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-center">Side View Comparison</h4>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <h5 className="text-sm font-medium text-center text-primary">Before</h5>
+                        {selectedPhotos.before.side_photo_url && <img src={selectedPhotos.before.side_photo_url} alt={`Before side - ${selectedPhotos.before.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                        <p className="text-center text-xs text-muted-foreground">
+                          {new Date(selectedPhotos.before.week_start_date).toLocaleDateString()}
+                        </p>
                       </div>
-                      <p className="text-center text-sm text-muted-foreground">
-                        {new Date(selectedPhotos.after.week_start_date).toLocaleDateString()}
-                      </p>
+                      <div className="space-y-2">
+                        <h5 className="text-sm font-medium text-center text-secondary">After</h5>
+                        {selectedPhotos.after.side_photo_url && <img src={selectedPhotos.after.side_photo_url} alt={`After side - ${selectedPhotos.after.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                        <p className="text-center text-xs text-muted-foreground">
+                          {new Date(selectedPhotos.after.week_start_date).toLocaleDateString()}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div> : <div className="space-y-4">
