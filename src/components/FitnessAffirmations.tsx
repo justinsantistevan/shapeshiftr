@@ -29,7 +29,7 @@ export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAff
   if (isLoading) {
     return <Card className="fitness-card p-6">
         <h3 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Daily Affirmations
+          Fitness Affirmations
         </h3>
         <div className="space-y-3">
           {[...Array(3)].map((_, index) => <div key={index} className="flex items-start space-x-3 p-3 rounded-lg bg-muted/30">
@@ -41,7 +41,7 @@ export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAff
   }
   return <Card className="fitness-card p-6">
       <h3 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-        Daily Affirmations
+        Fitness Affirmations
       </h3>
       {affirmations.length === 0 ? <div className="text-center py-8">
           <p className="text-muted-foreground mb-4">Add your own affirmations to see them here!</p>
