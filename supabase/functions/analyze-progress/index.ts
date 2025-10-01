@@ -70,7 +70,14 @@ Provide a brief, encouraging analysis of my progress.`;
     }
 
     const data = await response.json();
-    const analysis = data.choices[0].message.content;
+    console.log('OpenAI response:', JSON.stringify(data, null, 2));
+    
+    const analysis = data.choices?.[0]?.message?.content;
+    
+    if (!analysis) {
+      console.error('No analysis content in response');
+      throw new Error('Failed to generate analysis');
+    }
 
     console.log('Generated analysis:', analysis);
 
