@@ -291,15 +291,15 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
         ) : viewMode === 'table' ? (
           <div className="flex-1 min-h-0 relative">
             <div className="absolute inset-0">
-              <div className="overflow-auto h-full">
+              <div className="overflow-auto h-full" style={{ position: 'relative' }}>
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 z-20">
                     <TableRow>
-                      <TableHead className="w-[120px] sticky top-0 bg-background z-10">Week</TableHead>
+                      <TableHead className="w-[120px] sticky top-0 bg-background z-10 border-b-2">Week</TableHead>
                       {Object.entries(METRICS).map(([key, metric]) => {
                         const Icon = metric.icon;
                         return (
-                          <TableHead key={key} className="text-center sticky top-0 bg-background z-10">
+                          <TableHead key={key} className="text-center sticky top-0 bg-background z-10 border-b-2">
                             <div className="flex items-center justify-center gap-2">
                               <Icon className="h-4 w-4" />
                               <span>{metric.label}</span>
