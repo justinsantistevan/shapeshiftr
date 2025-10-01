@@ -7,8 +7,8 @@ import { ArrowLeft, ArrowRight, BarChart3, Table as TableIcon, Scale, Activity, 
 import { fetchUserGoals, UserGoals, DEFAULT_GOALS } from "@/lib/userGoals";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
-
-
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface WeeklyEntry {
   week: string;
@@ -291,52 +291,52 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
         ) : viewMode === 'table' ? (
           <div className="flex-1 min-h-0 relative">
             <div className="absolute inset-0">
-              <div className="overflow-auto h-full border rounded-md">
-                <table className="w-full border-collapse">
-                  <thead className="bg-background sticky top-0 z-20 border-b">
-                    <tr>
-                      <th className="w-[120px] text-left px-4 py-2">Week</th>
+              <div className="overflow-auto h-full" style={{ position: 'relative' }}>
+                <Table>
+                  <TableHeader className="sticky top-0 z-20">
+                    <TableRow>
+                      <TableHead className="w-[120px] sticky top-0 bg-background z-10 border-b-2">Week</TableHead>
                       {Object.entries(METRICS).map(([key, metric]) => {
                         const Icon = metric.icon;
                         return (
-                          <th key={key} className="text-center px-4 py-2">
+                          <TableHead key={key} className="text-center sticky top-0 bg-background z-10 border-b-2">
                             <div className="flex items-center justify-center gap-2">
                               <Icon className="h-4 w-4" />
                               <span>{metric.label}</span>
                             </div>
-                          </th>
+                          </TableHead>
                         );
                       })}
-                    </tr>
-                  </thead>
-                  <tbody>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {[...fitnessData].reverse().map((entry, index) => (
-                      <tr key={index} className="border-b last:border-0">
-                        <td className="font-medium px-4 py-2">{entry.week}</td>
-                        <td className="text-center px-4 py-2">
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{entry.week}</TableCell>
+                        <TableCell className="text-center">
                           {formatTableValue(entry.weight, 'weight')}
                           {entry.weight !== null && ' lbs'}
-                        </td>
-                        <td className="text-center px-4 py-2">
+                        </TableCell>
+                        <TableCell className="text-center">
                           {formatTableValue(entry.bodyFat, 'bodyFat')}
                           {entry.bodyFat !== null && '%'}
-                        </td>
-                        <td className="text-center px-4 py-2">
+                        </TableCell>
+                        <TableCell className="text-center">
                           {formatTableValue(entry.skinFold, 'skinFold')}
                           {entry.skinFold !== null && ' mm'}
-                        </td>
-                        <td className="text-center px-4 py-2">
+                        </TableCell>
+                        <TableCell className="text-center">
                           {formatTableValue(entry.avgExercise, 'avgExercise')}
                           {entry.avgExercise !== null && ' min'}
-                        </td>
-                        <td className="text-center px-4 py-2">
+                        </TableCell>
+                        <TableCell className="text-center">
                           {formatTableValue(entry.avgCalories, 'avgCalories')}
                           {entry.avgCalories !== null && ' cal'}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </div>
           </div>
