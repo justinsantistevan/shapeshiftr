@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +17,9 @@ export function Auth() {
   const [password, setPassword] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Memoize LiquidEther props to prevent re-renders when typing
+  const liquidEtherColors = useMemo(() => ['#5227FF', '#FF9FFC', '#B19EEF'], []);
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -112,7 +115,7 @@ export function Auth() {
       {/* Liquid Ether Background */}
       <div className="absolute inset-0 z-0">
         <LiquidEther
-          colors={['#5227FF', '#FF9FFC', '#B19EEF']}
+          colors={liquidEtherColors}
           mouseForce={20}
           cursorSize={100}
           autoDemo={true}
