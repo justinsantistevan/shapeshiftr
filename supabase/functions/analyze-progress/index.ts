@@ -19,6 +19,16 @@ serve(async (req) => {
     console.log('Analyzing progress with stats:', stats);
     console.log('User goals:', goals);
 
+    if (!openAIApiKey) {
+      console.error('OPENAI_API_KEY is not configured');
+      return new Response(JSON.stringify({ 
+        error: 'OpenAI API key is not configured. Please add it in Supabase secrets.' 
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const systemPrompt = `You are an expert fitness coach providing personalized progress analysis. Your role is to:
 - Analyze fitness trends over the past month
 - Celebrate wins and positive progress toward goals

@@ -25,6 +25,9 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
       });
 
       if (error) throw error;
+      if (data?.error) {
+        throw new Error(data.error);
+      }
       setAnalysis(data.analysis);
     } catch (error) {
       console.error('Error fetching progress analysis:', error);
