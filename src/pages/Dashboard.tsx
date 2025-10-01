@@ -577,7 +577,7 @@ export function Dashboard({
         <footer className="text-center py-8 animate-slide-up" style={{
         animationDelay: "1s"
       }}>
-          <p className="text-muted-foreground text-sm">Designed and built in a single Sunday afternoon with Lovable.</p>
+          <p className="text-muted-foreground text-sm">Designed and built on a lovely Sunday afternoon with Lovable.</p>
         </footer>
       </main>
 
