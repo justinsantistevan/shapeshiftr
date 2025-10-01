@@ -491,14 +491,30 @@ export function Dashboard({
                         <h5 className="text-sm font-medium text-center text-primary">Before</h5>
                         {selectedPhotos.before.front_photo_url && <img src={selectedPhotos.before.front_photo_url} alt={`Before front - ${selectedPhotos.before.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
-                          {new Date(selectedPhotos.before.week_start_date).toLocaleDateString()}
+                          {(() => {
+                            const [year, month, day] = selectedPhotos.before.week_start_date.split('-').map(Number);
+                            const date = new Date(year, month - 1, day);
+                            return date.toLocaleDateString('en-US', {
+                              month: 'numeric',
+                              day: 'numeric',
+                              year: 'numeric'
+                            });
+                          })()}
                         </p>
                       </div>
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium text-center text-secondary">After</h5>
                         {selectedPhotos.after.front_photo_url && <img src={selectedPhotos.after.front_photo_url} alt={`After front - ${selectedPhotos.after.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
-                          {new Date(selectedPhotos.after.week_start_date).toLocaleDateString()}
+                          {(() => {
+                            const [year, month, day] = selectedPhotos.after.week_start_date.split('-').map(Number);
+                            const date = new Date(year, month - 1, day);
+                            return date.toLocaleDateString('en-US', {
+                              month: 'numeric',
+                              day: 'numeric',
+                              year: 'numeric'
+                            });
+                          })()}
                         </p>
                       </div>
                     </div>
@@ -512,14 +528,30 @@ export function Dashboard({
                         <h5 className="text-sm font-medium text-center text-primary">Before</h5>
                         {selectedPhotos.before.side_photo_url && <img src={selectedPhotos.before.side_photo_url} alt={`Before side - ${selectedPhotos.before.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
-                          {new Date(selectedPhotos.before.week_start_date).toLocaleDateString()}
+                          {(() => {
+                            const [year, month, day] = selectedPhotos.before.week_start_date.split('-').map(Number);
+                            const date = new Date(year, month - 1, day);
+                            return date.toLocaleDateString('en-US', {
+                              month: 'numeric',
+                              day: 'numeric',
+                              year: 'numeric'
+                            });
+                          })()}
                         </p>
                       </div>
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium text-center text-secondary">After</h5>
                         {selectedPhotos.after.side_photo_url && <img src={selectedPhotos.after.side_photo_url} alt={`After side - ${selectedPhotos.after.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
-                          {new Date(selectedPhotos.after.week_start_date).toLocaleDateString()}
+                          {(() => {
+                            const [year, month, day] = selectedPhotos.after.week_start_date.split('-').map(Number);
+                            const date = new Date(year, month - 1, day);
+                            return date.toLocaleDateString('en-US', {
+                              month: 'numeric',
+                              day: 'numeric',
+                              year: 'numeric'
+                            });
+                          })()}
                         </p>
                       </div>
                     </div>
