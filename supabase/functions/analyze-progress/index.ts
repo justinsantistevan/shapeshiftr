@@ -37,6 +37,7 @@ serve(async (req) => {
 - Offer specific, actionable advice
 - Be encouraging yet realistic
 - Keep your response concise (3-4 sentences max)
+- Contextualize the timeline of your analysis, for example "In the last month..." or "Over the previous 4 weeks"
 
 Focus on the trends and how they relate to the user's goals. Be specific about numbers when relevant.`;
 
@@ -56,7 +57,7 @@ ${goals.goal_skin_fold_mm ? `- Target Skin Fold: ${goals.goal_skin_fold_mm} mm` 
 ${goals.goal_avg_daily_calories ? `- Target Daily Calories: ${goals.goal_avg_daily_calories} cal` : ''}
 ${goals.goal_avg_exercise_min_per_day ? `- Target Exercise: ${goals.goal_avg_exercise_min_per_day} min/day` : ''}
 
-Provide a brief, encouraging analysis of my progress.`;
+Provide a brief, encouraging yet realistic analysis of my progress.`;
 
     console.log('Calling Lovable AI Gateway...');
     
