@@ -25,7 +25,7 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [userMessage, setUserMessage] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const fetchAnalysis = async () => {
     if (!stats) return;
@@ -56,7 +56,12 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
   }, [stats, goals]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
   }, [chatMessages, isChatLoading]);
 
   const sendMessage = async () => {
@@ -142,7 +147,7 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
             <div className="h-4 bg-muted animate-pulse rounded w-4/6" />
           </div>
         ) : (
-          <p className="text-sm leading-relaxed text-muted-foreground">
+          <p className="text-base leading-relaxed text-muted-foreground">
             {analysis || "Loading your personalized progress analysis..."}
           </p>
         )}
@@ -168,7 +173,7 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
           </div>
 
           {(chatMessages.length > 0 || isChatLoading) && (
-            <ScrollArea className="h-64 pr-4">
+            <ScrollArea ref={scrollAreaRef} className="h-64 pr-4">
               <div className="space-y-3">
                 {chatMessages.map((msg, idx) => (
                   <div
@@ -190,7 +195,6 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
                     <p className="text-sm text-muted-foreground">Coach is thinking...</p>
                   </div>
                 )}
-                <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
           )}
