@@ -1,5 +1,4 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 import { fetchUserAffirmations, Affirmation } from "@/lib/affirmations";
@@ -27,7 +26,7 @@ export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAff
     loadAffirmations();
   }, []);
   if (isLoading) {
-    return <Card className="fitness-card p-6">
+    return <div className="fitness-card p-6">
         <h3 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           Fitness Affirmations
         </h3>
@@ -37,9 +36,9 @@ export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAff
               <div className="h-4 bg-muted rounded animate-pulse flex-1" />
             </div>)}
         </div>
-      </Card>;
+      </div>;
   }
-  return <Card className="fitness-card p-6">
+  return <div className="fitness-card p-6">
       <h3 className="text-2xl font-semibold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
         Fitness Affirmations
       </h3>
@@ -58,5 +57,5 @@ export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAff
               </p>
             </div>)}
         </div>}
-    </Card>;
+    </div>;
 });
