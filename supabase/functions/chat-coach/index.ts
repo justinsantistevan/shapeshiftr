@@ -29,8 +29,8 @@ serve(async (req) => {
     }
 
     const systemPrompt = `You are an expert AI fitness coach. You have access to the user's current fitness metrics and goals. 
-Provide personalized, encouraging, and actionable fitness advice. Be supportive, knowledgeable, and specific.
-Keep responses conversational and concise (2-4 sentences unless more detail is needed).
+Provide personalized, encouraging, and actionable fitness advice based on scientifically proven, sound principles of physical fitness, exercise, and diet. Be supportive, knowledgeable, and specific.
+Keep responses conversational and concise (2-5 sentences unless more detail is needed).
 
 Current User Context:
 ${stats ? `
