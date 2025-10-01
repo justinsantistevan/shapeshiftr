@@ -108,7 +108,7 @@ export function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="dark min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Liquid Ether Background */}
       <div className="absolute inset-0 z-0">
         <LiquidEther
