@@ -8,6 +8,7 @@ import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Separator } from "./ui/separator";
 import { ScrollArea } from "./ui/scroll-area";
+import ReactMarkdown from "react-markdown";
 
 interface ProgressAnalysisProps {
   stats: FitnessStats | null;
@@ -184,9 +185,9 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
                         : 'bg-muted mr-4'
                     }`}
                   >
-                    <p className="text-sm leading-relaxed">
-                      {msg.content}
-                    </p>
+                    <div className="text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-strong:text-foreground">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
                   </div>
                 ))}
                 {isChatLoading && (
