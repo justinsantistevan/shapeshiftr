@@ -14,7 +14,7 @@ serve(async (req) => {
   }
 
   try {
-    const { message, stats, goals, conversationHistory } = await req.json();
+    const { message, stats, goals, affirmations, conversationHistory } = await req.json();
 
     console.log('Chat coach called with message:', message);
 
@@ -46,7 +46,10 @@ ${goals.goal_weight ? `Target Weight: ${goals.goal_weight} lbs` : ''}
 ${goals.goal_body_fat_percentage ? `Target Body Fat: ${goals.goal_body_fat_percentage}%` : ''}
 ${goals.goal_skin_fold_mm ? `Target Skin Fold: ${goals.goal_skin_fold_mm} mm` : ''}
 ${goals.goal_avg_daily_calories ? `Target Daily Calories: ${goals.goal_avg_daily_calories} cal` : ''}
-${goals.goal_avg_exercise_min_per_day ? `Target Exercise: ${goals.goal_avg_exercise_min_per_day} min/day` : ''}` : 'No goals set'}`;
+${goals.goal_avg_exercise_min_per_day ? `Target Exercise: ${goals.goal_avg_exercise_min_per_day} min/day` : ''}` : 'No goals set'}
+
+${affirmations && affirmations.length > 0 ? `User's Personal Affirmations:
+${affirmations.map((a: { text: string }) => `- ${a.text}`).join('\n')}` : ''}`;
 
     const messages = [
       { role: 'system', content: systemPrompt },

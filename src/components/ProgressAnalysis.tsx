@@ -4,6 +4,7 @@ import { Sparkles, RefreshCw, Send, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { FitnessStats } from "@/lib/fitnessCalculations";
 import { UserGoals } from "@/lib/userGoals";
+import { fetchUserAffirmations, type Affirmation } from "@/lib/affirmations";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { Separator } from "./ui/separator";
@@ -26,7 +27,16 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [userMessage, setUserMessage] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
+  const [affirmations, setAffirmations] = useState<Affirmation[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const loadAffirmations = async () => {
+      const userAffirmations = await fetchUserAffirmations();
+      setAffirmations(userAffirmations);
+    };
+    loadAffirmations();
+  }, []);
 
   const fetchAnalysis = async () => {
     if (!stats) return;
@@ -83,6 +93,7 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
           message: userMessage,
           stats,
           goals,
+          affirmations,
           conversationHistory: chatMessages
         }
       });
