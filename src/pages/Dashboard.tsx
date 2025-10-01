@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { calculateFitnessStats, formatChange, formatCurrentValue, FitnessStats } from "@/lib/fitnessCalculations";
 import { fetchUserGoals, UserGoals } from "@/lib/userGoals";
+import { ProgressAnalysis } from "@/components/ProgressAnalysis";
 import shapeshiftrLogo from "/lovable-uploads/d1025a10-8e0c-4dc2-90f2-289110e6f482.png";
 interface DashboardProps {
   onSignOut: () => void;
@@ -440,6 +441,11 @@ export function Dashboard({
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Progress Analysis Section */}
+        <section className="animate-slide-up" style={{ animationDelay: "0.5s" }}>
+          <ProgressAnalysis stats={fitnessStats} goals={userGoals} />
         </section>
 
         {/* Progress Photos Section */}
