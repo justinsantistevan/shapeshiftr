@@ -28,7 +28,9 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
       setAnalysis(data.analysis);
     } catch (error) {
       console.error('Error fetching progress analysis:', error);
-      setAnalysis("Unable to generate analysis at this time. Please try again later.");
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Detailed error:', errorMessage);
+      setAnalysis(`Unable to generate analysis: ${errorMessage}`);
     } finally {
       setIsLoading(false);
     }

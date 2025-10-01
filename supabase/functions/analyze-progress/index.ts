@@ -47,6 +47,8 @@ ${goals.goal_avg_exercise_min_per_day ? `- Target Exercise: ${goals.goal_avg_exe
 
 Provide a brief, encouraging analysis of my progress.`;
 
+    console.log('Calling OpenAI API...');
+    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -63,10 +65,12 @@ Provide a brief, encouraging analysis of my progress.`;
       }),
     });
 
+    console.log('OpenAI response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI API error:', response.status, errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
+      console.error('OpenAI API error response:', errorText);
+      throw new Error(`OpenAI API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
