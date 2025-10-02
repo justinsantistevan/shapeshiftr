@@ -23,8 +23,8 @@ const METRICS = {
   weight: { label: "Weight", unit: "lbs", color: "#3b82f6", goalKey: "goal_weight" as keyof UserGoals, icon: Scale },
   bodyFat: { label: "Body Fat", unit: "%", color: "#8b5cf6", goalKey: "goal_body_fat_percentage" as keyof UserGoals, icon: Activity },
   skinFold: { label: "Belly Skinfold", unit: "mm", color: "#ef4444", goalKey: "goal_skin_fold_mm" as keyof UserGoals, icon: Ruler },
-  avgExercise: { label: "Avg Daily Exercise", unit: "min", color: "#10b981", goalKey: "goal_avg_exercise_min_per_day" as keyof UserGoals, icon: Zap },
-  avgCalories: { label: "Avg Daily Calories", unit: "cal", color: "#f59e0b", goalKey: "goal_avg_daily_calories" as keyof UserGoals, icon: UtensilsCrossed },
+  avgExercise: { label: "Daily Exercise", unit: "min", color: "#10b981", goalKey: "goal_avg_exercise_min_per_day" as keyof UserGoals, icon: Zap },
+  avgCalories: { label: "Daily Calories", unit: "cal", color: "#f59e0b", goalKey: "goal_avg_daily_calories" as keyof UserGoals, icon: UtensilsCrossed },
 };
 
 export interface MetricsChartRef {
@@ -84,7 +84,7 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
           const [year, month, day] = entry.week_start_date.split('-').map(Number);
           const weekStartDate = new Date(year, month - 1, day);
           return {
-            week: format(weekStartDate, 'M/d'),
+            week: format(weekStartDate, 'M/d/yy'),
             weight: entry.weight,
             bodyFat: entry.body_fat_percentage,
             skinFold: entry.skin_fold_mm,
@@ -292,14 +292,14 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
           <div className="flex-1 min-h-0 relative">
             <div className="absolute inset-0">
               <div className="overflow-auto h-full" style={{ position: 'relative' }}>
-                <Table>
+                  <Table>
                   <TableHeader className="sticky top-0 z-20">
                     <TableRow>
                       <TableHead className="w-[120px] sticky top-0 bg-background z-10 border-b-2">Week</TableHead>
                       {Object.entries(METRICS).map(([key, metric]) => {
                         const Icon = metric.icon;
                         return (
-                          <TableHead key={key} className="text-center sticky top-0 bg-background z-10 border-b-2">
+                          <TableHead key={key} className="text-center sticky top-0 bg-background z-10 border-b-2 w-[140px]">
                             <div className="flex items-center justify-center gap-2">
                               <Icon className="h-4 w-4" />
                               <span>{metric.label}</span>
