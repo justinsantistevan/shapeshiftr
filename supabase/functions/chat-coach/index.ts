@@ -66,9 +66,9 @@ Current User Context:
 ${stats ? `
 Weight: ${stats.weight.current}${stats.weight.unit}, recent change: ${stats.weight.change}${stats.weight.unit}
 Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit}, recent change: ${stats.bodyFat.change}${stats.bodyFat.unit}
-Exercise: ${stats.exercise.current}${stats.exercise.unit}/day
-Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit}
-Daily Calories: ${stats.calories.current}${stats.calories.unit}
+Exercise: ${stats.exercise.current}${stats.exercise.unit}/day, recent change: ${stats.exercise.change}${stats.exercise.unit}
+Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit}, recent change: ${stats.skinFold.change}${stats.skinFold.unit}
+Daily Calories: ${stats.calories.current}${stats.calories.unit}, recent change: ${stats.calories.change}${stats.calories.unit}
 ` : 'No current stats available'}
 
 ${goals && Object.keys(goals).length > 0 ? `User Goals:
