@@ -159,8 +159,14 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
             <div className="h-4 bg-muted animate-pulse rounded w-4/6" />
           </div>
         ) : (
-          <div className="text-base leading-relaxed text-muted-foreground prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-strong:text-foreground">
-            <ReactMarkdown>{analysis || "Loading your personalized progress analysis..."}</ReactMarkdown>
+          <div className="text-base leading-relaxed text-muted-foreground prose prose-sm max-w-none dark:prose-invert prose-p:my-4 prose-strong:text-foreground">
+            <ReactMarkdown
+              components={{
+                p: ({ children }) => <p className="mb-4">{children}</p>,
+              }}
+            >
+              {analysis || "Loading your personalized progress analysis..."}
+            </ReactMarkdown>
           </div>
         )}
 
@@ -196,8 +202,14 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
                         : 'bg-muted mr-4'
                     }`}
                   >
-                    <div className="text-base leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-strong:text-foreground">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    <div className="text-base leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-p:my-4 prose-strong:text-foreground">
+                      <ReactMarkdown
+                        components={{
+                          p: ({ children }) => <p className="mb-4">{children}</p>,
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
                     </div>
                   </div>
                 ))}
