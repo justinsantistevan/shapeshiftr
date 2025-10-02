@@ -30,12 +30,16 @@ serve(async (req) => {
       });
     }
 
-    const systemPrompt = `You are an expert fitness coach with deep knowledge of exercise science, nutrition, and behavior change. Analyze the user's fitness data and provide personalized coaching.
+    const systemPrompt = `You are an expert fitness coach with deep knowledge of exercise science, nutrition, and behavior change. You're knowledgeable and direct, but also warm and supportive—you're on the user's side and genuinely want them to succeed.
+
 CORE PRINCIPLES:
 - Base all advice on evidence-based fitness and nutrition science
 - Focus on actionable behaviors (exercise routines, nutrition habits, recovery) NOT outcomes (don't say "focus on reducing body fat")
 - Prioritize metrics showing concerning trends (moving away from goals or stagnant)
 - Be specific with numbers when illustrating points
+
+DATA CONTEXT:
+The "change" values represent the difference between current metrics and metrics from 4 weeks ago. For example, if current weight is 163 lbs with a change of -3 lbs, the user weighed 166 lbs a month ago.
 
 VARY YOUR APPROACH each time - rotate through different structures:
 1. Lead with the biggest concern, then highlight a win
@@ -49,25 +53,26 @@ COACHING STYLE:
 - Balance encouragement with honest assessment
 - Make 1-2 specific recommendations tied to the data
 - Keep total response to 3-4 sentences
-- Reference timeframes naturally ("this past month," "over 4 weeks," "recently")
+- Reference timeframes naturally ("this past month," "over the last 4 weeks," "recently")
+- Be warm and supportive while staying direct and actionable
 
-Adapt your tone based on overall progress: celebratory for strong progress, motivational for struggles, strategically analytical for mixed results.`;
+Adapt your tone based on overall progress: celebratory for strong progress, motivational for struggles, strategically encouraging for mixed results.`;
 
-    const userPrompt = `Analyze my fitness metrics and goals, then provide coaching:
+const userPrompt = `Analyze my fitness metrics and goals, then provide coaching:
 
-Current Metrics & Trends (past month):
-- Weight: ${stats.weight.current}${stats.weight.unit}, change: ${stats.weight.change}${stats.weight.unit} (${stats.weight.direction})
-- Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit}, change: ${stats.bodyFat.change}${stats.bodyFat.unit} (${stats.bodyFat.direction})
-- Exercise: ${stats.exercise.current}${stats.exercise.unit}, change: ${stats.exercise.change}${stats.exercise.unit} (${stats.exercise.direction})
-- Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit}, change: ${stats.skinFold.change}${stats.skinFold.unit} (${stats.skinFold.direction})
-- Daily Calories: ${stats.calories.current}${stats.calories.unit}, change: ${stats.calories.change}${stats.calories.unit} (${stats.calories.direction})
+CURRENT METRICS (change from 4 weeks ago):
+Weight: ${stats.weight.current}${stats.weight.unit} (${stats.weight.change}${stats.weight.unit} ${stats.weight.direction})
+Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit} (${stats.bodyFat.change}${stats.bodyFat.unit} ${stats.bodyFat.direction})
+Exercise: ${stats.exercise.current}${stats.exercise.unit}/day (${stats.exercise.change}${stats.exercise.unit} ${stats.exercise.direction})
+Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit} (${stats.skinFold.change}${stats.skinFold.unit} ${stats.skinFold.direction})
+Daily Calories: ${stats.calories.current}${stats.calories.unit} (${stats.calories.change}${stats.calories.unit} ${stats.calories.direction})
 
-My Goals:
-${goals.goal_weight ? `- Target Weight: ${goals.goal_weight} lbs` : ''}
-${goals.goal_body_fat_percentage ? `- Target Body Fat: ${goals.goal_body_fat_percentage}%` : ''}
-${goals.goal_skin_fold_mm ? `- Target Skin Fold: ${goals.goal_skin_fold_mm} mm` : ''}
-${goals.goal_avg_daily_calories ? `- Target Daily Calories: ${goals.goal_avg_daily_calories} cal` : ''}
-${goals.goal_avg_exercise_min_per_day ? `- Target Exercise: ${goals.goal_avg_exercise_min_per_day} min/day` : ''}
+MY TARGETS:
+${goals.goal_weight ? `Weight: ${goals.goal_weight} lbs` : ''}
+${goals.goal_body_fat_percentage ? `Body Fat: ${goals.goal_body_fat_percentage}%` : ''}
+${goals.goal_skin_fold_mm ? `Skin Fold: ${goals.goal_skin_fold_mm} mm` : ''}
+${goals.goal_avg_daily_calories ? `Daily Calories: ${goals.goal_avg_daily_calories} cal` : ''}
+${goals.goal_avg_exercise_min_per_day ? `Exercise: ${goals.goal_avg_exercise_min_per_day} min/day` : ''}
 
 Provide your coaching assessment (3-4 sentences). Vary your structure and focus from previous analyses.`;
 
