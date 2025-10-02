@@ -1,7 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY'); // legacy (unused)
 const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
 
 const corsHeaders = {
@@ -102,7 +101,7 @@ Provide your coaching assessment (3-4 sentences). Vary your structure and focus 
     }
 
     const data = await response.json();
-    console.log('OpenAI response:', JSON.stringify(data, null, 2));
+    console.log('AI Gateway response:', JSON.stringify(data, null, 2));
     
     const analysis = data.choices?.[0]?.message?.content;
     
