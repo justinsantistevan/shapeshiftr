@@ -228,29 +228,29 @@ export function AddDataForm({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="weight">Weight (lbs)</Label>
-                  <Input id="weight" type="number" step="0.1" placeholder="150.0" value={formData.weight} onChange={e => handleInputChange('weight', e.target.value)} />
+                  <Input id="weight" type="number" step="0.1" min="50" max="400" placeholder="150.0" value={formData.weight} onChange={e => handleInputChange('weight', e.target.value)} />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="body_fat">Body Fat (%)</Label>
-                  <Input id="body_fat" type="number" step="0.1" placeholder="20.0" value={formData.body_fat_percentage} onChange={e => handleInputChange('body_fat_percentage', e.target.value)} />
+                  <Input id="body_fat" type="number" step="0.1" min="0" max="100" placeholder="20.0" value={formData.body_fat_percentage} onChange={e => handleInputChange('body_fat_percentage', e.target.value)} />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="skin_fold">Belly Skinfold (mm)</Label>
-                <Input id="skin_fold" type="number" step="0.1" placeholder="18.0" value={formData.skin_fold_mm} onChange={e => handleInputChange('skin_fold_mm', e.target.value)} />
+                <Input id="skin_fold" type="number" step="0.1" min="0" max="100" placeholder="18.0" value={formData.skin_fold_mm} onChange={e => handleInputChange('skin_fold_mm', e.target.value)} />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="avg_exercise_min">Avg Exercise Min/Day</Label>
-                  <Input id="avg_exercise_min" type="number" placeholder="30" value={formData.avg_exercise_min_per_day} onChange={e => handleInputChange('avg_exercise_min_per_day', e.target.value)} />
+                  <Input id="avg_exercise_min" type="number" min="0" max="300" placeholder="30" value={formData.avg_exercise_min_per_day} onChange={e => handleInputChange('avg_exercise_min_per_day', e.target.value)} />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="avg_daily_calories">Avg Daily Calories</Label>
-                  <Input id="avg_daily_calories" type="number" placeholder="2000" value={formData.avg_daily_calories} onChange={e => handleInputChange('avg_daily_calories', e.target.value)} />
+                  <Input id="avg_daily_calories" type="number" min="0" max="10000" placeholder="2000" value={formData.avg_daily_calories} onChange={e => handleInputChange('avg_daily_calories', e.target.value)} />
                 </div>
               </div>
 
