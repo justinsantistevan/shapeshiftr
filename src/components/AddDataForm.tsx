@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -73,6 +73,8 @@ export function AddDataForm({
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
     defaultValues: {
       weight: "",
       body_fat_percentage: "",
@@ -88,7 +90,16 @@ export function AddDataForm({
     setShouldWiggle(true);
     setTimeout(() => setShouldWiggle(false), 500);
   };
-  const uploadPhoto = async (file: File, photoType: 'front' | 'side'): Promise<string | null> => {
+
+  // Wiggle when any field shows an error (live as user types)
+  useEffect(() => {
+    const hasErrors = Object.keys(form.formState.errors).length > 0;
+    if (hasErrors) {
+      setShouldWiggle(true);
+      const t = setTimeout(() => setShouldWiggle(false), 500);
+      return () => clearTimeout(t);
+    }
+  }, [form.formState.errors]);
     const {
       data: {
         user
