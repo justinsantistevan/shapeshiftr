@@ -384,7 +384,7 @@ export function AddDataForm({
                   <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" className="flex-1" disabled={isLoading}>
+                  <Button type="submit" className="flex-1" disabled={isLoading || !form.formState.isValid}>
                     {isLoading ? "Saving..." : "Save Data"}
                   </Button>
                 </div>
