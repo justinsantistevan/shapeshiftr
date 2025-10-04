@@ -100,6 +100,8 @@ export function AddDataForm({
       return () => clearTimeout(t);
     }
   }, [form.formState.errors]);
+
+  const uploadPhoto = async (file: File, photoType: 'front' | 'side'): Promise<string | null> => {
     const {
       data: {
         user
