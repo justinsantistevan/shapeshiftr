@@ -52,6 +52,7 @@ export function AddDataForm({
 }: AddDataFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [shouldWiggle, setShouldWiggle] = useState(false);
   const getWeekStartDate = (date: Date) => {
     const d = new Date(date);
     const day = d.getDay();
@@ -81,6 +82,12 @@ export function AddDataForm({
       notes: "",
     },
   });
+
+  // Trigger wiggle on validation errors
+  const onInvalid = () => {
+    setShouldWiggle(true);
+    setTimeout(() => setShouldWiggle(false), 500);
+  };
   const uploadPhoto = async (file: File, photoType: 'front' | 'side'): Promise<string | null> => {
     const {
       data: {
@@ -193,7 +200,7 @@ export function AddDataForm({
     setIsLoading(false);
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className={cn("sm:max-w-[425px] max-h-[90vh] overflow-y-auto", shouldWiggle && "animate-wiggle")}>
         <DialogHeader>
           <DialogTitle className="pt-1">Add Fitness Data</DialogTitle>
           <DialogDescription>
@@ -204,7 +211,7 @@ export function AddDataForm({
         <Card className="border-0 shadow-none">
           <CardContent className="p-0">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1.5 py-1.5">
+              <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-4 px-1.5 py-1.5">
                 <div className="space-y-2">
                   <Label>Week Starting (Sunday)</Label>
                   <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
