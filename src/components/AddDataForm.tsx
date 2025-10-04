@@ -233,7 +233,7 @@ export function AddDataForm({
 
                 <div className="space-y-2">
                   <Label htmlFor="body_fat">Body Fat (%)</Label>
-                  <Input id="body_fat" type="number" step="0.1" min="0" max="100" placeholder="20.0" value={formData.body_fat_percentage} onChange={e => handleInputChange('body_fat_percentage', e.target.value)} />
+                  <Input id="body_fat" type="number" step="0.1" min="0" max="50" placeholder="20.0" value={formData.body_fat_percentage} onChange={e => handleInputChange('body_fat_percentage', e.target.value)} />
                 </div>
               </div>
 
@@ -245,7 +245,7 @@ export function AddDataForm({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="avg_exercise_min">Avg Exercise Min/Day</Label>
-                  <Input id="avg_exercise_min" type="number" min="0" max="300" placeholder="30" value={formData.avg_exercise_min_per_day} onChange={e => handleInputChange('avg_exercise_min_per_day', e.target.value)} />
+                  <Input id="avg_exercise_min" type="number" min="0" max="600" placeholder="30" value={formData.avg_exercise_min_per_day} onChange={e => handleInputChange('avg_exercise_min_per_day', e.target.value)} />
                 </div>
 
                 <div className="space-y-2">
