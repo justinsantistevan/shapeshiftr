@@ -21,8 +21,8 @@ const formSchema = z.object({
   weight: z
     .string()
     .optional()
-    .refine((val) => !val || (parseFloat(val) >= 50 && parseFloat(val) <= 400), {
-      message: "Weight must be between 50 and 400 lbs",
+    .refine((val) => !val || (parseFloat(val) >= 0 && parseFloat(val) <= 400), {
+      message: "Weight must be between 0 and 400 lbs",
     }),
   body_fat_percentage: z
     .string()
