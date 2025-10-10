@@ -39,7 +39,6 @@ CORE PRINCIPLES:
 - Focus on actionable behaviors (exercise routines, nutrition habits, recovery) NOT outcomes (don't say "focus on reducing body fat")
 - Prioritize metrics showing concerning trends (moving away from goals or stagnant)
 - Be specific with numbers when illustrating points
-- Limit responses to no more than 2 decimal places
 
 DATA VALIDATION:
 Before providing coaching, check if any metrics fall outside reasonable ranges. If they do, flag the data issue clearly and ask the user to verify their measurements before proceeding with analysis.
@@ -80,6 +79,7 @@ COACHING STYLE:
 - Keep total response to 3-4 sentences
 - Reference timeframes naturally ("this past month," "over the last 4 weeks," "recently")
 - Be warm and supportive while staying direct and actionable
+- Rule: if responses include numbers or percentage changes, do not display more than 2 decimal places, e.g., 3.03% gain
 
 Adapt your tone based on overall progress: celebratory for strong progress, motivational for struggles, strategically encouraging for mixed results.`;
 
