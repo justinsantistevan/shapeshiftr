@@ -68,8 +68,9 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
     
     if (!currentEntry) return null;
     
-    // Find entry from approximately 4 weeks ago for monthly comparison
-    const fourWeeksAgo = new Date();
+    // Find entry from approximately 4 weeks ago from the most recent entry date
+    const currentEntryDate = new Date(currentEntry.week_start_date);
+    const fourWeeksAgo = new Date(currentEntryDate);
     fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28); // 4 weeks = 28 days
     
     const previousEntry = entries.find(entry => {
