@@ -392,9 +392,28 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
                 labelStyle={{
                   color: "hsl(var(--foreground))"
                 }}
-                  formatter={(value, name) => {
+                formatter={(value, name) => {
                   const metric = METRICS[name as keyof typeof METRICS];
-                  return [value, `${metric?.label || name} (${metric?.unit})`];
+                  const numValue = typeof value === 'number' ? value : parseFloat(value as string);
+                  
+                  let formattedValue: string;
+                  switch (metric?.unit) {
+                    case 'lbs':
+                    case '%':
+                      formattedValue = numValue.toFixed(1);
+                      break;
+                    case 'min':
+                    case 'mm':
+                      formattedValue = Math.round(numValue).toString();
+                      break;
+                    case 'cal':
+                      formattedValue = numValue.toLocaleString();
+                      break;
+                    default:
+                      formattedValue = numValue.toString();
+                  }
+                  
+                  return [formattedValue, `${metric?.label || name} (${metric?.unit})`];
                 }}
               />
               <Bar 
