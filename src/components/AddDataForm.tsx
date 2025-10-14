@@ -91,6 +91,14 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
     },
   });
 
+  // Clear photos when modal closes
+  useEffect(() => {
+    if (!open) {
+      setFrontPhoto(null);
+      setSidePhoto(null);
+    }
+  }, [open]);
+
   // Trigger wiggle on validation errors
   const onInvalid = () => {
     setShouldWiggle(true);
@@ -386,7 +394,7 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                             const file = e.target.files?.[0];
                             setFrontPhoto(file || null);
                           }}
-                          className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold"
+                          className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold [&::-webkit-file-upload-button]:cursor-pointer text-transparent"
                         />
                         <p className="text-xs text-muted-foreground">
                           {frontPhoto ? `Selected: ${frontPhoto.name}` : "No file chosen"}
@@ -403,7 +411,7 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                             const file = e.target.files?.[0];
                             setSidePhoto(file || null);
                           }}
-                          className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold"
+                          className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold [&::-webkit-file-upload-button]:cursor-pointer text-transparent"
                         />
                         <p className="text-xs text-muted-foreground">
                           {sidePhoto ? `Selected: ${sidePhoto.name}` : "No file chosen"}
