@@ -163,20 +163,6 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
 
       if (error) throw error;
 
-      // Show success feedback to user
-      if (newFeedbackType === 'positive') {
-        toast({
-          title: "Thanks for the positive feedback!",
-        });
-      } else if (newFeedbackType === 'negative') {
-        toast({
-          title: "Thanks for your feedback. We'll work to improve!",
-        });
-      } else {
-        toast({
-          title: "Feedback removed",
-        });
-      }
 
     } catch (error) {
       console.error('Error updating feedback:', error);
