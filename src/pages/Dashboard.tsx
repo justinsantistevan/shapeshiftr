@@ -492,14 +492,14 @@ export function Dashboard({
                         {selectedPhotos.before.front_photo_url && <img src={selectedPhotos.before.front_photo_url} alt={`Before front - ${selectedPhotos.before.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
                           {(() => {
-                            const [year, month, day] = selectedPhotos.before.week_start_date.split('-').map(Number);
-                            const date = new Date(year, month - 1, day);
-                            return date.toLocaleDateString('en-US', {
-                              month: 'numeric',
-                              day: 'numeric',
-                              year: 'numeric'
-                            });
-                          })()}
+                      const [year, month, day] = selectedPhotos.before.week_start_date.split('-').map(Number);
+                      const date = new Date(year, month - 1, day);
+                      return date.toLocaleDateString('en-US', {
+                        month: 'numeric',
+                        day: 'numeric',
+                        year: 'numeric'
+                      });
+                    })()}
                         </p>
                       </div>
                       <div className="space-y-2">
@@ -507,14 +507,14 @@ export function Dashboard({
                         {selectedPhotos.after.front_photo_url && <img src={selectedPhotos.after.front_photo_url} alt={`After front - ${selectedPhotos.after.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
                           {(() => {
-                            const [year, month, day] = selectedPhotos.after.week_start_date.split('-').map(Number);
-                            const date = new Date(year, month - 1, day);
-                            return date.toLocaleDateString('en-US', {
-                              month: 'numeric',
-                              day: 'numeric',
-                              year: 'numeric'
-                            });
-                          })()}
+                      const [year, month, day] = selectedPhotos.after.week_start_date.split('-').map(Number);
+                      const date = new Date(year, month - 1, day);
+                      return date.toLocaleDateString('en-US', {
+                        month: 'numeric',
+                        day: 'numeric',
+                        year: 'numeric'
+                      });
+                    })()}
                         </p>
                       </div>
                     </div>
@@ -529,14 +529,14 @@ export function Dashboard({
                         {selectedPhotos.before.side_photo_url && <img src={selectedPhotos.before.side_photo_url} alt={`Before side - ${selectedPhotos.before.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
                           {(() => {
-                            const [year, month, day] = selectedPhotos.before.week_start_date.split('-').map(Number);
-                            const date = new Date(year, month - 1, day);
-                            return date.toLocaleDateString('en-US', {
-                              month: 'numeric',
-                              day: 'numeric',
-                              year: 'numeric'
-                            });
-                          })()}
+                      const [year, month, day] = selectedPhotos.before.week_start_date.split('-').map(Number);
+                      const date = new Date(year, month - 1, day);
+                      return date.toLocaleDateString('en-US', {
+                        month: 'numeric',
+                        day: 'numeric',
+                        year: 'numeric'
+                      });
+                    })()}
                         </p>
                       </div>
                       <div className="space-y-2">
@@ -544,14 +544,14 @@ export function Dashboard({
                         {selectedPhotos.after.side_photo_url && <img src={selectedPhotos.after.side_photo_url} alt={`After side - ${selectedPhotos.after.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
                           {(() => {
-                            const [year, month, day] = selectedPhotos.after.week_start_date.split('-').map(Number);
-                            const date = new Date(year, month - 1, day);
-                            return date.toLocaleDateString('en-US', {
-                              month: 'numeric',
-                              day: 'numeric',
-                              year: 'numeric'
-                            });
-                          })()}
+                      const [year, month, day] = selectedPhotos.after.week_start_date.split('-').map(Number);
+                      const date = new Date(year, month - 1, day);
+                      return date.toLocaleDateString('en-US', {
+                        month: 'numeric',
+                        day: 'numeric',
+                        year: 'numeric'
+                      });
+                    })()}
                         </p>
                       </div>
                     </div>
@@ -609,7 +609,7 @@ export function Dashboard({
         <footer className="text-center py-8 animate-slide-up" style={{
         animationDelay: "1s"
       }}>
-          <p className="text-muted-foreground text-sm">Designed and built on a lovely Sunday afternoon with Lovable.</p>
+          <p className="text-muted-foreground text-sm">Send feedback to: jsantistevan@gmail.com</p>
         </footer>
       </main>
 
