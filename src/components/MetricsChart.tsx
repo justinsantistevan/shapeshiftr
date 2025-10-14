@@ -37,7 +37,7 @@ interface MetricsChartProps {
 
 export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((props, ref) => {
   const [primaryMetric, setPrimaryMetric] = useState<string>("weight");
-  const [secondaryMetric, setSecondaryMetric] = useState<string>("none");
+  const [secondaryMetric, setSecondaryMetric] = useState<string>("bodyFat");
   const [currentWeekIndex, setCurrentWeekIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [userGoals, setUserGoals] = useState<UserGoals>({});
