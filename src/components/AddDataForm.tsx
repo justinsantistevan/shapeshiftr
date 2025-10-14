@@ -386,9 +386,11 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                             const file = e.target.files?.[0];
                             setFrontPhoto(file || null);
                           }}
-                          className="cursor-pointer"
+                          className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold"
                         />
-                        {frontPhoto && <p className="text-xs text-muted-foreground">Selected: {frontPhoto.name}</p>}
+                        <p className="text-xs text-muted-foreground">
+                          {frontPhoto ? `Selected: ${frontPhoto.name}` : "No file chosen"}
+                        </p>
                       </div>
 
                       <div className="space-y-2">
@@ -401,9 +403,11 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                             const file = e.target.files?.[0];
                             setSidePhoto(file || null);
                           }}
-                          className="cursor-pointer"
+                          className="cursor-pointer file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold"
                         />
-                        {sidePhoto && <p className="text-xs text-muted-foreground">Selected: {sidePhoto.name}</p>}
+                        <p className="text-xs text-muted-foreground">
+                          {sidePhoto ? `Selected: ${sidePhoto.name}` : "No file chosen"}
+                        </p>
                       </div>
                     </div>
                   </div>
