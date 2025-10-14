@@ -1,11 +1,43 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
 // Model and prompt version tracking
 const MODEL = "google/gemini-2.5-flash";
 const PROMPT_VERSION = "v1.0";
+
+// Input validation schema
+const metricSchema = z.object({
+  current: z.number(),
+  change: z.number(),
+  direction: z.string(),
+  unit: z.string(),
+}).optional();
+
+const chatRequestSchema = z.object({
+  message: z.string().min(1).max(5000),
+  stats: z.object({
+    weight: metricSchema,
+    bodyFat: metricSchema,
+    exercise: metricSchema,
+    skinFold: metricSchema,
+    calories: metricSchema,
+  }).optional(),
+  goals: z.object({
+    goal_weight: z.number().nullable().optional(),
+    goal_body_fat_percentage: z.number().nullable().optional(),
+    goal_skin_fold_mm: z.number().nullable().optional(),
+    goal_avg_daily_calories: z.number().nullable().optional(),
+    goal_avg_exercise_min_per_day: z.number().nullable().optional(),
+  }).optional(),
+  affirmations: z.array(z.object({ text: z.string() })).optional(),
+  conversationHistory: z.array(z.object({
+    role: z.string(),
+    content: z.string(),
+  })).optional(),
+});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,9 +50,27 @@ serve(async (req) => {
   }
 
   try {
-    const { message, stats, goals, affirmations, conversationHistory } = await req.json();
+    const rawData = await req.json();
+    console.log("Received chat request");
 
-    console.log("Chat coach called with message:", message);
+    // Validate input
+    const validationResult = chatRequestSchema.safeParse(rawData);
+    if (!validationResult.success) {
+      console.error("Validation errors:", validationResult.error.format());
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid request. Message must be between 1-5000 characters.",
+          details: validationResult.error.format()
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const { message, stats, goals, affirmations, conversationHistory } = validationResult.data;
+    console.log("Chat coach called with validated message");
 
     if (!lovableApiKey) {
       console.error("LOVABLE_API_KEY is not configured");
@@ -99,7 +149,7 @@ Think of yourself as a knowledgeable trainer who's on the user's team—you keep
 
 Current User Context:
 ${
-  stats
+  stats && stats.weight && stats.bodyFat && stats.exercise && stats.skinFold && stats.calories
     ? `
 Weight: ${stats.weight.current}${stats.weight.unit}, recent change: ${stats.weight.change}${stats.weight.unit}
 Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit}, recent change: ${stats.bodyFat.change}${stats.bodyFat.unit}

@@ -1,7 +1,33 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+
+// Input validation schema
+const metricSchema = z.object({
+  current: z.number(),
+  change: z.number(),
+  direction: z.string(),
+  unit: z.string(),
+});
+
+const analyzeRequestSchema = z.object({
+  stats: z.object({
+    weight: metricSchema,
+    bodyFat: metricSchema,
+    exercise: metricSchema,
+    skinFold: metricSchema,
+    calories: metricSchema,
+  }),
+  goals: z.object({
+    goal_weight: z.number().nullable().optional(),
+    goal_body_fat_percentage: z.number().nullable().optional(),
+    goal_skin_fold_mm: z.number().nullable().optional(),
+    goal_avg_daily_calories: z.number().nullable().optional(),
+    goal_avg_exercise_min_per_day: z.number().nullable().optional(),
+  }),
+});
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,9 +40,27 @@ serve(async (req) => {
   }
 
   try {
-    const { stats, goals } = await req.json();
+    const rawData = await req.json();
+    console.log("Received analysis request");
 
-    console.log("Analyzing progress with stats:", stats);
+    // Validate input
+    const validationResult = analyzeRequestSchema.safeParse(rawData);
+    if (!validationResult.success) {
+      console.error("Validation errors:", validationResult.error.format());
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid request data. Please check your metrics and goals.",
+          details: validationResult.error.format()
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    const { stats, goals } = validationResult.data;
+    console.log("Analyzing progress with validated stats");
     console.log("User goals:", goals);
 
     if (!lovableApiKey) {

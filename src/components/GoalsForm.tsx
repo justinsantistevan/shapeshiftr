@@ -66,57 +66,43 @@ export function GoalsForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    try {
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
-      if (!user) {
-        toast({
-          title: "Authentication Error",
-          description: "You must be logged in to set goals.",
-          variant: "destructive"
-        });
-        return;
-      }
 
-      // Prepare data for insertion, converting strings to numbers where needed
-      const goalsData = {
-        user_id: user.id,
+    try {
+      const goalsPayload = {
         goal_weight: formData.goal_weight ? parseFloat(formData.goal_weight) : null,
         goal_body_fat_percentage: formData.goal_body_fat_percentage ? parseFloat(formData.goal_body_fat_percentage) : null,
         goal_skin_fold_mm: formData.goal_skin_fold_mm ? parseFloat(formData.goal_skin_fold_mm) : null,
         goal_avg_daily_calories: formData.goal_avg_daily_calories ? parseInt(formData.goal_avg_daily_calories) : null,
-        goal_avg_exercise_min_per_day: formData.goal_avg_exercise_min_per_day ? parseInt(formData.goal_avg_exercise_min_per_day) : null
+        goal_avg_exercise_min_per_day: formData.goal_avg_exercise_min_per_day ? parseInt(formData.goal_avg_exercise_min_per_day) : null,
       };
-      const {
-        error
-      } = await supabase.from('user_goals').upsert(goalsData, {
-        onConflict: 'user_id'
+
+      const { data, error } = await supabase.functions.invoke("update-goals", {
+        body: goalsPayload,
       });
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Success!",
-          description: "Your fitness goals have been saved."
-        });
-        onGoalsUpdated?.(); // Notify parent that goals were updated
-        onOpenChange(false);
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({
+        title: "Success",
+        description: "Your goals have been saved.",
+      });
+
+      if (onGoalsUpdated) {
+        onGoalsUpdated();
       }
+
+      onOpenChange(false);
     } catch (error) {
+      console.error("Error saving goals:", error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred.",
-        variant: "destructive"
+        description: error instanceof Error ? error.message : "Failed to save goals. Please try again.",
+        variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
