@@ -48,14 +48,14 @@ serve(async (req) => {
     if (!validationResult.success) {
       console.error("Validation errors:", validationResult.error.format());
       return new Response(
-        JSON.stringify({ 
+        JSON.stringify({
           error: "Invalid request data. Please check your metrics and goals.",
-          details: validationResult.error.format()
+          details: validationResult.error.format(),
         }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
+        },
       );
     }
 
@@ -126,6 +126,7 @@ COACHING STYLE:
 
 RULES:
 - If your response includes numbers such as percentage changes, round to 2 decimal places, e.g., 3.03% instead of 3.002700001%
+- Don't return text that calls explicit attention to your data validation or sanity checks, unless there is a problem. e.g.,never return "It looks like all your data is within reasonable ranges."
 
 Adapt your tone based on overall progress: celebratory for strong progress, motivational for struggles, strategically encouraging for mixed results.`;
 
