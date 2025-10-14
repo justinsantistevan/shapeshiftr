@@ -29,6 +29,9 @@ export type Database = {
           llm_model: string | null
           response_time_ms: number | null
           system_prompt_version: string
+          tokens_input: number | null
+          tokens_output: number | null
+          tokens_total: number | null
           updated_at: string
           user_affirmations_snapshot: Json | null
           user_goals_snapshot: Json | null
@@ -50,6 +53,9 @@ export type Database = {
           llm_model?: string | null
           response_time_ms?: number | null
           system_prompt_version?: string
+          tokens_input?: number | null
+          tokens_output?: number | null
+          tokens_total?: number | null
           updated_at?: string
           user_affirmations_snapshot?: Json | null
           user_goals_snapshot?: Json | null
@@ -71,6 +77,9 @@ export type Database = {
           llm_model?: string | null
           response_time_ms?: number | null
           system_prompt_version?: string
+          tokens_input?: number | null
+          tokens_output?: number | null
+          tokens_total?: number | null
           updated_at?: string
           user_affirmations_snapshot?: Json | null
           user_goals_snapshot?: Json | null

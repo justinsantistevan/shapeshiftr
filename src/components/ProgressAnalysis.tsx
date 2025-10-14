@@ -93,7 +93,10 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
     llmModel: string | null,
     promptVersion: string | null,
     convId: string,
-    convPosition: number
+    convPosition: number,
+    tokensInput: number | null,
+    tokensOutput: number | null,
+    tokensTotal: number | null
   ) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -126,6 +129,9 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
           error_message: errorMsg,
           conversation_id: convId,
           conversation_position: convPosition,
+          tokens_input: tokensInput,
+          tokens_output: tokensOutput,
+          tokens_total: tokensTotal,
         });
 
       if (error) {
@@ -256,7 +262,10 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
           data.metadata?.llm_model || null,
           data.metadata?.system_prompt_version || null,
           conversationId,
-          currentPosition
+          currentPosition,
+          data.metadata?.tokens_input || null,
+          data.metadata?.tokens_output || null,
+          data.metadata?.tokens_total || null
         );
 
     } catch (error) {
@@ -285,7 +294,10 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
           null,
           null,
           conversationId,
-          currentPosition
+          currentPosition,
+          null,
+          null,
+          null
         );
     } finally {
       setIsChatLoading(false);

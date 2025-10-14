@@ -158,6 +158,9 @@ ${affirmations.map((a: { text: string }) => `- ${a.text}`).join("\n")}`
 
     const data = await response.json();
     console.log("Chat response received");
+    if (data.usage) {
+      console.log("Token usage:", data.usage);
+    }
 
     const reply = data.choices?.[0]?.message?.content;
 
@@ -166,11 +169,24 @@ ${affirmations.map((a: { text: string }) => `- ${a.text}`).join("\n")}`
       throw new Error("Failed to generate reply");
     }
 
+    // Extract usage data from API response
+    const usage = data.usage || null;
+    const tokenUsage = usage ? {
+      tokens_input: usage.prompt_tokens || null,
+      tokens_output: usage.completion_tokens || null,
+      tokens_total: usage.total_tokens || null
+    } : {
+      tokens_input: null,
+      tokens_output: null,
+      tokens_total: null
+    };
+
     return new Response(JSON.stringify({ 
       reply,
       metadata: {
         llm_model: MODEL,
-        system_prompt_version: PROMPT_VERSION
+        system_prompt_version: PROMPT_VERSION,
+        ...tokenUsage
       }
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
