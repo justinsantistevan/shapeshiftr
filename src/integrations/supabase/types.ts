@@ -18,6 +18,8 @@ export type Database = {
         Row: {
           assistant_response: string
           conversation_context: Json | null
+          conversation_id: string | null
+          conversation_position: number | null
           created_at: string
           error_message: string | null
           error_occurred: boolean
@@ -37,6 +39,8 @@ export type Database = {
         Insert: {
           assistant_response: string
           conversation_context?: Json | null
+          conversation_id?: string | null
+          conversation_position?: number | null
           created_at?: string
           error_message?: string | null
           error_occurred?: boolean
@@ -56,6 +60,8 @@ export type Database = {
         Update: {
           assistant_response?: string
           conversation_context?: Json | null
+          conversation_id?: string | null
+          conversation_position?: number | null
           created_at?: string
           error_message?: string | null
           error_occurred?: boolean

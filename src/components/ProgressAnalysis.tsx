@@ -34,6 +34,8 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [affirmations, setAffirmations] = useState<Affirmation[]>([]);
   const [messageFeedback, setMessageFeedback] = useState<Record<string, 'positive' | 'negative' | 'none'>>({});
+  const [conversationId, setConversationId] = useState<string>(() => crypto.randomUUID());
+  const [messagePosition, setMessagePosition] = useState<number>(0);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -89,7 +91,9 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
     errorOccurred: boolean,
     errorMsg: string | null,
     llmModel: string | null,
-    promptVersion: string | null
+    promptVersion: string | null,
+    convId: string,
+    convPosition: number
   ) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -119,7 +123,9 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
           system_prompt_version: promptVersion || 'v1.0',
           response_time_ms: responseTimeMs,
           error_occurred: errorOccurred,
-          error_message: errorMsg
+          error_message: errorMsg,
+          conversation_id: convId,
+          conversation_position: convPosition,
         });
 
       if (error) {
@@ -186,6 +192,10 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
   const sendMessage = async () => {
     if (!userMessage.trim() || isChatLoading) return;
 
+    // Increment position for this message pair
+    const currentPosition = messagePosition + 1;
+    setMessagePosition(currentPosition);
+
     const userMsgContent = userMessage;
     const newUserMessage: ChatMessage = {
       role: 'user',
@@ -236,16 +246,18 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
       }));
 
       // Log interaction to database immediately (non-blocking)
-      await saveInteraction(
-        userMsgContent,
-        data.reply,
-        assistantMessageId,
-        responseTime,
-        false,
-        null,
-        data.metadata?.llm_model || null,
-        data.metadata?.system_prompt_version || null
-      );
+        await saveInteraction(
+          userMsgContent,
+          data.reply,
+          assistantMessageId,
+          responseTime,
+          false,
+          null,
+          data.metadata?.llm_model || null,
+          data.metadata?.system_prompt_version || null,
+          conversationId,
+          currentPosition
+        );
 
     } catch (error) {
       console.error('Error in chat:', error);
@@ -263,16 +275,18 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
       setChatMessages(prev => [...prev, errorResponse]);
       
       // Log error interaction
-      await saveInteraction(
-        userMsgContent,
-        errorResponse.content,
-        errorMessageId,
-        responseTime,
-        true,
-        errorMessage,
-        null,
-        null
-      );
+        await saveInteraction(
+          userMsgContent,
+          errorResponse.content,
+          errorMessageId,
+          responseTime,
+          true,
+          errorMessage,
+          null,
+          null,
+          conversationId,
+          currentPosition
+        );
     } finally {
       setIsChatLoading(false);
     }
@@ -287,6 +301,9 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
 
   const clearChat = () => {
     setChatMessages([]);
+    setConversationId(crypto.randomUUID());
+    setMessagePosition(0);
+    setMessageFeedback({});
   };
 
   return (
