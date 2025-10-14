@@ -14,6 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
+      coach_chat_logs: {
+        Row: {
+          assistant_response: string
+          conversation_context: Json | null
+          created_at: string
+          error_message: string | null
+          error_occurred: boolean
+          feedback_timestamp: string | null
+          feedback_type: string
+          id: string
+          llm_model: string | null
+          response_time_ms: number | null
+          system_prompt_version: string
+          updated_at: string
+          user_affirmations_snapshot: Json | null
+          user_goals_snapshot: Json | null
+          user_id: string
+          user_message: string
+          user_stats_snapshot: Json | null
+        }
+        Insert: {
+          assistant_response: string
+          conversation_context?: Json | null
+          created_at?: string
+          error_message?: string | null
+          error_occurred?: boolean
+          feedback_timestamp?: string | null
+          feedback_type?: string
+          id?: string
+          llm_model?: string | null
+          response_time_ms?: number | null
+          system_prompt_version?: string
+          updated_at?: string
+          user_affirmations_snapshot?: Json | null
+          user_goals_snapshot?: Json | null
+          user_id: string
+          user_message: string
+          user_stats_snapshot?: Json | null
+        }
+        Update: {
+          assistant_response?: string
+          conversation_context?: Json | null
+          created_at?: string
+          error_message?: string | null
+          error_occurred?: boolean
+          feedback_timestamp?: string | null
+          feedback_type?: string
+          id?: string
+          llm_model?: string | null
+          response_time_ms?: number | null
+          system_prompt_version?: string
+          updated_at?: string
+          user_affirmations_snapshot?: Json | null
+          user_goals_snapshot?: Json | null
+          user_id?: string
+          user_message?: string
+          user_stats_snapshot?: Json | null
+        }
+        Relationships: []
+      }
+      coach_prompt_versions: {
+        Row: {
+          created_at: string
+          description: string | null
+          is_active: boolean
+          prompt_text: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          is_active?: boolean
+          prompt_text: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          is_active?: boolean
+          prompt_text?: string
+          version?: string
+        }
+        Relationships: []
+      }
       user_affirmations: {
         Row: {
           created_at: string

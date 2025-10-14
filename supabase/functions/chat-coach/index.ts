@@ -3,6 +3,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
+// Model and prompt version tracking
+const MODEL = "google/gemini-2.5-flash";
+const PROMPT_VERSION = "v1.0";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -139,7 +143,7 @@ ${affirmations.map((a: { text: string }) => `- ${a.text}`).join("\n")}`
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: MODEL,
         messages,
       }),
     });
@@ -162,7 +166,13 @@ ${affirmations.map((a: { text: string }) => `- ${a.text}`).join("\n")}`
       throw new Error("Failed to generate reply");
     }
 
-    return new Response(JSON.stringify({ reply }), {
+    return new Response(JSON.stringify({ 
+      reply,
+      metadata: {
+        llm_model: MODEL,
+        system_prompt_version: PROMPT_VERSION
+      }
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {

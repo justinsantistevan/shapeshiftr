@@ -10,6 +10,8 @@ import { Textarea } from "./ui/textarea";
 import { Separator } from "./ui/separator";
 import { ScrollArea } from "./ui/scroll-area";
 import ReactMarkdown from "react-markdown";
+import { ChatFeedback } from "./ChatFeedback";
+import { toast } from "@/hooks/use-toast";
 
 interface ProgressAnalysisProps {
   stats: FitnessStats | null;
@@ -19,6 +21,9 @@ interface ProgressAnalysisProps {
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
+  id: string;
+  feedbackType?: 'positive' | 'negative' | 'none';
+  timestamp?: string;
 }
 
 export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
@@ -28,6 +33,7 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
   const [userMessage, setUserMessage] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [affirmations, setAffirmations] = useState<Affirmation[]>([]);
+  const [messageFeedback, setMessageFeedback] = useState<Record<string, 'positive' | 'negative' | 'none'>>({});
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -75,22 +81,129 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
     }
   }, [chatMessages, isChatLoading]);
 
+  const saveInteraction = async (
+    userMsg: string,
+    assistantResp: string,
+    messageId: string,
+    responseTimeMs: number,
+    errorOccurred: boolean,
+    errorMsg: string | null,
+    llmModel: string | null,
+    promptVersion: string | null
+  ) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.warn('No authenticated user, skipping log save');
+        return;
+      }
+
+      // Limit conversation context to last 10 messages to keep size manageable
+      const limitedContext = chatMessages.length > 10 
+        ? chatMessages.slice(-10) 
+        : chatMessages;
+
+      const { error } = await supabase
+        .from('coach_chat_logs')
+        .insert({
+          id: messageId,
+          user_id: user.id,
+          user_message: userMsg,
+          assistant_response: assistantResp,
+          feedback_type: 'none',
+          user_stats_snapshot: stats as any,
+          user_goals_snapshot: goals as any,
+          user_affirmations_snapshot: affirmations as any,
+          conversation_context: limitedContext.length > 0 ? (limitedContext as any) : null,
+          llm_model: llmModel,
+          system_prompt_version: promptVersion || 'v1.0',
+          response_time_ms: responseTimeMs,
+          error_occurred: errorOccurred,
+          error_message: errorMsg
+        });
+
+      if (error) {
+        console.error('Error saving chat interaction:', error);
+      }
+    } catch (error) {
+      console.error('Exception saving chat interaction:', error);
+    }
+  };
+
+  const handleFeedbackChange = async (
+    messageId: string,
+    newFeedbackType: 'positive' | 'negative' | 'none'
+  ) => {
+    try {
+      // Optimistic UI update
+      setMessageFeedback(prev => ({
+        ...prev,
+        [messageId]: newFeedbackType
+      }));
+
+      const { error } = await supabase
+        .from('coach_chat_logs')
+        .update({
+          feedback_type: newFeedbackType,
+          feedback_timestamp: newFeedbackType !== 'none' ? new Date().toISOString() : null
+        })
+        .eq('id', messageId);
+
+      if (error) throw error;
+
+      // Show success feedback to user
+      if (newFeedbackType === 'positive') {
+        toast({
+          title: "Thanks for the positive feedback!",
+        });
+      } else if (newFeedbackType === 'negative') {
+        toast({
+          title: "Thanks for your feedback. We'll work to improve!",
+        });
+      } else {
+        toast({
+          title: "Feedback removed",
+        });
+      }
+
+    } catch (error) {
+      console.error('Error updating feedback:', error);
+      
+      // Revert optimistic update on error
+      setMessageFeedback(prev => ({
+        ...prev,
+        [messageId]: prev[messageId] || 'none'
+      }));
+      
+      toast({
+        title: "Failed to save feedback",
+        description: "Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const sendMessage = async () => {
     if (!userMessage.trim() || isChatLoading) return;
 
+    const userMsgContent = userMessage;
     const newUserMessage: ChatMessage = {
       role: 'user',
-      content: userMessage
+      content: userMsgContent,
+      id: crypto.randomUUID(),
+      timestamp: new Date().toISOString()
     };
 
     setChatMessages(prev => [...prev, newUserMessage]);
     setUserMessage("");
     setIsChatLoading(true);
+    
+    const startTime = Date.now();
 
     try {
       const { data, error } = await supabase.functions.invoke('chat-coach', {
         body: { 
-          message: userMessage,
+          message: userMsgContent,
           stats,
           goals,
           affirmations,
@@ -103,20 +216,63 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
         throw new Error(data.error);
       }
 
+      const responseTime = Date.now() - startTime;
+      const assistantMessageId = crypto.randomUUID();
+
       const assistantMessage: ChatMessage = {
         role: 'assistant',
-        content: data.reply
+        content: data.reply,
+        id: assistantMessageId,
+        feedbackType: 'none',
+        timestamp: new Date().toISOString()
       };
 
       setChatMessages(prev => [...prev, assistantMessage]);
+      
+      // Initialize feedback state for this message
+      setMessageFeedback(prev => ({
+        ...prev,
+        [assistantMessageId]: 'none'
+      }));
+
+      // Log interaction to database immediately (non-blocking)
+      await saveInteraction(
+        userMsgContent,
+        data.reply,
+        assistantMessageId,
+        responseTime,
+        false,
+        null,
+        data.metadata?.llm_model || null,
+        data.metadata?.system_prompt_version || null
+      );
+
     } catch (error) {
       console.error('Error in chat:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const responseTime = Date.now() - startTime;
+      const errorMessageId = crypto.randomUUID();
+      
       const errorResponse: ChatMessage = {
         role: 'assistant',
-        content: `Sorry, I encountered an error: ${errorMessage}`
+        content: `Sorry, I encountered an error: ${errorMessage}`,
+        id: errorMessageId,
+        timestamp: new Date().toISOString()
       };
+      
       setChatMessages(prev => [...prev, errorResponse]);
+      
+      // Log error interaction
+      await saveInteraction(
+        userMsgContent,
+        errorResponse.content,
+        errorMessageId,
+        responseTime,
+        true,
+        errorMessage,
+        null,
+        null
+      );
     } finally {
       setIsChatLoading(false);
     }
@@ -193,24 +349,33 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
           {(chatMessages.length > 0 || isChatLoading) && (
             <ScrollArea ref={scrollAreaRef} className="h-64 pr-4">
               <div className="space-y-3">
-                {chatMessages.map((msg, idx) => (
-                  <div
-                    key={idx}
-                    className={`p-3 rounded-lg ${
-                      msg.role === 'user'
-                        ? 'bg-primary/10 ml-4'
-                        : 'bg-muted mr-4'
-                    }`}
-                  >
-                    <div className="text-base leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-p:my-4 prose-strong:text-foreground">
-                      <ReactMarkdown
-                        components={{
-                          p: ({ children }) => <p className="mb-4">{children}</p>,
-                        }}
-                      >
-                        {msg.content}
-                      </ReactMarkdown>
+                {chatMessages.map((msg) => (
+                  <div key={msg.id} className="space-y-2">
+                    <div
+                      className={`p-3 rounded-lg ${
+                        msg.role === 'user'
+                          ? 'bg-primary/10 ml-4'
+                          : 'bg-muted mr-4'
+                      }`}
+                    >
+                      <div className="text-base leading-relaxed prose prose-sm max-w-none dark:prose-invert prose-p:my-4 prose-strong:text-foreground">
+                        <ReactMarkdown
+                          components={{
+                            p: ({ children }) => <p className="mb-4">{children}</p>,
+                          }}
+                        >
+                          {msg.content}
+                        </ReactMarkdown>
+                      </div>
                     </div>
+                    {msg.role === 'assistant' && msg.id && (
+                      <ChatFeedback
+                        messageId={msg.id}
+                        currentFeedback={messageFeedback[msg.id] || msg.feedbackType || 'none'}
+                        onFeedbackChange={handleFeedbackChange}
+                        isDisabled={isChatLoading}
+                      />
+                    )}
                   </div>
                 ))}
                 {isChatLoading && (
