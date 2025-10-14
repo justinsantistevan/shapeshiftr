@@ -85,7 +85,44 @@ export function Dashboard({
         ascending: true
       });
       if (error) throw error;
-      setFitnessPhotos(data || []);
+      
+      // Convert any existing public URLs to signed URLs for private bucket access
+      const photosWithSignedUrls = await Promise.all((data || []).map(async (entry) => {
+        const updatedEntry = { ...entry };
+        
+        // Only process if URLs exist and need to be converted
+        if (entry.front_photo_url) {
+          try {
+            const fileName = entry.front_photo_url.split('/').pop();
+            if (fileName) {
+              const { data: signedData } = await supabase.storage
+                .from('fitness-photos')
+                .createSignedUrl(`${user.id}/${fileName}`, 31536000); // 1 year expiry
+              if (signedData) updatedEntry.front_photo_url = signedData.signedUrl;
+            }
+          } catch (e) {
+            console.error('Error creating signed URL for front photo:', e);
+          }
+        }
+        
+        if (entry.side_photo_url) {
+          try {
+            const fileName = entry.side_photo_url.split('/').pop();
+            if (fileName) {
+              const { data: signedData } = await supabase.storage
+                .from('fitness-photos')
+                .createSignedUrl(`${user.id}/${fileName}`, 31536000); // 1 year expiry
+              if (signedData) updatedEntry.side_photo_url = signedData.signedUrl;
+            }
+          } catch (e) {
+            console.error('Error creating signed URL for side photo:', e);
+          }
+        }
+        
+        return updatedEntry;
+      }));
+      
+      setFitnessPhotos(photosWithSignedUrls);
     } catch (error) {
       console.error('Error fetching fitness photos:', error);
     }

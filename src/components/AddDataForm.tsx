@@ -120,10 +120,17 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
     if (uploadError) {
       throw uploadError;
     }
-    const {
-      data: { publicUrl },
-    } = supabase.storage.from("fitness-photos").getPublicUrl(fileName);
-    return publicUrl;
+    
+    // Get signed URL for private bucket access (expires in 1 year)
+    const { data: signedData, error: signedError } = await supabase.storage
+      .from("fitness-photos")
+      .createSignedUrl(fileName, 31536000); // 1 year expiry
+    
+    if (signedError || !signedData) {
+      throw signedError || new Error("Failed to create signed URL");
+    }
+    
+    return signedData.signedUrl;
   };
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
