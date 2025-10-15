@@ -334,6 +334,9 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
             <ReactMarkdown
               components={{
                 p: ({ children }) => <p className="mb-4">{children}</p>,
+                ul: ({ children }) => <ul className="list-disc list-inside mb-4 space-y-2">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal list-inside mb-4 space-y-2">{children}</ol>,
+                li: ({ children }) => <li className="ml-4">{children}</li>,
               }}
             >
               {analysis || "Loading your personalized progress analysis..."}
@@ -377,6 +380,9 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
                         <ReactMarkdown
                           components={{
                             p: ({ children }) => <p className="mb-4">{children}</p>,
+                            ul: ({ children }) => <ul className="list-disc list-inside mb-4 space-y-2">{children}</ul>,
+                            ol: ({ children }) => <ol className="list-decimal list-inside mb-4 space-y-2">{children}</ol>,
+                            li: ({ children }) => <li className="ml-4">{children}</li>,
                           }}
                         >
                           {msg.content}
