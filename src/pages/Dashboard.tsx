@@ -93,29 +93,45 @@ export function Dashboard({
         // Only process if URLs exist and need to be converted
         if (entry.front_photo_url) {
           try {
-            const fileName = entry.front_photo_url.split('/').pop();
-            if (fileName) {
-              const { data: signedData } = await supabase.storage
+            // Extract the full path after 'fitness-photos/' from the URL
+            const pathMatch = entry.front_photo_url.match(/fitness-photos\/(.+)$/);
+            const storagePath = pathMatch ? pathMatch[1] : null;
+            
+            if (storagePath) {
+              const { data: signedData, error: signedError } = await supabase.storage
                 .from('fitness-photos')
-                .createSignedUrl(`${user.id}/${fileName}`, 31536000); // 1 year expiry
-              if (signedData) updatedEntry.front_photo_url = signedData.signedUrl;
+                .createSignedUrl(storagePath, 31536000); // 1 year expiry
+              
+              if (signedError) {
+                console.error('Error creating signed URL for front photo:', signedError, 'Path:', storagePath);
+              } else if (signedData) {
+                updatedEntry.front_photo_url = signedData.signedUrl;
+              }
             }
           } catch (e) {
-            console.error('Error creating signed URL for front photo:', e);
+            console.error('Error processing front photo URL:', e);
           }
         }
         
         if (entry.side_photo_url) {
           try {
-            const fileName = entry.side_photo_url.split('/').pop();
-            if (fileName) {
-              const { data: signedData } = await supabase.storage
+            // Extract the full path after 'fitness-photos/' from the URL
+            const pathMatch = entry.side_photo_url.match(/fitness-photos\/(.+)$/);
+            const storagePath = pathMatch ? pathMatch[1] : null;
+            
+            if (storagePath) {
+              const { data: signedData, error: signedError } = await supabase.storage
                 .from('fitness-photos')
-                .createSignedUrl(`${user.id}/${fileName}`, 31536000); // 1 year expiry
-              if (signedData) updatedEntry.side_photo_url = signedData.signedUrl;
+                .createSignedUrl(storagePath, 31536000); // 1 year expiry
+              
+              if (signedError) {
+                console.error('Error creating signed URL for side photo:', signedError, 'Path:', storagePath);
+              } else if (signedData) {
+                updatedEntry.side_photo_url = signedData.signedUrl;
+              }
             }
           } catch (e) {
-            console.error('Error creating signed URL for side photo:', e);
+            console.error('Error processing side photo URL:', e);
           }
         }
         
