@@ -29,10 +29,6 @@ const QUOTES = [
     author: "Unknown",
   },
   {
-    text: "A goal is a dream with a deadline.",
-    author: "Napoleon Hill",
-  },
-  {
     text: "Your body can do it. It's your mind you have to convince.",
     author: "Unknown",
   },
@@ -207,6 +203,178 @@ const QUOTES = [
   {
     text: "Success is not final, failure is not fatal: it is the courage to continue that counts.",
     author: "Winston Churchill",
+  },
+  {
+    text: "Hard work beats talent when talent doesn't work hard.",
+    author: "Tim Notke",
+  },
+  {
+    text: "It's not whether you get knocked down, it's whether you get up.",
+    author: "Vince Lombardi",
+  },
+  {
+    text: "Long-term consistency trumps short-term intensity.",
+    author: "Bruce Lee",
+  },
+  {
+    text: "Nothing will work unless you do.",
+    author: "Maya Angelou",
+  },
+  {
+    text: "The difference between the impossible and the possible lies in a person's determination.",
+    author: "Tommy Lasorda",
+  },
+  {
+    text: "When you feel like quitting, remember why you started.",
+    author: "Unknown",
+  },
+  {
+    text: "I hated every minute of training, but I said, 'Don't quit. Suffer now and live the rest of your life as a champion.'",
+    author: "Muhammad Ali",
+  },
+  {
+    text: "Run when you can, walk if you have to, crawl if you must; just never give up.",
+    author: "Dean Karnazes",
+  },
+  {
+    text: "Some people want it to happen, some wish it would happen, others make it happen.",
+    author: "Michael Jordan",
+  },
+  {
+    text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
+    author: "Aristotle",
+  },
+  {
+    text: "The only place where success comes before work is in the dictionary.",
+    author: "Vidal Sassoon",
+  },
+  {
+    text: "Perseverance is not a long race; it is many short races one after another.",
+    author: "Walter Elliott",
+  },
+  {
+    text: "If you don't find the time, if you don't do the work, you don't get the results.",
+    author: "Arnold Schwarzenegger",
+  },
+  {
+    text: "A well-built physique is a status symbol. It reflects you worked hard for it, no money can buy it.",
+    author: "Pauline Nordine",
+  },
+  {
+    text: "Those who think they have not time for bodily exercise will sooner or later have to find time for illness.",
+    author: "Edward Stanley",
+  },
+  {
+    text: "Don't lower your expectations to meet your performance. Raise your level of performance to meet your expectations.",
+    author: "Ralph Marston",
+  },
+  {
+    text: "Physical fitness is not only one of the most important keys to a healthy body, it is the basis of dynamic and creative intellectual activity.",
+    author: "John F. Kennedy",
+  },
+  {
+    text: "I don't stop when I'm tired. I stop when I'm done.",
+    author: "David Goggins",
+  },
+  {
+    text: "Success is no accident. It is hard work, perseverance, learning, studying, sacrifice and most of all, love of what you are doing.",
+    author: "Pelé",
+  },
+  {
+    text: "Energy and persistence conquer all things.",
+    author: "Benjamin Franklin",
+  },
+  {
+    text: "The body achieves what the mind believes.",
+    author: "Unknown",
+  },
+  {
+    text: "You have power over your mind, not outside events. Realize this, and you will find strength.",
+    author: "Marcus Aurelius",
+  },
+  {
+    text: "It's hard to beat a person who never gives up.",
+    author: "Babe Ruth",
+  },
+  {
+    text: "If you think lifting is dangerous, try being weak. Being weak is dangerous.",
+    author: "Bret Contreras",
+  },
+  {
+    text: "Never say never because limits, like fears, are often just an illusion.",
+    author: "Michael Jordan",
+  },
+  {
+    text: "Dead last finish is greater than did not finish, which trumps did not start.",
+    author: "Unknown",
+  },
+  {
+    text: "The last three or four reps is what makes the muscle grow. This area of pain divides a champion from someone who is not a champion.",
+    author: "Arnold Schwarzenegger",
+  },
+  {
+    text: "Winning doesn't always mean being first. Winning means you're doing better than you've ever done before.",
+    author: "Bonnie Blair",
+  },
+  {
+    text: "Exercise is king and nutrition is queen. Together you have a kingdom.",
+    author: "Jack LaLanne",
+  },
+  {
+    text: "If something stands between you and your success, move it. Never be denied.",
+    author: "Dwayne 'The Rock' Johnson",
+  },
+  {
+    text: "Make each day your masterpiece.",
+    author: "John Wooden",
+  },
+  {
+    text: "To uncover your true potential you must first find your own limits and then you have the courage to blow past them.",
+    author: "Picabo Street",
+  },
+  {
+    text: "I've failed over and over and over again in my life and that is why I succeed.",
+    author: "Michael Jordan",
+  },
+  {
+    text: "There may be people who have more talent than you, but there's no excuse for anyone to work harder than you do.",
+    author: "Derek Jeter",
+  },
+  {
+    text: "Without self-discipline, success is impossible, period.",
+    author: "Lou Holtz",
+  },
+  {
+    text: "An athlete cannot run with money in his pockets. He must run with hope in his heart and dreams in his head.",
+    author: "Emil Zatopek",
+  },
+  {
+    text: "Persistence can change failure into extraordinary achievement.",
+    author: "Matt Biondi",
+  },
+  {
+    text: "You will never always be motivated, so you must learn to be disciplined.",
+    author: "Unknown",
+  },
+  {
+    text: "Mastering others is strength. Mastering yourself is true power.",
+    author: "Lao Tzu",
+  },
+  {
+    text: "You can't put a limit on anything. The more you dream, the farther you get.",
+    author: "Michael Phelps",
+  },
+  {
+    text: "Champions are made from something they have deep inside them — a desire, a dream, a vision.",
+    author: "Muhammad Ali",
+  },
+  {
+    text: "In training, you listen to your body. In competition, you tell your body to shut up.",
+    author: "Rich Froning Jr.",
+  },
+  {
+    text: "I am building a fire, and every day I train, I add more fuel. At just the right moment, I light the match.",
+    author: "Mia Hamm",
   },
 ];
 
