@@ -1,7 +1,12 @@
+// Deno Edge Function - TypeScript configuration for Deno runtime
+// @ts-ignore - Deno imports are resolved at runtime
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
+// @ts-ignore - Deno imports are resolved at runtime
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// @ts-ignore - Deno imports are resolved at runtime
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
+// @ts-ignore - Deno global is available in Deno runtime
 const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
 // Model and prompt version tracking
