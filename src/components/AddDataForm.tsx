@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { usePhotoCropping } from "@/hooks/usePhotoCropping";
 
 const formSchema = z.object({
   weight: z
@@ -75,7 +76,10 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
   });
   const [frontPhoto, setFrontPhoto] = useState<File | null>(null);
   const [sidePhoto, setSidePhoto] = useState<File | null>(null);
+  const [isCroppingFront, setIsCroppingFront] = useState(false);
+  const [isCroppingSide, setIsCroppingSide] = useState(false);
   const { toast } = useToast();
+  const { cropPhoto, isProcessing, error: croppingError, clearError } = usePhotoCropping();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -96,8 +100,11 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
     if (!open) {
       setFrontPhoto(null);
       setSidePhoto(null);
+      setIsCroppingFront(false);
+      setIsCroppingSide(false);
+      clearError();
     }
-  }, [open]);
+  }, [open, clearError]);
 
   // Trigger wiggle on validation errors
   const onInvalid = () => {
@@ -114,6 +121,60 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
       return () => clearTimeout(t);
     }
   }, [form.formState.errors]);
+
+  // Handle front photo selection and cropping
+  const handleFrontPhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsCroppingFront(true);
+    clearError();
+
+    const result = await cropPhoto(file, 'front');
+
+    if (result) {
+      setFrontPhoto(result.croppedFile);
+      toast({
+        title: "Front photo processed",
+        description: "Photo has been cropped and is ready to upload.",
+      });
+    } else if (croppingError) {
+      toast({
+        title: "Error processing front photo",
+        description: croppingError,
+        variant: "destructive",
+      });
+    }
+
+    setIsCroppingFront(false);
+  };
+
+  // Handle side photo selection and cropping
+  const handleSidePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsCroppingSide(true);
+    clearError();
+
+    const result = await cropPhoto(file, 'side');
+
+    if (result) {
+      setSidePhoto(result.croppedFile);
+      toast({
+        title: "Side photo processed",
+        description: "Photo has been cropped and is ready to upload.",
+      });
+    } else if (croppingError) {
+      toast({
+        title: "Error processing side photo",
+        description: croppingError,
+        variant: "destructive",
+      });
+    }
+
+    setIsCroppingSide(false);
+  };
 
   const uploadPhoto = async (file: File, photoType: "front" | "side"): Promise<string | null> => {
     const {
@@ -382,6 +443,9 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                 <div className="space-y-4">
                   <div className="space-y-3">
                     <Label className="text-base font-medium">Progress Photos</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Stand with your full body in frame, arms up at 90 degrees, feet shoulder-width apart.
+                    </p>
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -390,15 +454,20 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                           id="front_photo"
                           type="file"
                           accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            setFrontPhoto(file || null);
-                          }}
-                          className="cursor-pointer py-0 h-10 flex items-center file:h-full file:mr-4 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:cursor-pointer text-transparent"
+                          onChange={handleFrontPhotoChange}
+                          disabled={isCroppingFront || isCroppingSide}
+                          className="cursor-pointer py-0 h-10 flex items-center file:h-full file:mr-4 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:cursor-pointer text-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                         />
-                        <p className="text-xs text-muted-foreground">
-                          {frontPhoto ? `Selected: ${frontPhoto.name}` : "No file chosen"}
-                        </p>
+                        {isCroppingFront ? (
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Processing front photo...
+                          </p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">
+                            {frontPhoto ? `✓ ${frontPhoto.name}` : "No file chosen"}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
@@ -407,15 +476,20 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                           id="side_photo"
                           type="file"
                           accept="image/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            setSidePhoto(file || null);
-                          }}
-                          className="cursor-pointer py-0 h-10 flex items-center file:h-full file:mr-4 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:cursor-pointer text-transparent"
+                          onChange={handleSidePhotoChange}
+                          disabled={isCroppingFront || isCroppingSide}
+                          className="cursor-pointer py-0 h-10 flex items-center file:h-full file:mr-4 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:cursor-pointer text-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                         />
-                        <p className="text-xs text-muted-foreground">
-                          {sidePhoto ? `Selected: ${sidePhoto.name}` : "No file chosen"}
-                        </p>
+                        {isCroppingSide ? (
+                          <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            Processing side photo...
+                          </p>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">
+                            {sidePhoto ? `✓ ${sidePhoto.name}` : "No file chosen"}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -425,7 +499,11 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                   <Button type="button" variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" className="flex-1" disabled={isLoading || !form.formState.isValid}>
+                  <Button
+                    type="submit"
+                    className="flex-1"
+                    disabled={isLoading || !form.formState.isValid || isCroppingFront || isCroppingSide}
+                  >
                     {isLoading ? "Saving..." : "Save Data"}
                   </Button>
                 </div>
