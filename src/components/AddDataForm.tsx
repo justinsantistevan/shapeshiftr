@@ -385,7 +385,7 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                     <FormItem>
                       <FormLabel>Belly Skinfold (mm)</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.1" placeholder="18.0" {...field} />
+                        <Input type="number" step="0.1" placeholder="18" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
