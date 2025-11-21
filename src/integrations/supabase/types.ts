@@ -1,0 +1,364 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
+  public: {
+    Tables: {
+      coach_chat_logs: {
+        Row: {
+          assistant_response: string
+          conversation_context: Json | null
+          conversation_id: string | null
+          conversation_position: number | null
+          created_at: string
+          error_message: string | null
+          error_occurred: boolean
+          feedback_timestamp: string | null
+          feedback_type: string
+          id: string
+          llm_model: string | null
+          response_time_ms: number | null
+          system_prompt_version: string
+          tokens_input: number | null
+          tokens_output: number | null
+          tokens_total: number | null
+          updated_at: string
+          user_affirmations_snapshot: Json | null
+          user_goals_snapshot: Json | null
+          user_id: string
+          user_message: string
+          user_stats_snapshot: Json | null
+        }
+        Insert: {
+          assistant_response: string
+          conversation_context?: Json | null
+          conversation_id?: string | null
+          conversation_position?: number | null
+          created_at?: string
+          error_message?: string | null
+          error_occurred?: boolean
+          feedback_timestamp?: string | null
+          feedback_type?: string
+          id?: string
+          llm_model?: string | null
+          response_time_ms?: number | null
+          system_prompt_version?: string
+          tokens_input?: number | null
+          tokens_output?: number | null
+          tokens_total?: number | null
+          updated_at?: string
+          user_affirmations_snapshot?: Json | null
+          user_goals_snapshot?: Json | null
+          user_id: string
+          user_message: string
+          user_stats_snapshot?: Json | null
+        }
+        Update: {
+          assistant_response?: string
+          conversation_context?: Json | null
+          conversation_id?: string | null
+          conversation_position?: number | null
+          created_at?: string
+          error_message?: string | null
+          error_occurred?: boolean
+          feedback_timestamp?: string | null
+          feedback_type?: string
+          id?: string
+          llm_model?: string | null
+          response_time_ms?: number | null
+          system_prompt_version?: string
+          tokens_input?: number | null
+          tokens_output?: number | null
+          tokens_total?: number | null
+          updated_at?: string
+          user_affirmations_snapshot?: Json | null
+          user_goals_snapshot?: Json | null
+          user_id?: string
+          user_message?: string
+          user_stats_snapshot?: Json | null
+        }
+        Relationships: []
+      }
+      coach_prompt_versions: {
+        Row: {
+          created_at: string
+          description: string | null
+          is_active: boolean
+          prompt_text: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          is_active?: boolean
+          prompt_text: string
+          version: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          is_active?: boolean
+          prompt_text?: string
+          version?: string
+        }
+        Relationships: []
+      }
+      user_affirmations: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          id: string
+          text: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          text: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          text?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_goals: {
+        Row: {
+          created_at: string
+          goal_avg_daily_calories: number | null
+          goal_avg_exercise_min_per_day: number | null
+          goal_body_fat_percentage: number | null
+          goal_skin_fold_mm: number | null
+          goal_weight: number | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          goal_avg_daily_calories?: number | null
+          goal_avg_exercise_min_per_day?: number | null
+          goal_body_fat_percentage?: number | null
+          goal_skin_fold_mm?: number | null
+          goal_weight?: number | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          goal_avg_daily_calories?: number | null
+          goal_avg_exercise_min_per_day?: number | null
+          goal_body_fat_percentage?: number | null
+          goal_skin_fold_mm?: number | null
+          goal_weight?: number | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      weekly_fitness_entries: {
+        Row: {
+          avg_daily_calories: number | null
+          avg_exercise_min_per_day: number | null
+          body_fat_percentage: number | null
+          created_at: string
+          front_photo_url: string | null
+          id: string
+          notes: string | null
+          side_photo_url: string | null
+          skin_fold_mm: number | null
+          updated_at: string
+          user_id: string
+          week_start_date: string
+          weight: number | null
+        }
+        Insert: {
+          avg_daily_calories?: number | null
+          avg_exercise_min_per_day?: number | null
+          body_fat_percentage?: number | null
+          created_at?: string
+          front_photo_url?: string | null
+          id?: string
+          notes?: string | null
+          side_photo_url?: string | null
+          skin_fold_mm?: number | null
+          updated_at?: string
+          user_id: string
+          week_start_date: string
+          weight?: number | null
+        }
+        Update: {
+          avg_daily_calories?: number | null
+          avg_exercise_min_per_day?: number | null
+          body_fat_percentage?: number | null
+          created_at?: string
+          front_photo_url?: string | null
+          id?: string
+          notes?: string | null
+          side_photo_url?: string | null
+          skin_fold_mm?: number | null
+          updated_at?: string
+          user_id?: string
+          week_start_date?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const

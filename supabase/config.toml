@@ -1,0 +1,10 @@
+project_id = "nkeiuyejylpiinffmoxx"
+
+[functions.analyze-progress]
+verify_jwt = true
+
+[functions.chat-coach]
+verify_jwt = true
+
+[functions.update-goals]
+verify_jwt = true
