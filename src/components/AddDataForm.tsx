@@ -49,7 +49,7 @@ const formSchema = z.object({
     .refine((val) => !val || (parseInt(val) >= 0 && parseInt(val) <= 10000), {
       message: "Calories must be between 0 and 10000",
     }),
-  notes: z.string().optional(),
+  notes: z.string().max(2000, "Notes must be less than 2000 characters").optional(),
 });
 interface AddDataFormProps {
   open: boolean;
@@ -435,6 +435,9 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                           {...field}
                         />
                       </FormControl>
+                      <p className="text-xs text-muted-foreground">
+                        {field.value?.length || 0}/2000 characters
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
