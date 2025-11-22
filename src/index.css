@@ -2,14 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ShapeShiftr Design System - Inspired by premium fitness brands
+/* ShapeShiftr Design System - High-End Training Studio Aesthetic
    All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Base colors - clean white background */
-    --background: 0 0% 98%;
+    /* Base colors - clean off-white background */
+    --background: 210 20% 98%;
     --foreground: 220 25% 15%;
 
     /* Card surfaces */
@@ -20,127 +20,121 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 25% 15%;
 
-    /* Primary brand - fitness blue gradient */
-    --primary: 235 85% 55%;
+    /* Primary brand - Deep Teal (Sophisticated, Calm, Strength) */
+    --primary: 176 90% 30%; /* #089083 */
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 240 80% 65%;
+    --primary-glow: 176 80% 50%;
 
-    /* Secondary - energizing purple */
-    --secondary: 260 75% 60%;
+    /* Secondary - Amber/Gold (Energy, Highlights, Success) */
+    --secondary: 38 92% 50%; /* #F59E0B */
     --secondary-foreground: 0 0% 100%;
 
     /* Muted backgrounds */
-    --muted: 220 15% 96%;
-    --muted-foreground: 220 20% 50%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 220 15% 40%;
 
-    /* Accent - success green */
-    --accent: 150 80% 45%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent - Sharp contrast */
+    --accent: 176 80% 94%;
+    --accent-foreground: 176 90% 30%;
 
-    /* Destructive - warning red */
-    --destructive: 0 75% 55%;
+    /* Destructive - clean red */
+    --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
 
     /* Border and input */
-    --border: 220 15% 88%;
-    --input: 220 15% 92%;
-    --ring: 235 85% 55%;
+    --border: 220 15% 90%;
+    --input: 220 15% 94%;
+    --ring: 176 90% 30%;
 
     /* Fitness-specific colors */
-    --chart-primary: 235 85% 55%;
-    --chart-secondary: 260 75% 60%;
-    --success: 150 80% 45%;
-    --warning: 35 85% 55%;
+    --chart-primary: 176 90% 30%;
+    --chart-secondary: 38 92% 50%;
+    --success: 150 80% 40%;
+    --warning: 38 92% 50%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(235 85% 55%), hsl(240 80% 65%));
-    --gradient-secondary: linear-gradient(135deg, hsl(260 75% 60%), hsl(280 70% 70%));
-    --gradient-hero: linear-gradient(135deg, hsl(235 85% 55%) 0%, hsl(260 75% 60%) 50%, hsl(280 70% 70%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 15% 98%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(176 90% 30%), hsl(174 70% 40%));
+    --gradient-secondary: linear-gradient(135deg, hsl(38 92% 50%), hsl(45 90% 60%));
+    --gradient-hero: linear-gradient(135deg, hsl(176 90% 30%) 0%, hsl(174 70% 40%) 50%, hsl(38 92% 50%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(210 20% 98%) 100%);
 
-    /* Shadows */
-    --shadow-soft: 0 2px 20px -4px hsl(235 85% 55% / 0.1);
-    --shadow-medium: 0 8px 32px -8px hsl(235 85% 55% / 0.15);
-    --shadow-strong: 0 16px 48px -12px hsl(235 85% 55% / 0.25);
-    --shadow-glow: 0 0 40px hsl(235 85% 55% / 0.3);
+    /* Shadows - crisper, less diffuse glow than "AI slop" */
+    --shadow-soft: 0 4px 20px -4px rgba(8, 144, 131, 0.1);
+    --shadow-medium: 0 10px 40px -10px rgba(8, 144, 131, 0.15);
+    --shadow-strong: 0 20px 60px -15px rgba(8, 144, 131, 0.2);
+    --shadow-glow: 0 0 25px rgba(8, 144, 131, 0.25);
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-
+    --sidebar-background: 210 20% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
+    --sidebar-primary: 176 90% 30%;
     --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 176 90% 30%;
     --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 176 90% 30%;
   }
 
   .dark {
-    /* Dark theme - sophisticated dark backgrounds */
-    --background: 220 25% 8%;
-    --foreground: 220 15% 92%;
+    /* Dark theme - "Training Studio" Dark (Charcoal/Slate, not deep blue) */
+    --background: 220 15% 10%; /* Deep charcoal */
+    --foreground: 220 15% 90%;
 
-    /* Dark card surfaces */
-    --card: 220 20% 12%;
-    --card-foreground: 220 15% 92%;
+    /* Dark card surfaces - lighter charcoal */
+    --card: 220 15% 14%;
+    --card-foreground: 220 15% 90%;
 
     /* Dark popover surfaces */
-    --popover: 220 20% 12%;
-    --popover-foreground: 220 15% 92%;
+    --popover: 220 15% 14%;
+    --popover-foreground: 220 15% 90%;
 
-    /* Primary in dark mode */
-    --primary: 235 85% 60%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 240 80% 70%;
+    /* Primary in dark mode - bright teal */
+    --primary: 174 80% 45%;
+    --primary-foreground: 0 0% 0%;
+    --primary-glow: 174 80% 50%;
 
-    /* Secondary in dark mode */
-    --secondary: 260 75% 65%;
-    --secondary-foreground: 0 0% 100%;
+    /* Secondary in dark mode - warm amber */
+    --secondary: 38 95% 55%;
+    --secondary-foreground: 0 0% 0%;
 
     /* Muted in dark mode */
-    --muted: 220 20% 16%;
-    --muted-foreground: 220 15% 65%;
+    --muted: 220 10% 20%;
+    --muted-foreground: 220 10% 60%;
 
     /* Accent in dark mode */
-    --accent: 150 80% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 174 80% 20%;
+    --accent-foreground: 174 80% 60%;
 
     /* Destructive in dark mode */
-    --destructive: 0 75% 60%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
     /* Borders and inputs in dark mode */
-    --border: 220 20% 20%;
-    --input: 220 20% 16%;
-    --ring: 235 85% 60%;
+    --border: 220 10% 24%;
+    --input: 220 10% 24%;
+    --ring: 174 80% 45%;
 
-    /* Dark mode gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(235 85% 60%), hsl(240 80% 70%));
-    --gradient-secondary: linear-gradient(135deg, hsl(260 75% 65%), hsl(280 70% 75%));
-    --gradient-hero: linear-gradient(135deg, hsl(235 85% 60%) 0%, hsl(260 75% 65%) 50%, hsl(280 70% 75%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(220 20% 12%) 0%, hsl(220 20% 16%) 100%);
+    /* Dark mode gradients - subtler, sophisticated */
+    --gradient-primary: linear-gradient(135deg, hsl(174 80% 45%), hsl(174 60% 35%));
+    --gradient-secondary: linear-gradient(135deg, hsl(38 95% 55%), hsl(35 90% 45%));
+    --gradient-hero: linear-gradient(135deg, hsl(174 80% 45%) 0%, hsl(174 60% 35%) 50%, hsl(38 95% 55%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(220 15% 16%) 0%, hsl(220 15% 13%) 100%);
 
     /* Dark shadows */
-    --shadow-soft: 0 2px 20px -4px hsl(0 0% 0% / 0.3);
-    --shadow-medium: 0 8px 32px -8px hsl(0 0% 0% / 0.4);
-    --shadow-strong: 0 16px 48px -12px hsl(0 0% 0% / 0.5);
-    --shadow-glow: 0 0 40px hsl(235 85% 60% / 0.4);
-    --sidebar-background: 240 5.9% 10%;
+    --shadow-soft: 0 4px 20px -4px rgba(0, 0, 0, 0.4);
+    --shadow-medium: 0 10px 40px -10px rgba(0, 0, 0, 0.6);
+    --shadow-strong: 0 20px 60px -15px rgba(0, 0, 0, 0.7);
+    --shadow-glow: 0 0 30px rgba(45, 212, 191, 0.15);
+
+    --sidebar-background: 220 15% 14%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 174 80% 45%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent: 220 10% 24%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-border: 220 10% 24%;
+    --sidebar-ring: 174 80% 45%;
   }
 }
 
@@ -155,8 +149,8 @@
 
   /* Custom fitness animations */
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 20px hsl(var(--primary) / 0.3); }
-    50% { box-shadow: 0 0 40px hsl(var(--primary) / 0.6); }
+    0%, 100% { box-shadow: 0 0 15px hsl(var(--primary) / 0.2); }
+    50% { box-shadow: 0 0 30px hsl(var(--primary) / 0.4); }
   }
 
   @keyframes slide-up {
@@ -173,7 +167,8 @@
 @layer components {
   /* Fitness component styles */
   .fitness-card {
-    @apply bg-gradient-to-br from-card to-muted/50 border border-border/50 shadow-soft hover:shadow-medium transition-all duration-300;
+    /* Changed from uniform border/shadow to something more structured */
+    @apply bg-card border border-border/60 shadow-soft hover:shadow-medium transition-all duration-300;
   }
 
   .hero-gradient {
@@ -181,15 +176,21 @@
   }
 
   .chart-container {
-    @apply bg-gradient-to-br from-card via-card to-muted/30;
+    @apply bg-card/50 backdrop-blur-sm;
   }
 
   .metric-value {
-    @apply text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+    /* More solid, less gradient-heavy for values, to look more "pro" */
+    @apply text-2xl font-bold text-foreground tracking-tight;
+  }
+  
+  /* Optional: Keep gradient for specific highlights */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
   }
 
   .goal-line {
-    @apply stroke-accent stroke-2 stroke-dasharray;
+    @apply stroke-secondary stroke-2 stroke-dasharray;
   }
 
   .animate-chart-bar {
@@ -215,7 +216,11 @@
     border: 1px solid hsl(var(--border)) !important;
   }
 
+  .dark .recharts-tooltip-cursor {
+    fill: hsl(var(--muted) / 0.4) !important;
+  }
+
   .dark .recharts-active-bar {
-    filter: brightness(0.8);
+    filter: brightness(1.2);
   }
 }

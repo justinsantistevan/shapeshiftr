@@ -19,7 +19,7 @@ export function Auth() {
   const navigate = useNavigate();
 
   // Memoize LiquidEther props to prevent re-renders when typing
-  const liquidEtherColors = useMemo(() => ['#5227FF', '#FF9FFC', '#B19EEF'], []);
+  const liquidEtherColors = useMemo(() => ['#089083', '#10B981', '#22D3EE'], []);
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -134,7 +134,7 @@ export function Auth() {
               className="h-16 w-16 animate-pulse-glow rounded-lg"
             />
           </div>
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <CardTitle className="text-2xl font-bold text-primary">
             ShapeShiftr
           </CardTitle>
           <CardDescription>
