@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
 import { Sparkles, RefreshCw, Send, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { FitnessStats } from "@/lib/fitnessCalculations";
@@ -305,7 +305,7 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
   };
 
   return (
-    <Card className="bg-gradient-to-br from-primary/5 to-secondary/5 border-primary/20">
+    <div className="w-full fitness-card rounded-xl bg-card">
       <CardContent className="pt-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -429,6 +429,6 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
           </div>
         </div>
       </CardContent>
-    </Card>
+    </div>
   );
 };

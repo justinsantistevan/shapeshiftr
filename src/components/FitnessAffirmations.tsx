@@ -26,9 +26,9 @@ export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAff
     loadAffirmations();
   }, []);
   if (isLoading) {
-    return <div className="fitness-card p-6">
+    return <div className="fitness-card p-6 rounded-xl">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-2xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <h3 className="text-2xl font-semibold text-primary">
             Fitness Affirmations
           </h3>
         </div>
@@ -40,9 +40,9 @@ export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAff
         </div>
       </div>;
   }
-  return <div className="fitness-card p-6">
+  return <div className="fitness-card p-6 rounded-xl">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-2xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+        <h3 className="text-2xl font-semibold text-primary">
           Fitness Affirmations
         </h3>
       </div>
@@ -55,7 +55,7 @@ export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAff
           {affirmations.map((affirmation, index) => <div key={affirmation.id} className="flex items-start space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors animate-slide-up" style={{
         animationDelay: `${index * 0.1}s`
       }}>
-              <CheckCircle className="h-5 w-5 text-accent mt-0.5 flex-shrink-0" />
+              <CheckCircle className="h-5 w-5 text-secondary mt-0.5 flex-shrink-0" />
               <p className="text-sm font-medium text-foreground leading-relaxed">
                 {affirmation.text}
               </p>

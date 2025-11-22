@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import shapeshiftrLogo from "@/assets/shapeshiftr-logo.png";
+import shapeshiftrLogo from "@/assets/shapeshiftr-logo-new-sq.png";
 
 interface AuthFormProps {
   onAuthSuccess: () => void;
@@ -59,7 +59,7 @@ export function AuthForm({ onAuthSuccess }: AuthFormProps) {
             <img 
               src={shapeshiftrLogo} 
               alt="ShapeShiftr" 
-              className="h-16 w-16 animate-pulse-glow"
+              className="h-[90px] w-[90px] animate-pulse-glow"
             />
           </div>
           <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">

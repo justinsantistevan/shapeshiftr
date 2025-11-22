@@ -8,8 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import LiquidEther from "@/components/LiquidEther";
-// Using the dark background logo for Auth page only
-const shapeshiftrLogo = "/lovable-uploads/23423cdb-b1d6-4ce3-bc5f-57c099414ad5.png";
+import shapeshiftrLogo from "@/assets/shapeshiftr-logo-new-sq.png";
 
 export function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,7 +18,7 @@ export function Auth() {
   const navigate = useNavigate();
 
   // Memoize LiquidEther props to prevent re-renders when typing
-  const liquidEtherColors = useMemo(() => ['#5227FF', '#FF9FFC', '#B19EEF'], []);
+  const liquidEtherColors = useMemo(() => ['#089083', '#059669', '#22D3EE'], []);
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -125,16 +124,16 @@ export function Auth() {
         />
       </div>
       
-      <Card className="w-full max-w-md fitness-card shadow-strong relative z-10">
+      <Card className="w-full max-w-md fitness-card shadow-strong relative z-10 rounded-xl">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <img 
               src={shapeshiftrLogo} 
               alt="ShapeShiftr" 
-              className="h-16 w-16 animate-pulse-glow rounded-lg"
+              className="h-[90px] w-[90px] animate-pulse-glow rounded-lg"
             />
           </div>
-          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <CardTitle className="text-2xl font-bold text-primary">
             ShapeShiftr
           </CardTitle>
           <CardDescription>

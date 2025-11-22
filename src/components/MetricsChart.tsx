@@ -20,11 +20,11 @@ interface WeeklyEntry {
 }
 
 const METRICS = {
-  weight: { label: "Weight", unit: "lbs", color: "#3b82f6", goalKey: "goal_weight" as keyof UserGoals, icon: Scale },
-  bodyFat: { label: "Body Fat", unit: "%", color: "#8b5cf6", goalKey: "goal_body_fat_percentage" as keyof UserGoals, icon: Activity },
-  skinFold: { label: "Belly Skinfold", unit: "mm", color: "#ef4444", goalKey: "goal_skin_fold_mm" as keyof UserGoals, icon: Ruler },
-  avgExercise: { label: "Daily Exercise", unit: "min", color: "#10b981", goalKey: "goal_avg_exercise_min_per_day" as keyof UserGoals, icon: Zap },
-  avgCalories: { label: "Daily Calories", unit: "cal", color: "#f59e0b", goalKey: "goal_avg_daily_calories" as keyof UserGoals, icon: UtensilsCrossed },
+  weight: { label: "Weight", unit: "lbs", color: "hsl(var(--primary))", goalKey: "goal_weight" as keyof UserGoals, icon: Scale },
+  bodyFat: { label: "Body Fat", unit: "%", color: "hsl(var(--secondary))", goalKey: "goal_body_fat_percentage" as keyof UserGoals, icon: Activity },
+  skinFold: { label: "Belly Skinfold", unit: "mm", color: "hsl(var(--destructive))", goalKey: "goal_skin_fold_mm" as keyof UserGoals, icon: Ruler },
+  avgExercise: { label: "Daily Exercise", unit: "min", color: "hsl(150 80% 40%)", goalKey: "goal_avg_exercise_min_per_day" as keyof UserGoals, icon: Zap },
+  avgCalories: { label: "Daily Calories", unit: "cal", color: "hsl(270 50% 60%)", goalKey: "goal_avg_daily_calories" as keyof UserGoals, icon: UtensilsCrossed },
 };
 
 export interface MetricsChartRef {
@@ -45,6 +45,9 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
   const [fitnessData, setFitnessData] = useState<WeeklyEntry[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [viewMode, setViewMode] = useState<'chart' | 'table'>('chart');
+  const [isDarkMode, setIsDarkMode] = useState(() => 
+    document.documentElement.classList.contains('dark')
+  );
   
   // Detect screen size
   useEffect(() => {
@@ -55,6 +58,20 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  // Listen for theme changes
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   // Load user goals
@@ -170,10 +187,10 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
   };
 
   return (
-    <Card className="fitness-card col-span-2 h-full min-h-[400px] md:min-h-0 flex flex-col">
+    <Card className="fitness-card col-span-2 h-full min-h-[400px] md:min-h-0 flex flex-col rounded-xl">
       <CardHeader className="flex-shrink-0">
         <div className="flex items-center justify-between">
-          <CardTitle className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent leading-normal">
+          <CardTitle className="text-primary leading-normal">
             Progress Metrics
           </CardTitle>
           <div className="flex items-center gap-2">
@@ -385,7 +402,7 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
               )}
               <Tooltip 
                 contentStyle={{
-                  backgroundColor: document.documentElement.classList.contains('dark') ? "#1f2937" : "#f8fafc",
+                  backgroundColor: isDarkMode ? "hsl(var(--card))" : "hsl(var(--card))",
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "8px"
                 }}

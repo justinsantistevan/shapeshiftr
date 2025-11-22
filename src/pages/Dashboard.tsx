@@ -16,7 +16,9 @@ import { useToast } from "@/hooks/use-toast";
 import { calculateFitnessStats, formatChange, formatCurrentValue, FitnessStats } from "@/lib/fitnessCalculations";
 import { fetchUserGoals, UserGoals } from "@/lib/userGoals";
 import { ProgressAnalysis } from "@/components/ProgressAnalysis";
-import shapeshiftrLogo from "/lovable-uploads/d1025a10-8e0c-4dc2-90f2-289110e6f482.png";
+import shapeshiftrLogo from "@/assets/shapeshiftr-logo-new-sq.png";
+import { GlowingEffect } from "@/components/ui/glowing-effect";
+
 interface DashboardProps {
   onSignOut: () => void;
 }
@@ -234,12 +236,12 @@ export function Dashboard({
   };
   return <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <header className="sticky border-b border-border/50 bg-card/50 backdrop-blur-sm top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo and Title */}
           <div className="flex items-center space-x-2">
-            <img src={shapeshiftrLogo} alt="ShapeShiftr" className="h-8 w-8 sm:h-9 sm:w-9" />
-            <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <img src={shapeshiftrLogo} alt="ShapeShiftr" className="h-[45px] w-[45px] sm:h-[50px] sm:w-[50px]" />
+            <h1 className="text-lg sm:text-2xl font-bold text-primary">
               ShapeShiftr
             </h1>
           </div>
@@ -309,10 +311,13 @@ export function Dashboard({
         {/* Metrics Dashboard */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Chart Section */}
-          <div className="lg:col-span-2 animate-slide-up h-full" style={{
+          <div className="lg:col-span-2 animate-slide-up h-full relative rounded-xl" style={{
           animationDelay: "0.2s"
         }}>
-            <MetricsChart ref={metricsChartRef} />
+            <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} />
+            <div className="relative h-full bg-card rounded-xl">
+              <MetricsChart ref={metricsChartRef} />
+            </div>
           </div>
 
           {/* Quick Stats */}
@@ -320,164 +325,179 @@ export function Dashboard({
           animationDelay: "0.4s"
         }}>
             <div className="grid grid-cols-1 gap-3 flex-1">
-              <div className="fitness-card p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Scale className="h-5 w-5 text-primary mr-2" />
-                  <div className="text-sm text-muted-foreground">Current Weight</div>
-                </div>
-                <div className="metric-value">
-                  {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.weight || {
-                  current: null,
-                  change: null,
-                  direction: 'neutral',
-                  unit: 'lbs'
-                })}
-                </div>
-                {userGoals.goal_weight && <div className="text-xs text-muted-foreground mt-1">
-                    Goal: {userGoals.goal_weight} lbs
-                  </div>}
-                <div className="text-xs mt-1 flex items-center justify-center gap-1">
-                  {isLoadingStats ? "" : (() => {
-                  const changeData = formatChange(fitnessStats?.weight || {
+              <div className="relative rounded-xl">
+                <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} />
+                <div className="fitness-card p-3 text-center relative z-10 bg-card rounded-xl">
+                  <div className="flex items-center justify-center mb-2">
+                    <Scale className="h-5 w-5 text-primary mr-2" />
+                    <div className="text-sm text-muted-foreground">Current Weight</div>
+                  </div>
+                  <div className="metric-value">
+                    {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.weight || {
                     current: null,
                     change: null,
                     direction: 'neutral',
                     unit: 'lbs'
-                  });
-                  return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-green-600' : 'text-red-500'}`}>
-                        {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
-                        {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
-                        <span>{changeData.text}</span>
-                      </div> : null;
-                })()}
+                  })}
+                  </div>
+                  {userGoals.goal_weight && <div className="text-xs text-muted-foreground mt-1">
+                      Goal: {userGoals.goal_weight} lbs
+                    </div>}
+                  <div className="text-xs mt-1 flex items-center justify-center gap-1">
+                    {isLoadingStats ? "" : (() => {
+                    const changeData = formatChange(fitnessStats?.weight || {
+                      current: null,
+                      change: null,
+                      direction: 'neutral',
+                      unit: 'lbs'
+                    });
+                    return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
+                          {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
+                          {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
+                          <span>{changeData.text}</span>
+                        </div> : null;
+                  })()}
+                  </div>
                 </div>
               </div>
-              <div className="fitness-card p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Activity className="h-5 w-5 text-primary mr-2" />
-                  <div className="text-sm text-muted-foreground">Body Fat</div>
-                </div>
-                <div className="metric-value">
-                  {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.bodyFat || {
-                  current: null,
-                  change: null,
-                  direction: 'neutral',
-                  unit: '%'
-                })}
-                </div>
-                {userGoals.goal_body_fat_percentage && <div className="text-xs text-muted-foreground mt-1">
-                    Goal: {userGoals.goal_body_fat_percentage}%
-                  </div>}
-                <div className="text-xs mt-1 flex items-center justify-center gap-1">
-                  {isLoadingStats ? "" : (() => {
-                  const changeData = formatChange(fitnessStats?.bodyFat || {
+              <div className="relative rounded-xl">
+                <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} />
+                <div className="fitness-card p-3 text-center relative z-10 bg-card rounded-xl">
+                  <div className="flex items-center justify-center mb-2">
+                    <Activity className="h-5 w-5 text-primary mr-2" />
+                    <div className="text-sm text-muted-foreground">Body Fat</div>
+                  </div>
+                  <div className="metric-value">
+                    {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.bodyFat || {
                     current: null,
                     change: null,
                     direction: 'neutral',
                     unit: '%'
-                  });
-                  return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-green-600' : 'text-red-500'}`}>
-                        {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
-                        {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
-                        <span>{changeData.text}</span>
-                      </div> : null;
-                })()}
+                  })}
+                  </div>
+                  {userGoals.goal_body_fat_percentage && <div className="text-xs text-muted-foreground mt-1">
+                      Goal: {userGoals.goal_body_fat_percentage}%
+                    </div>}
+                  <div className="text-xs mt-1 flex items-center justify-center gap-1">
+                    {isLoadingStats ? "" : (() => {
+                    const changeData = formatChange(fitnessStats?.bodyFat || {
+                      current: null,
+                      change: null,
+                      direction: 'neutral',
+                      unit: '%'
+                    });
+                    return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
+                          {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
+                          {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
+                          <span>{changeData.text}</span>
+                        </div> : null;
+                  })()}
+                  </div>
                 </div>
               </div>
-              <div className="fitness-card p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Ruler className="h-5 w-5 text-primary mr-2" />
-                  <div className="text-sm text-muted-foreground">Belly Skinfold</div>
-                </div>
-                <div className="metric-value">
-                  {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.skinFold || {
-                  current: null,
-                  change: null,
-                  direction: 'neutral',
-                  unit: 'mm'
-                })}
-                </div>
-                {userGoals.goal_skin_fold_mm && <div className="text-xs text-muted-foreground mt-1">
-                    Goal: {userGoals.goal_skin_fold_mm}mm
-                  </div>}
-                <div className="text-xs mt-1 flex items-center justify-center gap-1">
-                  {isLoadingStats ? "" : (() => {
-                  const changeData = formatChange(fitnessStats?.skinFold || {
+              <div className="relative rounded-xl">
+                <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} />
+                <div className="fitness-card p-3 text-center relative z-10 bg-card rounded-xl">
+                  <div className="flex items-center justify-center mb-2">
+                    <Ruler className="h-5 w-5 text-primary mr-2" />
+                    <div className="text-sm text-muted-foreground">Belly Skinfold</div>
+                  </div>
+                  <div className="metric-value">
+                    {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.skinFold || {
                     current: null,
                     change: null,
                     direction: 'neutral',
                     unit: 'mm'
-                  });
-                  return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-green-600' : 'text-red-500'}`}>
-                        {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
-                        {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
-                        <span>{changeData.text}</span>
-                      </div> : null;
-                })()}
+                  })}
+                  </div>
+                  {userGoals.goal_skin_fold_mm && <div className="text-xs text-muted-foreground mt-1">
+                      Goal: {userGoals.goal_skin_fold_mm}mm
+                    </div>}
+                  <div className="text-xs mt-1 flex items-center justify-center gap-1">
+                    {isLoadingStats ? "" : (() => {
+                    const changeData = formatChange(fitnessStats?.skinFold || {
+                      current: null,
+                      change: null,
+                      direction: 'neutral',
+                      unit: 'mm'
+                    });
+                    return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
+                          {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
+                          {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
+                          <span>{changeData.text}</span>
+                        </div> : null;
+                  })()}
+                  </div>
                 </div>
               </div>
-              <div className="fitness-card p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Zap className="h-5 w-5 text-primary mr-2" />
-                  <div className="text-sm text-muted-foreground">Avg Daily Exercise</div>
-                </div>
-                <div className="metric-value">
-                  {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.exercise || {
-                  current: null,
-                  change: null,
-                  direction: 'neutral',
-                  unit: 'min'
-                })}
-                </div>
-                {userGoals.goal_avg_exercise_min_per_day && <div className="text-xs text-muted-foreground mt-1">
-                    Goal: {userGoals.goal_avg_exercise_min_per_day} min
-                  </div>}
-                <div className="text-xs mt-1 flex items-center justify-center gap-1">
-                  {isLoadingStats ? "" : (() => {
-                  const changeData = formatChange(fitnessStats?.exercise || {
+              <div className="relative rounded-xl">
+                <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} />
+                <div className="fitness-card p-3 text-center relative z-10 bg-card rounded-xl">
+                  <div className="flex items-center justify-center mb-2">
+                    <Zap className="h-5 w-5 text-primary mr-2" />
+                    <div className="text-sm text-muted-foreground">Avg Daily Exercise</div>
+                  </div>
+                  <div className="metric-value">
+                    {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.exercise || {
                     current: null,
                     change: null,
                     direction: 'neutral',
                     unit: 'min'
-                  });
-                  return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-green-600' : 'text-red-500'}`}>
-                        {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
-                        {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
-                        <span>{changeData.text}</span>
-                      </div> : null;
-                })()}
+                  })}
+                  </div>
+                  {userGoals.goal_avg_exercise_min_per_day && <div className="text-xs text-muted-foreground mt-1">
+                      Goal: {userGoals.goal_avg_exercise_min_per_day} min
+                    </div>}
+                  <div className="text-xs mt-1 flex items-center justify-center gap-1">
+                    {isLoadingStats ? "" : (() => {
+                    const changeData = formatChange(fitnessStats?.exercise || {
+                      current: null,
+                      change: null,
+                      direction: 'neutral',
+                      unit: 'min'
+                    });
+                    return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
+                          {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
+                          {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
+                          <span>{changeData.text}</span>
+                        </div> : null;
+                  })()}
+                  </div>
                 </div>
               </div>
-              <div className="fitness-card p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <UtensilsCrossed className="h-5 w-5 text-primary mr-2" />
-                  <div className="text-sm text-muted-foreground">Avg Daily Calories</div>
-                </div>
-                <div className="metric-value">
-                  {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.calories || {
-                  current: null,
-                  change: null,
-                  direction: 'neutral',
-                  unit: 'cal'
-                })}
-                </div>
-                {userGoals.goal_avg_daily_calories && <div className="text-xs text-muted-foreground mt-1">
-                    Goal: {userGoals.goal_avg_daily_calories.toLocaleString()} cal
-                  </div>}
-                <div className="text-xs mt-1 flex items-center justify-center gap-1">
-                  {isLoadingStats ? "" : (() => {
-                  const changeData = formatChange(fitnessStats?.calories || {
+              <div className="relative rounded-xl">
+                <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} />
+                <div className="fitness-card p-3 text-center relative z-10 bg-card rounded-xl">
+                  <div className="flex items-center justify-center mb-2">
+                    <UtensilsCrossed className="h-5 w-5 text-primary mr-2" />
+                    <div className="text-sm text-muted-foreground">Avg Daily Calories</div>
+                  </div>
+                  <div className="metric-value">
+                    {isLoadingStats ? "..." : formatCurrentValue(fitnessStats?.calories || {
                     current: null,
                     change: null,
                     direction: 'neutral',
                     unit: 'cal'
-                  });
-                  return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-green-600' : 'text-red-500'}`}>
-                        {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
-                        {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
-                        <span>{changeData.text}</span>
-                      </div> : null;
-                })()}
+                  })}
+                  </div>
+                  {userGoals.goal_avg_daily_calories && <div className="text-xs text-muted-foreground mt-1">
+                      Goal: {userGoals.goal_avg_daily_calories.toLocaleString()} cal
+                    </div>}
+                  <div className="text-xs mt-1 flex items-center justify-center gap-1">
+                    {isLoadingStats ? "" : (() => {
+                    const changeData = formatChange(fitnessStats?.calories || {
+                      current: null,
+                      change: null,
+                      direction: 'neutral',
+                      unit: 'cal'
+                    });
+                    return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
+                          {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
+                          {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
+                          <span>{changeData.text}</span>
+                        </div> : null;
+                  })()}
+                  </div>
                 </div>
               </div>
             </div>
@@ -485,19 +505,23 @@ export function Dashboard({
         </section>
 
         {/* Progress Analysis Section */}
-        <section className="animate-slide-up" style={{
+        <section className="animate-slide-up relative rounded-xl" style={{
         animationDelay: "0.5s"
       }}>
-          <ProgressAnalysis stats={fitnessStats} goals={userGoals} />
+          <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} />
+          <div className="relative z-10 bg-card rounded-xl">
+            <ProgressAnalysis stats={fitnessStats} goals={userGoals} />
+          </div>
         </section>
 
         {/* Progress Photos Section */}
-        <section className="animate-slide-up" style={{
+        <section className="animate-slide-up relative rounded-xl" style={{
         animationDelay: "0.6s"
       }}>
-          <div className="fitness-card p-6">
+          <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} />
+          <div className="fitness-card p-6 relative z-10 bg-card rounded-xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-2xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              <h3 className="text-2xl font-semibold text-primary">
                 Progress Photos
               </h3>
               {fitnessPhotos.length > 1 && !isCompareMode && <Button variant="outline" size="sm" onClick={handleCompareMode}>
@@ -652,17 +676,29 @@ export function Dashboard({
         </section>
 
         {/* Affirmations */}
-        <section className="animate-slide-up" style={{
+        <section className="animate-slide-up relative rounded-xl" style={{
         animationDelay: "0.8s"
       }}>
-          <FitnessAffirmations ref={fitnessAffirmationsRef} onOpenAffirmations={() => setShowAffirmationsManager(true)} />
+          <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} />
+          <div className="relative z-10 bg-card rounded-xl">
+            <FitnessAffirmations ref={fitnessAffirmationsRef} onOpenAffirmations={() => setShowAffirmationsManager(true)} />
+          </div>
         </section>
 
         {/* Footer */}
         <footer className="text-center py-8 animate-slide-up" style={{
         animationDelay: "1s"
       }}>
-          <p className="text-muted-foreground text-sm">Send feedback to: jsantistevan@gmail.com</p>
+          <p className="text-muted-foreground text-sm">
+            <a
+              href="https://github.com/justinsantistevan/shapeshiftr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-primary transition-colors"
+            >
+              https://github.com/justinsantistevan/shapeshiftr
+            </a>
+          </p>
         </footer>
       </main>
 
