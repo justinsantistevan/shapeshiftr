@@ -90,7 +90,7 @@ export const calculateCropForFrontView = (
 /**
  * Calculate crop dimensions for a side view photo
  * Uses median of body keypoints for horizontal centering (more robust)
- * Generous padding: 30% top (for raised arm), 10% bottom
+ * Standard padding: 10% top, 10% bottom
  */
 export const calculateCropForSideView = (
   pose: Pose,
@@ -138,8 +138,8 @@ export const calculateCropForSideView = (
   const bodyHeight = bottomY - topY;
   console.log('Body height calculated:', bodyHeight);
 
-  // Side view: more generous padding for raised arms and feet
-  const topPadding = bodyHeight * 0.30;  // 30% for raised arm with hand/fingertips
+  // Side view padding
+  const topPadding = bodyHeight * 0.10;  // 10% for raised arm with hand/fingertips
   const bottomPadding = bodyHeight * 0.10; // 10% for feet
   const totalHeight = bodyHeight + topPadding + bottomPadding;
 
