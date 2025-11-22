@@ -55,7 +55,7 @@ export const FitnessAffirmations = forwardRef<FitnessAffirmationsRef, FitnessAff
           {affirmations.map((affirmation, index) => <div key={affirmation.id} className="flex items-start space-x-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors animate-slide-up" style={{
         animationDelay: `${index * 0.1}s`
       }}>
-              <CheckCircle className="h-5 w-5 text-emerald-500 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
+              <CheckCircle className="h-5 w-5 text-secondary mt-0.5 flex-shrink-0" />
               <p className="text-sm font-medium text-foreground leading-relaxed">
                 {affirmation.text}
               </p>

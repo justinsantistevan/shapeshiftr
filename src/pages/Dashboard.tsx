@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { calculateFitnessStats, formatChange, formatCurrentValue, FitnessStats } from "@/lib/fitnessCalculations";
 import { fetchUserGoals, UserGoals } from "@/lib/userGoals";
 import { ProgressAnalysis } from "@/components/ProgressAnalysis";
-import shapeshiftrLogo from "/lovable-uploads/d1025a10-8e0c-4dc2-90f2-289110e6f482.png";
+import shapeshiftrLogo from "@/assets/shapeshiftr-logo-new-sq.png";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 
 interface DashboardProps {
@@ -240,7 +240,7 @@ export function Dashboard({
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo and Title */}
           <div className="flex items-center space-x-2">
-            <img src={shapeshiftrLogo} alt="ShapeShiftr" className="h-8 w-8 sm:h-9 sm:w-9" />
+            <img src={shapeshiftrLogo} alt="ShapeShiftr" className="h-[45px] w-[45px] sm:h-[50px] sm:w-[50px]" />
             <h1 className="text-lg sm:text-2xl font-bold text-primary">
               ShapeShiftr
             </h1>
@@ -689,7 +689,16 @@ export function Dashboard({
         <footer className="text-center py-8 animate-slide-up" style={{
         animationDelay: "1s"
       }}>
-          <p className="text-muted-foreground text-sm">Send feedback to: jsantistevan@gmail.com</p>
+          <p className="text-muted-foreground text-sm">
+            <a
+              href="https://github.com/justinsantistevan/shapeshiftr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-primary transition-colors"
+            >
+              https://github.com/justinsantistevan/shapeshiftr
+            </a>
+          </p>
         </footer>
       </main>
 
