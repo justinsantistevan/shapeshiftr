@@ -19,7 +19,7 @@ export function Auth() {
   const navigate = useNavigate();
 
   // Memoize LiquidEther props to prevent re-renders when typing
-  const liquidEtherColors = useMemo(() => ['#089083', '#10B981', '#22D3EE'], []);
+  const liquidEtherColors = useMemo(() => ['#089083', '#059669', '#22D3EE'], []);
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -125,7 +125,7 @@ export function Auth() {
         />
       </div>
       
-      <Card className="w-full max-w-md fitness-card shadow-strong relative z-10">
+      <Card className="w-full max-w-md fitness-card shadow-strong relative z-10 rounded-xl">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <img 

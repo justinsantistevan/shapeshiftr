@@ -217,10 +217,20 @@
   }
 
   .dark .recharts-tooltip-cursor {
-    fill: hsl(var(--muted) / 0.4) !important;
+    fill: hsl(var(--muted) / 0.6) !important;
   }
 
   .dark .recharts-active-bar {
     filter: brightness(1.2);
+  }
+
+  /* Optimized header with backdrop blur for smooth scrolling */
+  header.sticky {
+    will-change: backdrop-filter;
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    isolation: isolate;
+    contain: layout style paint;
   }
 }

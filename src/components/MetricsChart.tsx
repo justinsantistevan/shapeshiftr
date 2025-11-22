@@ -45,6 +45,9 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
   const [fitnessData, setFitnessData] = useState<WeeklyEntry[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [viewMode, setViewMode] = useState<'chart' | 'table'>('chart');
+  const [isDarkMode, setIsDarkMode] = useState(() => 
+    document.documentElement.classList.contains('dark')
+  );
   
   // Detect screen size
   useEffect(() => {
@@ -55,6 +58,20 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  // Listen for theme changes
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   // Load user goals
@@ -385,7 +402,7 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
               )}
               <Tooltip 
                 contentStyle={{
-                  backgroundColor: document.documentElement.classList.contains('dark') ? "#1f2937" : "#f8fafc",
+                  backgroundColor: isDarkMode ? "hsl(var(--card))" : "hsl(var(--card))",
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "8px"
                 }}

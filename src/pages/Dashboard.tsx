@@ -236,7 +236,7 @@ export function Dashboard({
   };
   return <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border/50 bg-card/50 backdrop-blur-sm sticky top-0 z-50">
+      <header className="sticky border-b border-border/50 bg-card/50 backdrop-blur-sm top-0 z-50">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo and Title */}
           <div className="flex items-center space-x-2">
