@@ -556,7 +556,3 @@ https://lovable.dev/projects/c1e25c55-4a52-4f6a-8bbf-62dc3f19aaa3
 - [ ] Implement data migration tools for schema changes
 
 ---
-
-**Built with ❤️ using Lovable, React, TypeScript, Supabase, and AI**
-
-For support or questions, visit the [Lovable Discord Community](https://discord.com/channels/1119885301872070706/1280461670979993613)
