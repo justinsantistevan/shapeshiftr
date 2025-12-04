@@ -95,10 +95,11 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
     });
     
     // If no entries in ideal range, fall back to most recent entry that is at least 28 days ago
+    // Since entries are ordered descending, the first match will be the closest to 28 days ago
     if (!previousEntry) {
       previousEntry = entriesWithData.find(entry => {
         const entryDate = new Date(entry.week_start_date);
-        return entryDate < twentyEightDaysAgo;
+        return entryDate <= twentyEightDaysAgo;
       });
     }
 
