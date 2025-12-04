@@ -219,8 +219,8 @@ Exercise: ${stats.exercise.current}${stats.exercise.unit}/day, recent change: ${
 Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit}, recent change: ${stats.skinFold.change}${stats.skinFold.unit}
 Daily Calories: ${stats.calories.current}${stats.calories.unit}, recent change: ${stats.calories.change}${stats.calories.unit}
 ${
-  stats.comparisonDate && stats.comparisonDaysAgo && (stats.comparisonDaysAgo < 28 || stats.comparisonDaysAgo >= 35)
-    ? `\nNote: These changes compare to data from the week of ${stats.comparisonDate} (${stats.comparisonDaysAgo >= 35 ? `approximately ${Math.round(stats.comparisonDaysAgo / 30)} months` : `approximately ${Math.round(stats.comparisonDaysAgo / 7)} weeks`} ago).`
+  stats.comparisonDate && stats.comparisonDaysAgo && stats.comparisonDaysAgo >= 35
+    ? `\nNote: These changes compare to data from the week of ${stats.comparisonDate} (${stats.comparisonDaysAgo >= 60 ? `approximately ${Math.round(stats.comparisonDaysAgo / 30)} months` : `approximately ${Math.round(stats.comparisonDaysAgo / 7)} weeks`} ago).`
     : ""
 }
 `
