@@ -111,7 +111,6 @@ IMPORTANT - HANDLING MISSING COMPARISON DATA:
 If change values show "N/A" or are null, this means there's insufficient historical data (less than 28 days) for comparison. In these cases:
 - Acknowledge that trend analysis isn't possible yet due to limited data history
 - Focus on analyzing current metrics against the user's goals
-- Provide baseline recommendations and guidance for establishing healthy habits
 - Encourage the user to continue tracking so future comparisons will be available
 - Be supportive and frame this as a starting point, not a limitation
 - Still provide valuable coaching based on current metrics and goals
