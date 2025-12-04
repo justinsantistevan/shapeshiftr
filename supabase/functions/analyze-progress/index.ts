@@ -116,6 +116,14 @@ Only proceed with normal coaching if all metrics are within reasonable ranges.
 DATA CONTEXT:
 The "change" values represent the difference between current metrics and metrics from a comparison period. The ideal comparison is 4 weeks (28-34 days) ago, but if no data exists in that range, the comparison uses the most recent available data that is at least 28 days old. For example, if current weight is 163 lbs with a change of -3 lbs, the user weighed 166 lbs at the comparison point.
 
+IMPORTANT - HANDLING MISSING COMPARISON DATA:
+If change values show "N/A", this means there's insufficient historical data (less than 28 days) for comparison. In these cases:
+- Acknowledge that trend analysis isn't possible yet due to limited data history
+- Focus on analyzing current metrics against the user's goals
+- Provide baseline recommendations and guidance for establishing healthy habits
+- Encourage the user to continue tracking so future comparisons will be available
+- Be supportive and frame this as a starting point, not a limitation
+
 IMPORTANT - COMPARISON CONTEXTUALIZATION:
 When providing analysis, you will receive comparison metadata indicating the date and age of the comparison data. If the comparison is not exactly 4 weeks ago (e.g., it's 35+ days old), you MUST contextualize this in your response. For example:
 - If comparison is 35-60 days old: "comparing to your latest results from at least 1 month ago" or "the trend from your data from the week of [date]"
@@ -144,6 +152,14 @@ RULES:
 
 Adapt your tone based on overall progress: celebratory for strong progress, motivational for struggles, strategically encouraging for mixed results.`;
 
+    // Helper function to format change values
+    const formatChange = (change: number | null, unit: string, direction: string): string => {
+      if (change === null) {
+        return "N/A";
+      }
+      return `${change}${unit} ${direction}`;
+    };
+
     const comparisonContext = stats.comparisonDate && stats.comparisonDaysAgo
       ? stats.comparisonDaysAgo >= 28 && stats.comparisonDaysAgo < 35
         ? "" // Ideal range, no need to mention
@@ -152,14 +168,18 @@ Adapt your tone based on overall progress: celebratory for strong progress, moti
         : `\n\nCOMPARISON NOTE: These changes are comparing to your data from the week of ${stats.comparisonDate} (approximately ${Math.round(stats.comparisonDaysAgo / 30)} months ago).`
       : "";
 
+    const hasComparisonData = stats.weight.change !== null || stats.bodyFat.change !== null || 
+                             stats.exercise.change !== null || stats.skinFold.change !== null || 
+                             stats.calories.change !== null;
+
     const userPrompt = `Analyze my fitness metrics and goals, then provide coaching:
 
-CURRENT METRICS (change from comparison period):
-Weight: ${stats.weight.current}${stats.weight.unit} (${stats.weight.change}${stats.weight.unit} ${stats.weight.direction})
-Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit} (${stats.bodyFat.change}${stats.bodyFat.unit} ${stats.bodyFat.direction})
-Exercise: ${stats.exercise.current}${stats.exercise.unit}/day (${stats.exercise.change}${stats.exercise.unit} ${stats.exercise.direction})
-Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit} (${stats.skinFold.change}${stats.skinFold.unit} ${stats.skinFold.direction})
-Daily Calories: ${stats.calories.current}${stats.calories.unit} (${stats.calories.change}${stats.calories.unit} ${stats.calories.direction})${comparisonContext}
+CURRENT METRICS${hasComparisonData ? " (change from comparison period)" : " (insufficient data for comparison - less than 28 days of history)"}:
+Weight: ${stats.weight.current}${stats.weight.unit}${stats.weight.change !== null ? ` (${formatChange(stats.weight.change, stats.weight.unit, stats.weight.direction)})` : " (N/A - no comparison data)"}
+Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit}${stats.bodyFat.change !== null ? ` (${formatChange(stats.bodyFat.change, stats.bodyFat.unit, stats.bodyFat.direction)})` : " (N/A - no comparison data)"}
+Exercise: ${stats.exercise.current}${stats.exercise.unit}/day${stats.exercise.change !== null ? ` (${formatChange(stats.exercise.change, stats.exercise.unit, stats.exercise.direction)})` : " (N/A - no comparison data)"}
+Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit}${stats.skinFold.change !== null ? ` (${formatChange(stats.skinFold.change, stats.skinFold.unit, stats.skinFold.direction)})` : " (N/A - no comparison data)"}
+Daily Calories: ${stats.calories.current}${stats.calories.unit}${stats.calories.change !== null ? ` (${formatChange(stats.calories.change, stats.calories.unit, stats.calories.direction)})` : " (N/A - no comparison data)"}${comparisonContext}
 
 MY TARGETS:
 ${goals.goal_weight ? `Weight: ${goals.goal_weight} lbs` : ""}

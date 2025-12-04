@@ -107,6 +107,15 @@ serve(async (req) => {
 USER CONTEXT:
 You have access to the user's current metrics, goals, and affirmations. "Change" values represent differences from a comparison period. The ideal comparison is 4 weeks (28-34 days) ago, but if no data exists in that range, the comparison uses the most recent available data that is at least 28 days old (e.g., weight 163 lbs with -3 lbs change = 166 lbs at the comparison point). Reference these naturally when relevant to personalize advice.
 
+IMPORTANT - HANDLING MISSING COMPARISON DATA:
+If change values show "N/A" or are null, this means there's insufficient historical data (less than 28 days) for comparison. In these cases:
+- Acknowledge that trend analysis isn't possible yet due to limited data history
+- Focus on analyzing current metrics against the user's goals
+- Provide baseline recommendations and guidance for establishing healthy habits
+- Encourage the user to continue tracking so future comparisons will be available
+- Be supportive and frame this as a starting point, not a limitation
+- Still provide valuable coaching based on current metrics and goals
+
 IMPORTANT - COMPARISON CONTEXTUALIZATION:
 When the user asks about comparisons or trends, you will have access to comparison metadata indicating the date and age of the comparison data. If the comparison is not exactly 4 weeks ago (e.g., it's 35+ days old), you MUST contextualize this in your response. For example:
 - If comparison is 35-60 days old: "comparing to your latest results from at least 1 month ago" or "the trend from your data from the week of [date]"
@@ -213,11 +222,11 @@ Current User Context:
 ${
   stats && stats.weight && stats.bodyFat && stats.exercise && stats.skinFold && stats.calories
     ? `
-Weight: ${stats.weight.current}${stats.weight.unit}, recent change: ${stats.weight.change}${stats.weight.unit}
-Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit}, recent change: ${stats.bodyFat.change}${stats.bodyFat.unit}
-Exercise: ${stats.exercise.current}${stats.exercise.unit}/day, recent change: ${stats.exercise.change}${stats.exercise.unit}
-Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit}, recent change: ${stats.skinFold.change}${stats.skinFold.unit}
-Daily Calories: ${stats.calories.current}${stats.calories.unit}, recent change: ${stats.calories.change}${stats.calories.unit}
+Weight: ${stats.weight.current}${stats.weight.unit}, recent change: ${stats.weight.change !== null ? `${stats.weight.change}${stats.weight.unit}` : "N/A (insufficient data for comparison)"}
+Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit}, recent change: ${stats.bodyFat.change !== null ? `${stats.bodyFat.change}${stats.bodyFat.unit}` : "N/A (insufficient data for comparison)"}
+Exercise: ${stats.exercise.current}${stats.exercise.unit}/day, recent change: ${stats.exercise.change !== null ? `${stats.exercise.change}${stats.exercise.unit}` : "N/A (insufficient data for comparison)"}
+Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit}, recent change: ${stats.skinFold.change !== null ? `${stats.skinFold.change}${stats.skinFold.unit}` : "N/A (insufficient data for comparison)"}
+Daily Calories: ${stats.calories.current}${stats.calories.unit}, recent change: ${stats.calories.change !== null ? `${stats.calories.change}${stats.calories.unit}` : "N/A (insufficient data for comparison)"}
 ${
   stats.comparisonDate && stats.comparisonDaysAgo && stats.comparisonDaysAgo >= 35
     ? `\nNote: These changes compare to data from the week of ${stats.comparisonDate} (${stats.comparisonDaysAgo >= 60 ? `approximately ${Math.round(stats.comparisonDaysAgo / 30)} months` : `approximately ${Math.round(stats.comparisonDaysAgo / 7)} weeks`} ago).`
