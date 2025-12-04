@@ -32,6 +32,8 @@ const chatRequestSchema = z.object({
       exercise: metricSchema,
       skinFold: metricSchema,
       calories: metricSchema,
+      comparisonDate: z.string().optional(),
+      comparisonDaysAgo: z.number().optional(),
     })
     .optional(),
   goals: z
@@ -103,7 +105,14 @@ serve(async (req) => {
     const systemPrompt = `You are an expert AI fitness coach with deep knowledge of exercise science, nutrition, physiology, and behavior change psychology. You're direct and knowledgeable, but also warm and encouraging - genuinely invested in helping the user succeed.
 
 USER CONTEXT:
-You have access to the user's current metrics, goals, and affirmations. "Change" values represent differences from 4 weeks ago (e.g., weight 163 lbs with -3 lbs change = 166 lbs four weeks ago). Reference these naturally when relevant to personalize advice.
+You have access to the user's current metrics, goals, and affirmations. "Change" values represent differences from a comparison period. The ideal comparison is 4 weeks (28-34 days) ago, but if no data exists in that range, the comparison uses the most recent available data that is at least 28 days old (e.g., weight 163 lbs with -3 lbs change = 166 lbs at the comparison point). Reference these naturally when relevant to personalize advice.
+
+IMPORTANT - COMPARISON CONTEXTUALIZATION:
+When the user asks about comparisons or trends, you will have access to comparison metadata indicating the date and age of the comparison data. If the comparison is not exactly 4 weeks ago (e.g., it's 35+ days old), you MUST contextualize this in your response. For example:
+- If comparison is 35-60 days old: "comparing to your latest results from at least 1 month ago" or "the trend from your data from the week of [date]"
+- If comparison is 60+ days old: "comparing to your results from [X] months ago" or "the trend from your data from the week of [date]"
+- Only mention the comparison timeframe if it's outside the ideal 28-34 day range
+- Be natural and conversational when contextualizing - don't make it sound like an error
 
 OUTPUT LENGTH:
 - Keep it consise! Most responses should not be more than 2-4 sentences
@@ -209,6 +218,11 @@ Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit}, recent change: ${stats.
 Exercise: ${stats.exercise.current}${stats.exercise.unit}/day, recent change: ${stats.exercise.change}${stats.exercise.unit}
 Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit}, recent change: ${stats.skinFold.change}${stats.skinFold.unit}
 Daily Calories: ${stats.calories.current}${stats.calories.unit}, recent change: ${stats.calories.change}${stats.calories.unit}
+${
+  stats.comparisonDate && stats.comparisonDaysAgo && (stats.comparisonDaysAgo < 28 || stats.comparisonDaysAgo >= 35)
+    ? `\nNote: These changes compare to data from the week of ${stats.comparisonDate} (${stats.comparisonDaysAgo >= 35 ? `approximately ${Math.round(stats.comparisonDaysAgo / 30)} months` : `approximately ${Math.round(stats.comparisonDaysAgo / 7)} weeks`} ago).`
+    : ""
+}
 `
     : "No current stats available"
 }

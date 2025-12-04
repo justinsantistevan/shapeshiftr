@@ -24,6 +24,8 @@ const analyzeRequestSchema = z.object({
     exercise: metricSchema,
     skinFold: metricSchema,
     calories: metricSchema,
+    comparisonDate: z.string().optional(),
+    comparisonDaysAgo: z.number().optional(),
   }),
   goals: z.object({
     goal_weight: z.number().nullable().optional(),
@@ -112,7 +114,14 @@ If ANY metric violates these ranges, respond with:
 Only proceed with normal coaching if all metrics are within reasonable ranges.
 
 DATA CONTEXT:
-The "change" values represent the difference between current metrics and metrics from 4 weeks ago. For example, if current weight is 163 lbs with a change of -3 lbs, the user weighed 166 lbs a month ago.
+The "change" values represent the difference between current metrics and metrics from a comparison period. The ideal comparison is 4 weeks (28-34 days) ago, but if no data exists in that range, the comparison uses the most recent available data that is at least 28 days old. For example, if current weight is 163 lbs with a change of -3 lbs, the user weighed 166 lbs at the comparison point.
+
+IMPORTANT - COMPARISON CONTEXTUALIZATION:
+When providing analysis, you will receive comparison metadata indicating the date and age of the comparison data. If the comparison is not exactly 4 weeks ago (e.g., it's 35+ days old), you MUST contextualize this in your response. For example:
+- If comparison is 35-60 days old: "comparing to your latest results from at least 1 month ago" or "the trend from your data from the week of [date]"
+- If comparison is 60+ days old: "comparing to your results from [X] months ago" or "the trend from your data from the week of [date]"
+- Only mention the comparison timeframe if it's outside the ideal 28-34 day range
+- Be natural and conversational when contextualizing - don't make it sound like an error
 
 VARY YOUR APPROACH each time - rotate through different structures:
 1. Lead with the biggest concern, then highlight a win
@@ -135,14 +144,22 @@ RULES:
 
 Adapt your tone based on overall progress: celebratory for strong progress, motivational for struggles, strategically encouraging for mixed results.`;
 
+    const comparisonContext = stats.comparisonDate && stats.comparisonDaysAgo
+      ? stats.comparisonDaysAgo >= 28 && stats.comparisonDaysAgo < 35
+        ? "" // Ideal range, no need to mention
+        : stats.comparisonDaysAgo >= 35 && stats.comparisonDaysAgo < 60
+        ? `\n\nCOMPARISON NOTE: These changes are comparing to your data from the week of ${stats.comparisonDate} (approximately ${Math.round(stats.comparisonDaysAgo / 7)} weeks ago).`
+        : `\n\nCOMPARISON NOTE: These changes are comparing to your data from the week of ${stats.comparisonDate} (approximately ${Math.round(stats.comparisonDaysAgo / 30)} months ago).`
+      : "";
+
     const userPrompt = `Analyze my fitness metrics and goals, then provide coaching:
 
-CURRENT METRICS (change from 4 weeks ago):
+CURRENT METRICS (change from comparison period):
 Weight: ${stats.weight.current}${stats.weight.unit} (${stats.weight.change}${stats.weight.unit} ${stats.weight.direction})
 Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit} (${stats.bodyFat.change}${stats.bodyFat.unit} ${stats.bodyFat.direction})
 Exercise: ${stats.exercise.current}${stats.exercise.unit}/day (${stats.exercise.change}${stats.exercise.unit} ${stats.exercise.direction})
 Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit} (${stats.skinFold.change}${stats.skinFold.unit} ${stats.skinFold.direction})
-Daily Calories: ${stats.calories.current}${stats.calories.unit} (${stats.calories.change}${stats.calories.unit} ${stats.calories.direction})
+Daily Calories: ${stats.calories.current}${stats.calories.unit} (${stats.calories.change}${stats.calories.unit} ${stats.calories.direction})${comparisonContext}
 
 MY TARGETS:
 ${goals.goal_weight ? `Weight: ${goals.goal_weight} lbs` : ""}

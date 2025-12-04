@@ -23,6 +23,8 @@ export interface FitnessStats {
   exercise: FitnessTrend;
   skinFold: FitnessTrend;
   calories: FitnessTrend;
+  comparisonDate?: string; // week_start_date of the comparison entry
+  comparisonDaysAgo?: number; // days between current and comparison entry
 }
 
 // Calculate the trend between two values
@@ -70,19 +72,46 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
     
     // Find entry from approximately 4 weeks ago from the most recent entry date
     const currentEntryDate = new Date(currentEntry.week_start_date);
-    const fourWeeksAgo = new Date(currentEntryDate);
-    fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28); // 4 weeks = 28 days
+    const twentyEightDaysAgo = new Date(currentEntryDate);
+    twentyEightDaysAgo.setDate(twentyEightDaysAgo.getDate() - 28); // 4 weeks = 28 days
+    const thirtyFiveDaysAgo = new Date(currentEntryDate);
+    thirtyFiveDaysAgo.setDate(thirtyFiveDaysAgo.getDate() - 35); // 5 weeks = 35 days
     
-    const previousEntry = entries.find(entry => {
+    // Filter entries with actual data
+    const entriesWithData = entries.filter(entry => 
+      entry.weight !== null || 
+      entry.body_fat_percentage !== null || 
+      entry.skin_fold_mm !== null || 
+      entry.avg_daily_calories !== null || 
+      entry.avg_exercise_min_per_day !== null
+    );
+    
+    // First try to find entries in the ideal range: >= 28 days ago and < 35 days ago
+    // This means entryDate > thirtyFiveDaysAgo (more recent than 35 days ago) 
+    // AND entryDate <= twentyEightDaysAgo (at least 28 days ago)
+    let previousEntry = entriesWithData.find(entry => {
       const entryDate = new Date(entry.week_start_date);
-      return entryDate <= fourWeeksAgo && (
-        entry.weight !== null || 
-        entry.body_fat_percentage !== null || 
-        entry.skin_fold_mm !== null || 
-        entry.avg_daily_calories !== null || 
-        entry.avg_exercise_min_per_day !== null
-      );
+      return entryDate > thirtyFiveDaysAgo && entryDate <= twentyEightDaysAgo;
     });
+    
+    // If no entries in ideal range, fall back to most recent entry that is at least 28 days ago
+    if (!previousEntry) {
+      previousEntry = entriesWithData.find(entry => {
+        const entryDate = new Date(entry.week_start_date);
+        return entryDate < twentyEightDaysAgo;
+      });
+    }
+
+    // Calculate comparison metadata
+    let comparisonDate: string | undefined;
+    let comparisonDaysAgo: number | undefined;
+    
+    if (previousEntry) {
+      const previousEntryDate = new Date(previousEntry.week_start_date);
+      comparisonDate = previousEntry.week_start_date;
+      const daysDiff = Math.floor((currentEntryDate.getTime() - previousEntryDate.getTime()) / (1000 * 60 * 60 * 24));
+      comparisonDaysAgo = daysDiff;
+    }
 
     // Calculate trends for each metric
     const weight = calculateTrend(currentEntry.weight, previousEntry?.weight || null, 'lbs');
@@ -96,7 +125,9 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
       bodyFat,
       exercise,
       skinFold,
-      calories
+      calories,
+      comparisonDate,
+      comparisonDaysAgo
     };
   } catch (error) {
     console.error('Error calculating fitness stats:', error);
