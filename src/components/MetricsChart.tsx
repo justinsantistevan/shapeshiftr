@@ -312,7 +312,7 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[120px] sticky top-0 bg-background z-10">Week</TableHead>
+                      <TableHead className="w-[120px] sticky top-0 bg-background z-10">Week ending</TableHead>
                       {Object.entries(METRICS).map(([key, metric]) => {
                         const Icon = metric.icon;
                         return (

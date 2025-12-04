@@ -125,10 +125,11 @@ If change values show "N/A", this means there's insufficient historical data (le
 - Be supportive and frame this as a starting point, not a limitation
 
 IMPORTANT - COMPARISON CONTEXTUALIZATION:
-When providing analysis, you will receive comparison metadata indicating the date and age of the comparison data. If the comparison is not exactly 4 weeks ago (e.g., it's 35+ days old), you MUST contextualize this in your response. For example:
-- If comparison is 35-60 days old: "comparing to your latest results from at least 1 month ago" or "the trend from your data from the week of [date]"
-- If comparison is 60+ days old: "comparing to your results from [X] months ago" or "the trend from your data from the week of [date]"
-- Only mention the comparison timeframe if it's outside the ideal 28-34 day range
+When providing analysis, you will receive comparison metadata indicating the exact date and age of the comparison data. Always be aware of what timeframe you're comparing to:
+- If comparison is 28-34 days old (4 weeks): This is the ideal range, you can say "over the past 4 weeks" or "in the last month"
+- If comparison is 35-60 days old: Contextualize as "comparing to the week ending [date]" or "over the past [X] weeks"
+- If comparison is 60+ days old: Contextualize as "comparing to the week ending [date]" or "over the past [X] months"
+- Always use "week ending" (not "week of") when referencing specific dates, since user data represents the week ending on a particular Sunday
 - Be natural and conversational when contextualizing - don't make it sound like an error
 
 VARY YOUR APPROACH each time - rotate through different structures:
@@ -161,11 +162,7 @@ Adapt your tone based on overall progress: celebratory for strong progress, moti
     };
 
     const comparisonContext = stats.comparisonDate && stats.comparisonDaysAgo
-      ? stats.comparisonDaysAgo >= 28 && stats.comparisonDaysAgo < 35
-        ? "" // Ideal range, no need to mention
-        : stats.comparisonDaysAgo >= 35 && stats.comparisonDaysAgo < 60
-        ? `\n\nCOMPARISON NOTE: These changes are comparing to your data from the week of ${stats.comparisonDate} (approximately ${Math.round(stats.comparisonDaysAgo / 7)} weeks ago).`
-        : `\n\nCOMPARISON NOTE: These changes are comparing to your data from the week of ${stats.comparisonDate} (approximately ${Math.round(stats.comparisonDaysAgo / 30)} months ago).`
+      ? `\n\nCOMPARISON PERIOD: These changes compare to data from the week ending ${stats.comparisonDate} (${Math.round(stats.comparisonDaysAgo / 7)} weeks ago).`
       : "";
 
     const hasComparisonData = stats.weight.change !== null || stats.bodyFat.change !== null || 

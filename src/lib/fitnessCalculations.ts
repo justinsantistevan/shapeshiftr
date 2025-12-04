@@ -154,8 +154,27 @@ function isPositiveTrend(trend: FitnessTrend): boolean {
   }
 }
 
+// Format the comparison timeframe for display
+function formatComparisonTimeframe(daysAgo?: number): string {
+  if (daysAgo === undefined) return 'this month';
+  
+  const weeks = Math.round(daysAgo / 7);
+  
+  if (weeks <= 4) {
+    return 'in 4 weeks';
+  } else if (weeks <= 8) {
+    return `in ${weeks} weeks`;
+  } else {
+    const months = Math.round(daysAgo / 30);
+    return `in ${months} month${months > 1 ? 's' : ''}`;
+  }
+}
+
 // Format the change value for display
-export function formatChange(trend: FitnessTrend): { text: string; direction: 'up' | 'down' | 'neutral'; isPositive: boolean } {
+export function formatChange(
+  trend: FitnessTrend,
+  comparisonDaysAgo?: number
+): { text: string; direction: 'up' | 'down' | 'neutral'; isPositive: boolean } {
   if (trend.change === null) return { text: '', direction: 'neutral', isPositive: false };
   
   const absChange = Math.abs(trend.change);
@@ -181,8 +200,10 @@ export function formatChange(trend: FitnessTrend): { text: string; direction: 'u
       formattedChange = absChange.toString();
   }
   
+  const timeframe = formatComparisonTimeframe(comparisonDaysAgo);
+  
   return {
-    text: `${formattedChange} ${trend.unit} this month`,
+    text: `${formattedChange} ${trend.unit} ${timeframe}`,
     direction: trend.direction,
     isPositive: isPositiveTrend(trend)
   };

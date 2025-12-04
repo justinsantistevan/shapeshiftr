@@ -301,7 +301,7 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-4 px-1.5 py-1.5">
                 <div className="space-y-2">
-                  <Label>Week Starting (Sunday)</Label>
+                  <Label>Week ending (Sunday)</Label>
                   <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                       <Button
@@ -345,7 +345,7 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
                       />
                     </PopoverContent>
                   </Popover>
-                  <p className="text-xs text-muted-foreground">Only Sundays can be selected as week start dates</p>
+                  <p className="text-xs text-muted-foreground">Enter data for the week ending on the selected Sunday</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

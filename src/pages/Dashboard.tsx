@@ -350,7 +350,7 @@ export function Dashboard({
                       change: null,
                       direction: 'neutral',
                       unit: 'lbs'
-                    });
+                    }, fitnessStats?.comparisonDaysAgo);
                     return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
                           {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
                           {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
@@ -385,7 +385,7 @@ export function Dashboard({
                       change: null,
                       direction: 'neutral',
                       unit: '%'
-                    });
+                    }, fitnessStats?.comparisonDaysAgo);
                     return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
                           {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
                           {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
@@ -420,7 +420,7 @@ export function Dashboard({
                       change: null,
                       direction: 'neutral',
                       unit: 'mm'
-                    });
+                    }, fitnessStats?.comparisonDaysAgo);
                     return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
                           {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
                           {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
@@ -455,7 +455,7 @@ export function Dashboard({
                       change: null,
                       direction: 'neutral',
                       unit: 'min'
-                    });
+                    }, fitnessStats?.comparisonDaysAgo);
                     return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
                           {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
                           {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
@@ -490,7 +490,7 @@ export function Dashboard({
                       change: null,
                       direction: 'neutral',
                       unit: 'cal'
-                    });
+                    }, fitnessStats?.comparisonDaysAgo);
                     return changeData.text ? <div className={`flex items-center gap-1 ${changeData.isPositive ? 'text-emerald-500' : 'text-rose-500'}`}>
                           {changeData.direction === 'up' && <TrendingUp className="h-3 w-3" />}
                           {changeData.direction === 'down' && <TrendingDown className="h-3 w-3" />}
@@ -545,7 +545,7 @@ export function Dashboard({
                           </div>
                         </div>
                         <p className="text-center text-sm text-muted-foreground mt-2">
-                          Week of {(() => {
+                          Week ending {(() => {
                     const [year, month, day] = entry.week_start_date.split('-').map(Number);
                     const date = new Date(year, month - 1, day);
                     return date.toLocaleDateString('en-US', {
@@ -650,7 +650,7 @@ export function Dashboard({
                           </div>
                         </div>
                         <p className="text-center text-xs text-muted-foreground mt-1">
-                          Week of {(() => {
+                          Week ending {(() => {
                     const [year, month, day] = entry.week_start_date.split('-').map(Number);
                     const date = new Date(year, month - 1, day);
                     return date.toLocaleDateString('en-US', {

@@ -116,10 +116,11 @@ If change values show "N/A" or are null, this means there's insufficient histori
 - Still provide valuable coaching based on current metrics and goals
 
 IMPORTANT - COMPARISON CONTEXTUALIZATION:
-When the user asks about comparisons or trends, you will have access to comparison metadata indicating the date and age of the comparison data. If the comparison is not exactly 4 weeks ago (e.g., it's 35+ days old), you MUST contextualize this in your response. For example:
-- If comparison is 35-60 days old: "comparing to your latest results from at least 1 month ago" or "the trend from your data from the week of [date]"
-- If comparison is 60+ days old: "comparing to your results from [X] months ago" or "the trend from your data from the week of [date]"
-- Only mention the comparison timeframe if it's outside the ideal 28-34 day range
+When discussing comparisons or trends, you will have access to comparison metadata indicating the exact date and age of the comparison data. Always be aware of what timeframe you're comparing to:
+- If comparison is 28-34 days old (4 weeks): This is the ideal range, you can say "over the past 4 weeks" or "in the last month"
+- If comparison is 35-60 days old: Contextualize as "comparing to the week ending [date]" or "over the past [X] weeks"
+- If comparison is 60+ days old: Contextualize as "comparing to the week ending [date]" or "over the past [X] months"
+- Always use "week ending" (not "week of") when referencing specific dates, since user data represents the week ending on a particular Sunday
 - Be natural and conversational when contextualizing - don't make it sound like an error
 
 OUTPUT LENGTH:
@@ -227,8 +228,8 @@ Exercise: ${stats.exercise.current}${stats.exercise.unit}/day, recent change: ${
 Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit}, recent change: ${stats.skinFold.change !== null ? `${stats.skinFold.change}${stats.skinFold.unit}` : "N/A (insufficient data for comparison)"}
 Daily Calories: ${stats.calories.current}${stats.calories.unit}, recent change: ${stats.calories.change !== null ? `${stats.calories.change}${stats.calories.unit}` : "N/A (insufficient data for comparison)"}
 ${
-  stats.comparisonDate && stats.comparisonDaysAgo && stats.comparisonDaysAgo >= 35
-    ? `\nNote: These changes compare to data from the week of ${stats.comparisonDate} (${stats.comparisonDaysAgo >= 60 ? `approximately ${Math.round(stats.comparisonDaysAgo / 30)} months` : `approximately ${Math.round(stats.comparisonDaysAgo / 7)} weeks`} ago).`
+  stats.comparisonDate && stats.comparisonDaysAgo
+    ? `\nComparison period: These changes compare to data from the week ending ${stats.comparisonDate} (${Math.round(stats.comparisonDaysAgo / 7)} weeks ago).`
     : ""
 }
 `
