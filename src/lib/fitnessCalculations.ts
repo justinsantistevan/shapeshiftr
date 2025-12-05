@@ -27,6 +27,12 @@ export interface FitnessStats {
   comparisonDaysAgo?: number; // days between current and comparison entry
 }
 
+// Parse a YYYY-MM-DD string as a UTC date to avoid timezone issues
+function parseUTCDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+}
+
 // Calculate the trend between two values
 function calculateTrend(current: number | null, previous: number | null, unit: string): FitnessTrend {
   if (current === null) {
@@ -70,11 +76,11 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
     
     if (!currentEntry) return null;
     
-    // Find entry from exactly 4 weeks ago (28 days)
-    const currentEntryDate = new Date(currentEntry.week_start_date);
-    const twentyEightDaysAgoDate = new Date(currentEntryDate);
-    twentyEightDaysAgoDate.setDate(twentyEightDaysAgoDate.getDate() - 28); // 4 weeks = 28 days
-    const twentyEightDaysAgoStr = twentyEightDaysAgoDate.toISOString().split('T')[0];
+    // Find entry from exactly 4 weeks ago (28 days), using UTC-safe date math
+    const currentEntryDate = parseUTCDate(currentEntry.week_start_date);
+    const twentyEightDaysAgoDate = new Date(currentEntryDate.getTime());
+    twentyEightDaysAgoDate.setUTCDate(twentyEightDaysAgoDate.getUTCDate() - 28); // 4 weeks = 28 days
+    const twentyEightDaysAgoStr = twentyEightDaysAgoDate.toISOString().slice(0, 10);
     
     // Filter entries with actual data
     const entriesWithData = entries.filter(entry => 
@@ -94,8 +100,8 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
     // Since entries are ordered descending, the first match will be the closest to 28 days ago
     if (!previousEntry) {
       previousEntry = entriesWithData.find(entry => {
-        const entryDate = new Date(entry.week_start_date);
-        return entryDate <= twentyEightDaysAgoDate;
+        const entryDate = parseUTCDate(entry.week_start_date);
+        return entryDate.getTime() <= twentyEightDaysAgoDate.getTime();
       });
     }
 
@@ -104,7 +110,7 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
     let comparisonDaysAgo: number | undefined;
     
     if (previousEntry) {
-      const previousEntryDate = new Date(previousEntry.week_start_date);
+      const previousEntryDate = parseUTCDate(previousEntry.week_start_date);
       comparisonDate = previousEntry.week_start_date;
       const daysDiff = Math.floor((currentEntryDate.getTime() - previousEntryDate.getTime()) / (1000 * 60 * 60 * 24));
       comparisonDaysAgo = daysDiff;
@@ -156,17 +162,19 @@ function formatComparisonTimeframe(daysAgo?: number): string {
   
   const weeks = Math.round(daysAgo / 7);
   
-  // Exact 4 weeks (28 days) or close to it should say "this month" as requested
+  // Exact 4 weeks (28 days) should be labeled as "this month"
   if (weeks === 4) {
     return 'this month';
-  } else if (weeks < 4) {
-    return `in ${weeks} week${weeks > 1 ? 's' : ''}`;
-  } else if (weeks <= 8) {
-    return `in ${weeks} weeks`;
-  } else {
-    const months = Math.round(daysAgo / 30);
-    return `in ${months} month${months > 1 ? 's' : ''}`;
   }
+
+  // For other week-based comparisons, be explicit about the timeframe
+  if (weeks > 0 && weeks < 8) {
+    return `last ${weeks} week${weeks > 1 ? 's' : ''}`;
+  }
+
+  // For longer timeframes, switch to months
+  const months = Math.round(daysAgo / 30);
+  return `last ${months} month${months > 1 ? 's' : ''}`;
 }
 
 // Format the change value for display
