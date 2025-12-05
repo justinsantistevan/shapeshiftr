@@ -70,12 +70,11 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
     
     if (!currentEntry) return null;
     
-    // Find entry from approximately 4 weeks ago from the most recent entry date
+    // Find entry from exactly 4 weeks ago (28 days)
     const currentEntryDate = new Date(currentEntry.week_start_date);
-    const twentyEightDaysAgo = new Date(currentEntryDate);
-    twentyEightDaysAgo.setDate(twentyEightDaysAgo.getDate() - 28); // 4 weeks = 28 days
-    const thirtyFiveDaysAgo = new Date(currentEntryDate);
-    thirtyFiveDaysAgo.setDate(thirtyFiveDaysAgo.getDate() - 35); // 5 weeks = 35 days
+    const twentyEightDaysAgoDate = new Date(currentEntryDate);
+    twentyEightDaysAgoDate.setDate(twentyEightDaysAgoDate.getDate() - 28); // 4 weeks = 28 days
+    const twentyEightDaysAgoStr = twentyEightDaysAgoDate.toISOString().split('T')[0];
     
     // Filter entries with actual data
     const entriesWithData = entries.filter(entry => 
@@ -86,20 +85,17 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
       entry.avg_exercise_min_per_day !== null
     );
     
-    // First try to find entries in the ideal range: >= 28 days ago and < 35 days ago
-    // This means entryDate > thirtyFiveDaysAgo (more recent than 35 days ago) 
-    // AND entryDate <= twentyEightDaysAgo (at least 28 days ago)
-    let previousEntry = entriesWithData.find(entry => {
-      const entryDate = new Date(entry.week_start_date);
-      return entryDate > thirtyFiveDaysAgo && entryDate <= twentyEightDaysAgo;
-    });
+    // 1. STRICT PRIORITY: Look for entry exactly 28 days ago
+    let previousEntry = entriesWithData.find(entry => 
+      entry.week_start_date === twentyEightDaysAgoStr
+    );
     
-    // If no entries in ideal range, fall back to most recent entry that is at least 28 days ago
+    // 2. Fallback: If exact 28-day entry not found, look for most recent entry at least 28 days ago
     // Since entries are ordered descending, the first match will be the closest to 28 days ago
     if (!previousEntry) {
       previousEntry = entriesWithData.find(entry => {
         const entryDate = new Date(entry.week_start_date);
-        return entryDate <= twentyEightDaysAgo;
+        return entryDate <= twentyEightDaysAgoDate;
       });
     }
 
@@ -160,8 +156,11 @@ function formatComparisonTimeframe(daysAgo?: number): string {
   
   const weeks = Math.round(daysAgo / 7);
   
-  if (weeks <= 4) {
-    return 'in 4 weeks';
+  // Exact 4 weeks (28 days) or close to it should say "this month" as requested
+  if (weeks === 4) {
+    return 'this month';
+  } else if (weeks < 4) {
+    return `in ${weeks} week${weeks > 1 ? 's' : ''}`;
   } else if (weeks <= 8) {
     return `in ${weeks} weeks`;
   } else {
