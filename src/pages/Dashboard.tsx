@@ -31,19 +31,19 @@ export function Dashboard({
   const [fitnessPhotos, setFitnessPhotos] = useState<Array<{
     front_photo_url?: string;
     side_photo_url?: string;
-    week_start_date: string;
+    week_end_date: string;
   }>>([]);
   const [isCompareMode, setIsCompareMode] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<{
     before?: {
       front_photo_url?: string;
       side_photo_url?: string;
-      week_start_date: string;
+      week_end_date: string;
     };
     after?: {
       front_photo_url?: string;
       side_photo_url?: string;
-      week_start_date: string;
+      week_end_date: string;
     };
   }>({});
   const [selectionStep, setSelectionStep] = useState<'before' | 'after'>('before');
@@ -83,7 +83,7 @@ export function Dashboard({
       const {
         data,
         error
-      } = await supabase.from('weekly_fitness_entries').select('front_photo_url, side_photo_url, week_start_date').eq('user_id', user.id).or('front_photo_url.not.is.null,side_photo_url.not.is.null').order('week_start_date', {
+      } = await supabase.from('weekly_fitness_entries').select('front_photo_url, side_photo_url, week_end_date').eq('user_id', user.id).or('front_photo_url.not.is.null,side_photo_url.not.is.null').order('week_end_date', {
         ascending: true
       });
       if (error) throw error;
@@ -215,7 +215,7 @@ export function Dashboard({
   const handlePhotoSelect = (photo: {
     front_photo_url?: string;
     side_photo_url?: string;
-    week_start_date: string;
+    week_end_date: string;
   }) => {
     if (selectionStep === 'before') {
       setSelectedPhotos({
@@ -537,16 +537,16 @@ export function Dashboard({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <h4 className="text-sm font-medium text-center">Front View</h4>
-                            {entry.front_photo_url && <img src={entry.front_photo_url} alt={`Front view - ${entry.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                            {entry.front_photo_url && <img src={entry.front_photo_url} alt={`Front view - ${entry.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                           </div>
                           <div className="space-y-2">
                             <h4 className="text-sm font-medium text-center">Side View</h4>
-                            {entry.side_photo_url && <img src={entry.side_photo_url} alt={`Side view - ${entry.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                            {entry.side_photo_url && <img src={entry.side_photo_url} alt={`Side view - ${entry.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                           </div>
                         </div>
                         <p className="text-center text-sm text-muted-foreground mt-2">
                           Week ending {(() => {
-                    const [year, month, day] = entry.week_start_date.split('-').map(Number);
+                    const [year, month, day] = entry.week_end_date.split('-').map(Number);
                     const date = new Date(year, month - 1, day);
                     return date.toLocaleDateString('en-US', {
                       month: 'numeric',
@@ -566,10 +566,10 @@ export function Dashboard({
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium text-center text-primary">Before</h5>
-                        {selectedPhotos.before.front_photo_url && <img src={selectedPhotos.before.front_photo_url} alt={`Before front - ${selectedPhotos.before.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                        {selectedPhotos.before.front_photo_url && <img src={selectedPhotos.before.front_photo_url} alt={`Before front - ${selectedPhotos.before.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
                           {(() => {
-                      const [year, month, day] = selectedPhotos.before.week_start_date.split('-').map(Number);
+                      const [year, month, day] = selectedPhotos.before.week_end_date.split('-').map(Number);
                       const date = new Date(year, month - 1, day);
                       return date.toLocaleDateString('en-US', {
                         month: 'numeric',
@@ -581,10 +581,10 @@ export function Dashboard({
                       </div>
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium text-center text-secondary">After</h5>
-                        {selectedPhotos.after.front_photo_url && <img src={selectedPhotos.after.front_photo_url} alt={`After front - ${selectedPhotos.after.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                        {selectedPhotos.after.front_photo_url && <img src={selectedPhotos.after.front_photo_url} alt={`After front - ${selectedPhotos.after.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
                           {(() => {
-                      const [year, month, day] = selectedPhotos.after.week_start_date.split('-').map(Number);
+                      const [year, month, day] = selectedPhotos.after.week_end_date.split('-').map(Number);
                       const date = new Date(year, month - 1, day);
                       return date.toLocaleDateString('en-US', {
                         month: 'numeric',
@@ -603,10 +603,10 @@ export function Dashboard({
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium text-center text-primary">Before</h5>
-                        {selectedPhotos.before.side_photo_url && <img src={selectedPhotos.before.side_photo_url} alt={`Before side - ${selectedPhotos.before.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                        {selectedPhotos.before.side_photo_url && <img src={selectedPhotos.before.side_photo_url} alt={`Before side - ${selectedPhotos.before.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
                           {(() => {
-                      const [year, month, day] = selectedPhotos.before.week_start_date.split('-').map(Number);
+                      const [year, month, day] = selectedPhotos.before.week_end_date.split('-').map(Number);
                       const date = new Date(year, month - 1, day);
                       return date.toLocaleDateString('en-US', {
                         month: 'numeric',
@@ -618,10 +618,10 @@ export function Dashboard({
                       </div>
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium text-center text-secondary">After</h5>
-                        {selectedPhotos.after.side_photo_url && <img src={selectedPhotos.after.side_photo_url} alt={`After side - ${selectedPhotos.after.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                        {selectedPhotos.after.side_photo_url && <img src={selectedPhotos.after.side_photo_url} alt={`After side - ${selectedPhotos.after.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
                           {(() => {
-                      const [year, month, day] = selectedPhotos.after.week_start_date.split('-').map(Number);
+                      const [year, month, day] = selectedPhotos.after.week_end_date.split('-').map(Number);
                       const date = new Date(year, month - 1, day);
                       return date.toLocaleDateString('en-US', {
                         month: 'numeric',
@@ -642,16 +642,16 @@ export function Dashboard({
                         <div className="grid grid-cols-2 gap-2">
                           <div className="space-y-1">
                             <h5 className="text-xs font-medium text-center">Front</h5>
-                            {entry.front_photo_url && <img src={entry.front_photo_url} alt={`Front - ${entry.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded" />}
+                            {entry.front_photo_url && <img src={entry.front_photo_url} alt={`Front - ${entry.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded" />}
                           </div>
                           <div className="space-y-1">
                             <h5 className="text-xs font-medium text-center">Side</h5>
-                            {entry.side_photo_url && <img src={entry.side_photo_url} alt={`Side - ${entry.week_start_date}`} className="w-full aspect-[9/16] object-cover rounded" />}
+                            {entry.side_photo_url && <img src={entry.side_photo_url} alt={`Side - ${entry.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded" />}
                           </div>
                         </div>
                         <p className="text-center text-xs text-muted-foreground mt-1">
                           Week ending {(() => {
-                    const [year, month, day] = entry.week_start_date.split('-').map(Number);
+                    const [year, month, day] = entry.week_end_date.split('-').map(Number);
                     const date = new Date(year, month - 1, day);
                     return date.toLocaleDateString('en-US', {
                       month: 'numeric',

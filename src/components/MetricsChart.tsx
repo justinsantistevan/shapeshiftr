@@ -89,19 +89,19 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
       const { data, error } = await supabase
         .from('weekly_fitness_entries')
         .select('*')
-        .order('week_start_date', { ascending: true });
+        .order('week_end_date', { ascending: true });
 
       if (error) {
         console.error('Error fetching fitness data:', error);
         setFitnessData([]);
       } else {
         const formattedData: WeeklyEntry[] = data.map(entry => {
-          // Ensure we're showing the Sunday date (week start date)
+          // Ensure we're showing the Sunday date (week end date)
           // Parse the date as local date to avoid timezone issues
-          const [year, month, day] = entry.week_start_date.split('-').map(Number);
-          const weekStartDate = new Date(year, month - 1, day);
+          const [year, month, day] = entry.week_end_date.split('-').map(Number);
+          const weekEndDate = new Date(year, month - 1, day);
           return {
-            week: format(weekStartDate, 'M/d/yy'),
+            week: format(weekEndDate, 'M/d/yy'),
             weight: entry.weight,
             bodyFat: entry.body_fat_percentage,
             skinFold: entry.skin_fold_mm,

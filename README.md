@@ -97,7 +97,7 @@ Two distinct AI coaching features powered by Lovable AI Gateway:
 ```sql
 - id: UUID (primary key)
 - user_id: UUID (foreign key to auth.users)
-- week_start_date: DATE (unique per user)
+- week_end_date: DATE (unique per user)
 - weight_lbs: NUMERIC(5,2)
 - body_fat_percentage: NUMERIC(4,2)
 - skin_fold_mm: NUMERIC(5,2)
@@ -167,7 +167,7 @@ The app calculates monthly trends by comparing metrics between two time points:
 - **Current Entry**: Most recent weekly fitness entry
 - **Previous Entry**: Entry closest to 28 days (4 weeks) before the current entry's date
 
-**Important**: The 28-day lookback is calculated from the `week_start_date` of the most recent entry, NOT from today's date. This ensures consistent trend calculations regardless of when data was last entered.
+**Important**: The 28-day lookback is calculated from the `week_end_date` of the most recent entry, NOT from today's date. This ensures consistent trend calculations regardless of when data was last entered.
 
 Example:
 

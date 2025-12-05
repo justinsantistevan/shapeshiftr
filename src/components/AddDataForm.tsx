@@ -232,13 +232,13 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
         .from("weekly_fitness_entries")
         .select("*")
         .eq("user_id", user.id)
-        .eq("week_start_date", weekStartFormatted)
+        .eq("week_end_date", weekStartFormatted)
         .single();
 
       // Prepare data for insertion/update, only updating fields with new values
       const insertData: any = {
         user_id: user.id,
-        week_start_date: weekStartFormatted,
+        week_end_date: weekStartFormatted,
       };
 
       // Only include fields that have new values, preserve existing ones
@@ -254,7 +254,7 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
       if (frontPhotoUrl) insertData.front_photo_url = frontPhotoUrl;
       if (sidePhotoUrl) insertData.side_photo_url = sidePhotoUrl;
       const { error } = await supabase.from("weekly_fitness_entries").upsert(insertData, {
-        onConflict: "user_id,week_start_date",
+        onConflict: "user_id,week_end_date",
       });
       if (error) {
         toast({

@@ -189,7 +189,7 @@ export type Database = {
           skin_fold_mm: number | null
           updated_at: string
           user_id: string
-          week_start_date: string
+          week_end_date: string
           weight: number | null
         }
         Insert: {
@@ -204,7 +204,7 @@ export type Database = {
           skin_fold_mm?: number | null
           updated_at?: string
           user_id: string
-          week_start_date: string
+          week_end_date: string
           weight?: number | null
         }
         Update: {
@@ -219,7 +219,7 @@ export type Database = {
           skin_fold_mm?: number | null
           updated_at?: string
           user_id?: string
-          week_start_date?: string
+          week_end_date?: string
           weight?: number | null
         }
         Relationships: []

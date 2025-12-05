@@ -6,7 +6,7 @@ export interface FitnessEntry {
   skin_fold_mm?: number;
   avg_daily_calories?: number;
   avg_exercise_min_per_day?: number;
-  week_start_date: string;
+  week_end_date: string;
   created_at: string;
 }
 
@@ -23,7 +23,7 @@ export interface FitnessStats {
   exercise: FitnessTrend;
   skinFold: FitnessTrend;
   calories: FitnessTrend;
-  comparisonDate?: string; // week_start_date of the comparison entry
+  comparisonDate?: string; // week_end_date of the comparison entry
   comparisonDaysAgo?: number; // days between current and comparison entry
 }
 
@@ -58,9 +58,9 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
     // Fetch user's fitness entries ordered by date
     const { data: entries, error } = await supabase
       .from('weekly_fitness_entries')
-      .select('weight, body_fat_percentage, skin_fold_mm, avg_daily_calories, avg_exercise_min_per_day, week_start_date, created_at')
+      .select('weight, body_fat_percentage, skin_fold_mm, avg_daily_calories, avg_exercise_min_per_day, week_end_date, created_at')
       .eq('user_id', user.id)
-      .order('week_start_date', { ascending: false });
+      .order('week_end_date', { ascending: false });
 
     if (error) throw error;
     if (!entries || entries.length === 0) return null;
@@ -77,7 +77,7 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
     if (!currentEntry) return null;
     
     // Find entry from exactly 4 weeks ago (28 days), using UTC-safe date math
-    const currentEntryDate = parseUTCDate(currentEntry.week_start_date);
+    const currentEntryDate = parseUTCDate(currentEntry.week_end_date);
     const twentyEightDaysAgoDate = new Date(currentEntryDate.getTime());
     twentyEightDaysAgoDate.setUTCDate(twentyEightDaysAgoDate.getUTCDate() - 28); // 4 weeks = 28 days
     const twentyEightDaysAgoStr = twentyEightDaysAgoDate.toISOString().slice(0, 10);
@@ -93,14 +93,14 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
     
     // 1. STRICT PRIORITY: Look for entry exactly 28 days ago
     let previousEntry = entriesWithData.find(entry => 
-      entry.week_start_date === twentyEightDaysAgoStr
+      entry.week_end_date === twentyEightDaysAgoStr
     );
     
     // 2. Fallback: If exact 28-day entry not found, look for most recent entry at least 28 days ago
     // Since entries are ordered descending, the first match will be the closest to 28 days ago
     if (!previousEntry) {
       previousEntry = entriesWithData.find(entry => {
-        const entryDate = parseUTCDate(entry.week_start_date);
+        const entryDate = parseUTCDate(entry.week_end_date);
         return entryDate.getTime() <= twentyEightDaysAgoDate.getTime();
       });
     }
@@ -110,8 +110,8 @@ export async function calculateFitnessStats(): Promise<FitnessStats | null> {
     let comparisonDaysAgo: number | undefined;
     
     if (previousEntry) {
-      const previousEntryDate = parseUTCDate(previousEntry.week_start_date);
-      comparisonDate = previousEntry.week_start_date;
+      const previousEntryDate = parseUTCDate(previousEntry.week_end_date);
+      comparisonDate = previousEntry.week_end_date;
       const daysDiff = Math.floor((currentEntryDate.getTime() - previousEntryDate.getTime()) / (1000 * 60 * 60 * 24));
       comparisonDaysAgo = daysDiff;
     }
