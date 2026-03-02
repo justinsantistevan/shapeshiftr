@@ -153,30 +153,14 @@ RULES:
 
 Adapt your tone based on overall progress: celebratory for strong progress, motivational for struggles, strategically encouraging for mixed results.`;
 
-    // Helper function to format change values
-    const formatChange = (change: number | null, unit: string, direction: string): string => {
-      if (change === null) {
-        return "N/A";
-      }
-      return `${change}${unit} ${direction}`;
-    };
-
-    const comparisonContext = stats.comparisonDate && stats.comparisonDaysAgo
-      ? `\n\nCOMPARISON PERIOD: These changes compare to data from the week ending ${stats.comparisonDate} (${Math.round(stats.comparisonDaysAgo / 7)} weeks ago).`
-      : "";
-
-    const hasComparisonData = stats.weight.change !== null || stats.bodyFat.change !== null || 
-                             stats.exercise.change !== null || stats.skinFold.change !== null || 
-                             stats.calories.change !== null;
-
     const userPrompt = `Analyze my fitness metrics and goals, then provide coaching:
 
-CURRENT METRICS${hasComparisonData ? " (change from comparison period)" : " (insufficient data for comparison - less than 28 days of history)"}:
-Weight: ${stats.weight.current}${stats.weight.unit}${stats.weight.change !== null ? ` (${formatChange(stats.weight.change, stats.weight.unit, stats.weight.direction)})` : " (N/A - no comparison data)"}
-Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit}${stats.bodyFat.change !== null ? ` (${formatChange(stats.bodyFat.change, stats.bodyFat.unit, stats.bodyFat.direction)})` : " (N/A - no comparison data)"}
-Exercise: ${stats.exercise.current}${stats.exercise.unit}/day${stats.exercise.change !== null ? ` (${formatChange(stats.exercise.change, stats.exercise.unit, stats.exercise.direction)})` : " (N/A - no comparison data)"}
-Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit}${stats.skinFold.change !== null ? ` (${formatChange(stats.skinFold.change, stats.skinFold.unit, stats.skinFold.direction)})` : " (N/A - no comparison data)"}
-Daily Calories: ${stats.calories.current}${stats.calories.unit}${stats.calories.change !== null ? ` (${formatChange(stats.calories.change, stats.calories.unit, stats.calories.direction)})` : " (N/A - no comparison data)"}${comparisonContext}
+CURRENT METRICS:
+Weight: ${stats.weight.current} ${stats.weight.unit}
+Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit}
+Exercise: ${stats.exercise.current} ${stats.exercise.unit}/day
+Skin Fold: ${stats.skinFold.current} ${stats.skinFold.unit}
+Daily Calories: ${stats.calories.current} ${stats.calories.unit}
 
 MY TARGETS:
 ${goals.goal_weight ? `Weight: ${goals.goal_weight} lbs` : ""}
