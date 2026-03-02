@@ -88,9 +88,9 @@ Deno.serve(async (req) => {
       );
     }
 
+    const viewFilter = url.searchParams.get("view"); // "front" or "side" or null (both)
     const startIdx = batch;
     const endIdx = batch + 1;
-
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
@@ -107,15 +107,17 @@ Deno.serve(async (req) => {
       const weekLabel = `Week ${i + 1} of 12`;
 
       const makePrompt = (view: string) => {
-        const viewDesc = view === "front" ? "front-facing view" : "side profile view";
-        return `Create a clean, simple body diagram illustration of an adult male, ${viewDesc}. The figure should have a ${bodyDesc}. Style: flat medical/fitness body outline on a plain white background, like a body composition chart. No face details, just a clean silhouette with subtle body contour shading. The figure should be standing straight. Add a small label at the bottom: "${weekLabel} - ${week.weight} lbs / ${week.bf}% BF". Clean, professional, minimal.`;
+        const viewDesc = view === "front" ? "front-facing view, facing the viewer" : "side profile view, facing right";
+        return `Create a clean, simple body diagram illustration of an adult male, ${viewDesc}. The figure should have a ${bodyDesc}. Style: black and white / grayscale flat medical/fitness body outline on a plain white background, like a body composition chart. No color tints. No face details, just a clean full-body silhouette with subtle body contour shading. The figure should be standing straight, showing the full body from head to toe. Add a small label at the bottom: "${weekLabel} - ${week.weight} lbs / ${week.bf}% BF". Clean, professional, minimal.`;
       };
 
-      // Generate front and side in parallel
-      console.log(`Generating photos for ${week.date}...`);
+      // Generate views based on filter
+      const doFront = !viewFilter || viewFilter === "front";
+      const doSide = !viewFilter || viewFilter === "side";
+      console.log(`Generating photos for ${week.date} (view: ${viewFilter || "both"})...`);
       const [frontBytes, sideBytes] = await Promise.all([
-        generateImage(makePrompt("front"), lovableApiKey),
-        generateImage(makePrompt("side"), lovableApiKey),
+        doFront ? generateImage(makePrompt("front"), lovableApiKey) : Promise.resolve(null),
+        doSide ? generateImage(makePrompt("side"), lovableApiKey) : Promise.resolve(null),
       ]);
 
       for (const [view, imageBytes] of [["front", frontBytes], ["side", sideBytes]] as const) {
