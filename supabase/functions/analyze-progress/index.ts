@@ -171,6 +171,7 @@ COACHING STYLE:
 
 RULES:
 - If your response includes numbers such as percentage changes, round to 2 decimal places, e.g., 3.03% instead of 3.002700001%
+- For exercise minutes and daily calories, always round to whole numbers (no decimals). e.g., "2086 cal" not "2085.75 cal", "45 min" not "44.8 min"
 - Don't return text that calls explicit attention to your data validation or sanity checks, unless there is a problem. e.g.,never return "It looks like all your data is within reasonable ranges."
 - Always use "week ending" (not "week of") when referencing specific dates, since user data represents the week ending on a particular Sunday
 
