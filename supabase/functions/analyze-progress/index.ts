@@ -225,6 +225,19 @@ First validate all metrics are within reasonable ranges. If any data appears que
     if (!response.ok) {
       const errorText = await response.text();
       console.error("AI Gateway error response:", errorText);
+      
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "You've run out of AI credits. Please add credits to your workspace under Settings → Workspace → Usage." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Too many requests. Please wait a moment and try again." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
       throw new Error(`AI Gateway error: ${response.status} - ${errorText}`);
     }
 
