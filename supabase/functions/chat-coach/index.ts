@@ -7,11 +7,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 // @ts-ignore - Deno global is available in Deno runtime
-const claudeApiKey = Deno.env.get("CLAUDE_API_KEY");
+const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
 // Model and prompt version tracking
-const MODEL = "claude-haiku-4-5-20251001";
-const PROMPT_VERSION = "v1.7";
+const MODEL = "google/gemini-2.5-flash";
+const PROMPT_VERSION = "v1.5";
 console.log(`[chat-coach] Loaded version ${PROMPT_VERSION}`);
 
 // Input validation schema
@@ -55,14 +55,18 @@ const chatRequestSchema = z.object({
       }),
     )
     .optional(),
-  history: z.array(z.object({
-    week_end_date: z.string(),
-    weight: z.number().nullable().optional(),
-    body_fat_percentage: z.number().nullable().optional(),
-    skin_fold_mm: z.number().nullable().optional(),
-    avg_daily_calories: z.number().nullable().optional(),
-    avg_exercise_min_per_day: z.number().nullable().optional(),
-  })).optional(),
+  history: z
+    .array(
+      z.object({
+        week_end_date: z.string(),
+        weight: z.number().nullable().optional(),
+        body_fat_percentage: z.number().nullable().optional(),
+        skin_fold_mm: z.number().nullable().optional(),
+        avg_daily_calories: z.number().nullable().optional(),
+        avg_exercise_min_per_day: z.number().nullable().optional(),
+      }),
+    )
+    .optional(),
 });
 
 const corsHeaders = {
@@ -98,11 +102,11 @@ serve(async (req) => {
     const { message, stats, goals, affirmations, conversationHistory, history } = validationResult.data;
     console.log("Chat coach called with validated message");
 
-    if (!claudeApiKey) {
-      console.error("CLAUDE_API_KEY is not configured");
+    if (!lovableApiKey) {
+      console.error("LOVABLE_API_KEY is not configured");
       return new Response(
         JSON.stringify({
-          error: "AI API key is not configured. Please contact support.",
+          error: "AI gateway key is not configured. Please contact support.",
         }),
         {
           status: 500,
@@ -257,29 +261,27 @@ ${
   history && history.length > 0
     ? `FULL WEEKLY HISTORY (most recent first):
 Week Ending | Weight | Body Fat | Skin Fold | Calories | Exercise
-${history.map((h) => `${h.week_end_date} | ${h.weight ?? 'N/A'} lbs | ${h.body_fat_percentage ?? 'N/A'}% | ${h.skin_fold_mm ?? 'N/A'} mm | ${h.avg_daily_calories ?? 'N/A'} cal | ${h.avg_exercise_min_per_day ?? 'N/A'} min`).join("\n")}`
+${history.map((h) => `${h.week_end_date} | ${h.weight ?? "N/A"} lbs | ${h.body_fat_percentage ?? "N/A"}% | ${h.skin_fold_mm ?? "N/A"} mm | ${h.avg_daily_calories ?? "N/A"} cal | ${h.avg_exercise_min_per_day ?? "N/A"} min`).join("\n")}`
     : "No historical data available yet."
 }`;
 
-    const userMessages = [
+    const messages = [
+      { role: "system", content: systemPrompt },
       ...(conversationHistory || []),
       { role: "user", content: message },
     ];
 
-    console.log("Calling Anthropic API for chat...");
+    console.log("Calling Lovable AI Gateway for chat...");
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        "x-api-key": claudeApiKey,
-        "anthropic-version": "2023-06-01",
+        Authorization: `Bearer ${lovableApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: userMessages,
+        messages,
       }),
     });
 
@@ -287,15 +289,21 @@ ${history.map((h) => `${h.week_end_date} | ${h.weight ?? 'N/A'} lbs | ${h.body_f
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Anthropic API error response:", errorText);
+      console.error("AI Gateway error response:", errorText);
 
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "The AI coach is temporarily unavailable. Please try again later." }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "The AI coach is busy right now. Please wait a moment and try again." }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      throw new Error(`Anthropic API error: ${response.status} - ${errorText}`);
+      throw new Error(`AI Gateway error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
@@ -304,20 +312,20 @@ ${history.map((h) => `${h.week_end_date} | ${h.weight ?? 'N/A'} lbs | ${h.body_f
       console.log("Token usage:", data.usage);
     }
 
-    const reply = data.content?.[0]?.text;
+    const reply = data.choices?.[0]?.message?.content;
 
     if (!reply) {
       console.error("No reply content in response");
       throw new Error("Failed to generate reply");
     }
 
-    // Extract usage data from Anthropic response
+    // Extract usage data from API response
     const usage = data.usage || null;
     const tokenUsage = usage
       ? {
-          tokens_input: usage.input_tokens || null,
-          tokens_output: usage.output_tokens || null,
-          tokens_total: (usage.input_tokens || 0) + (usage.output_tokens || 0) || null,
+          tokens_input: usage.prompt_tokens || null,
+          tokens_output: usage.completion_tokens || null,
+          tokens_total: usage.total_tokens || null,
         }
       : {
           tokens_input: null,
