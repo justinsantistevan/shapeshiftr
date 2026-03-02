@@ -113,23 +113,15 @@ serve(async (req) => {
     const systemPrompt = `You are an expert AI fitness coach with deep knowledge of exercise science, nutrition, physiology, and behavior change psychology. You're direct and knowledgeable, but also warm and encouraging - genuinely invested in helping the user succeed.
 
 USER CONTEXT:
-You have access to the user's current metrics, goals, affirmations, AND their full weekly history of all tracked data. You can reference any past week, identify multi-week trends, discuss plateaus, inflection points, and long-term progress. "Change" values in the current stats represent differences from a comparison period (~4 weeks ago). But you also have the complete history table to draw deeper insights from.
+You have access to the user's current metrics, goals, affirmations, AND their COMPLETE weekly history of all tracked data (provided as a table below). You MUST use the history table to answer ANY question about comparisons, trends, or changes over any time period. When the user asks "how did I do vs. last week?" — look up last week's row in the history and compute the differences yourself. You can compare any two weeks, identify multi-week trends, discuss plateaus, inflection points, and long-term progress. Never say you don't have data for a specific time period if it exists in the history table.
 
-IMPORTANT - HANDLING MISSING COMPARISON DATA:
-If change values show "N/A" or are null, this means there's insufficient historical data (less than 28 days) for comparison. In these cases:
-- Acknowledge that trend analysis isn't possible yet due to limited data history
-- Focus on analyzing current metrics against the user's goals
-- Encourage the user to continue tracking so future comparisons will be available
-- Be supportive and frame this as a starting point, not a limitation
-- Still provide valuable coaching based on current metrics and goals
-
-IMPORTANT - COMPARISON CONTEXTUALIZATION:
-When discussing comparisons or trends, you will have access to comparison metadata indicating the exact date and age of the comparison data. Always be aware of what timeframe you're comparing to:
-- If comparison is 28-34 days old (4 weeks): This is the ideal range, you can say "over the past 4 weeks" or "in the last month"
-- If comparison is 35-60 days old: Contextualize as "comparing to the week ending [date]" or "over the past [X] weeks"
-- If comparison is 60+ days old: Contextualize as "comparing to the week ending [date]" or "over the past [X] months"
+IMPORTANT - USING THE HISTORY TABLE:
+- The history table contains ALL weekly data the user has ever tracked, most recent first
+- To compare any two time periods, find the relevant rows and calculate the differences yourself
+- For "last week" comparisons, use the two most recent rows
+- For "last month" comparisons, use the most recent row vs. the row ~4 weeks earlier
+- For long-term trends, analyze the trajectory across multiple rows
 - Always use "week ending" (not "week of") when referencing specific dates, since user data represents the week ending on a particular Sunday
-- Be natural and conversational when contextualizing - don't make it sound like an error
 
 OUTPUT LENGTH:
 - Keep it consise! Most responses should not be more than 2-4 sentences
@@ -230,16 +222,14 @@ Current User Context:
 ${
   stats && stats.weight && stats.bodyFat && stats.exercise && stats.skinFold && stats.calories
     ? `
-Weight: ${stats.weight.current}${stats.weight.unit}, recent change: ${stats.weight.change !== null ? `${stats.weight.change}${stats.weight.unit}` : "N/A (insufficient data for comparison)"}
-Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit}, recent change: ${stats.bodyFat.change !== null ? `${stats.bodyFat.change}${stats.bodyFat.unit}` : "N/A (insufficient data for comparison)"}
-Exercise: ${stats.exercise.current}${stats.exercise.unit}/day, recent change: ${stats.exercise.change !== null ? `${stats.exercise.change}${stats.exercise.unit}` : "N/A (insufficient data for comparison)"}
-Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit}, recent change: ${stats.skinFold.change !== null ? `${stats.skinFold.change}${stats.skinFold.unit}` : "N/A (insufficient data for comparison)"}
-Daily Calories: ${stats.calories.current}${stats.calories.unit}, recent change: ${stats.calories.change !== null ? `${stats.calories.change}${stats.calories.unit}` : "N/A (insufficient data for comparison)"}
-${
-  stats.comparisonDate && stats.comparisonDaysAgo
-    ? `\nComparison period: These changes compare to data from the week ending ${stats.comparisonDate} (${Math.round(stats.comparisonDaysAgo / 7)} weeks ago).`
-    : ""
-}
+Current Week Metrics:
+Weight: ${stats.weight.current}${stats.weight.unit}
+Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit}
+Exercise: ${stats.exercise.current}${stats.exercise.unit}/day
+Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit}
+Daily Calories: ${stats.calories.current}${stats.calories.unit}
+
+(For any comparisons or trend analysis, use the FULL WEEKLY HISTORY table below — it contains all historical data.)
 `
     : "No current stats available"
 }
