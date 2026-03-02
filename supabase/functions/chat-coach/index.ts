@@ -11,14 +11,14 @@ const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
 // Model and prompt version tracking
 const MODEL = "google/gemini-2.5-flash";
-const PROMPT_VERSION = "v1.5";
+const PROMPT_VERSION = "v1.6";
 
 // Input validation schema
 const metricSchema = z
   .object({
     current: z.number(),
-    change: z.number(),
-    direction: z.string(),
+    change: z.number().optional(),
+    direction: z.string().optional(),
     unit: z.string(),
   })
   .optional();
