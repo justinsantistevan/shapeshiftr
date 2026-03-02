@@ -187,7 +187,7 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
   };
 
   return (
-    <Card className="fitness-card col-span-2 h-full min-h-[400px] md:min-h-0 flex flex-col rounded-xl">
+    <Card className="fitness-card col-span-2 h-full min-h-[520px] md:min-h-0 flex flex-col rounded-xl">
       <CardHeader className="flex-shrink-0">
         <div className="flex items-center justify-between">
           <CardTitle className="text-primary leading-normal">
@@ -282,7 +282,7 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
           </div>
         )}
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col min-h-0">
+      <CardContent className="flex-1 flex flex-col min-h-0 pt-2 md:pt-6">
         {isLoadingData ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -358,7 +358,7 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
             </div>
           </div>
         ) : (
-          <div className="flex-1 min-h-0 chart-container p-4 rounded-lg">
+          <div className="flex-1 min-h-[250px] chart-container p-1 md:p-4 rounded-lg">
             <ResponsiveContainer width="100%" height="100%">
             <BarChart data={currentData}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
