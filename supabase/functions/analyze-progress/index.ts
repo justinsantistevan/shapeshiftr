@@ -56,7 +56,7 @@ serve(async (req) => {
 
   try {
     const rawData = await req.json();
-    console.log("Received analysis request");
+    console.log("Received analysis request - PROMPT v1.7 (no pre-computed changes)");
 
     // Validate input
     const validationResult = analyzeRequestSchema.safeParse(rawData);
