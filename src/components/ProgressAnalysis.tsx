@@ -52,7 +52,7 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
       if (!user) return [];
       const { data, error } = await supabase
         .from('weekly_fitness_entries')
-        .select('week_end_date, weight_lbs, body_fat_percentage, skin_fold_mm, avg_daily_calories, avg_exercise_min_per_day')
+        .select('week_end_date, weight, body_fat_percentage, skin_fold_mm, avg_daily_calories, avg_exercise_min_per_day')
         .eq('user_id', user.id)
         .order('week_end_date', { ascending: false });
       if (error) { console.error('Error fetching history:', error); return []; }

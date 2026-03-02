@@ -36,7 +36,7 @@ const analyzeRequestSchema = z.object({
   }),
   history: z.array(z.object({
     week_end_date: z.string(),
-    weight_lbs: z.number().nullable().optional(),
+    weight: z.number().nullable().optional(),
     body_fat_percentage: z.number().nullable().optional(),
     skin_fold_mm: z.number().nullable().optional(),
     avg_daily_calories: z.number().nullable().optional(),
@@ -188,7 +188,7 @@ ${goals.goal_avg_exercise_min_per_day ? `Exercise: ${goals.goal_avg_exercise_min
 ${history && history.length > 0
   ? `FULL WEEKLY HISTORY (most recent first):
 Week Ending | Weight | Body Fat | Skin Fold | Calories | Exercise
-${history.map((h) => `${h.week_end_date} | ${h.weight_lbs ?? 'N/A'} lbs | ${h.body_fat_percentage ?? 'N/A'}% | ${h.skin_fold_mm ?? 'N/A'} mm | ${h.avg_daily_calories ?? 'N/A'} cal | ${h.avg_exercise_min_per_day ?? 'N/A'} min`).join("\n")}
+${history.map((h) => `${h.week_end_date} | ${h.weight ?? 'N/A'} lbs | ${h.body_fat_percentage ?? 'N/A'}% | ${h.skin_fold_mm ?? 'N/A'} mm | ${h.avg_daily_calories ?? 'N/A'} cal | ${h.avg_exercise_min_per_day ?? 'N/A'} min`).join("\n")}
 
 Use this history to assess the TREND over the past ~4 weeks. Frame this week's data within that month-long trajectory. Do not overemphasize any single week-to-week change.`
   : "No historical data available yet — focus on current metrics vs. goals."}
