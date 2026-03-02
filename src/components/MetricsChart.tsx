@@ -307,8 +307,8 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
           </div>
         ) : viewMode === 'table' ? (
           <div className="flex-1 min-h-0 relative">
-            <div className="absolute inset-0">
-              <ScrollArea className="h-full w-full">
+          <div className="absolute inset-0 overflow-auto">
+              <div className="min-w-[700px]">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -354,7 +354,7 @@ export const MetricsChart = forwardRef<MetricsChartRef, MetricsChartProps>((prop
                     ))}
                   </TableBody>
                 </Table>
-              </ScrollArea>
+              </div>
             </div>
           </div>
         ) : (
