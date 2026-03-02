@@ -46,13 +46,28 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
     loadAffirmations();
   }, []);
 
+  const fetchHistory = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('weekly_fitness_entries')
+        .select('week_end_date, weight_lbs, body_fat_percentage, skin_fold_mm, avg_daily_calories, avg_exercise_min_per_day')
+        .eq('user_id', user.id)
+        .order('week_end_date', { ascending: false });
+      if (error) { console.error('Error fetching history:', error); return []; }
+      return data || [];
+    } catch (e) { console.error('Exception fetching history:', e); return []; }
+  };
+
   const fetchAnalysis = async () => {
     if (!stats) return;
 
     setIsLoading(true);
     try {
+      const history = await fetchHistory();
       const { data, error } = await supabase.functions.invoke('analyze-progress', {
-        body: { stats, goals }
+        body: { stats, goals, history }
       });
 
       if (error) throw error;
@@ -203,13 +218,15 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
     const startTime = Date.now();
 
     try {
+      const history = await fetchHistory();
       const { data, error } = await supabase.functions.invoke('chat-coach', {
         body: { 
           message: userMsgContent,
           stats,
           goals,
           affirmations,
-          conversationHistory: chatMessages
+          conversationHistory: chatMessages,
+          history
         }
       });
 
