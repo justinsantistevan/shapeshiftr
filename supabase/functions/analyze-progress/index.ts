@@ -7,7 +7,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 // @ts-ignore - Deno global is available in Deno runtime
-const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+const claudeApiKey = Deno.env.get("CLAUDE_API_KEY");
+const MODEL = "claude-haiku-4-5-20251001";
 
 // Input validation schema
 const metricSchema = z.object({
@@ -79,11 +80,11 @@ serve(async (req) => {
     console.log("User goals:", goals);
     console.log("History entries:", history?.length ?? 0);
 
-    if (!lovableApiKey) {
-      console.error("LOVABLE_API_KEY is not configured");
+    if (!claudeApiKey) {
+      console.error("CLAUDE_API_KEY is not configured");
       return new Response(
         JSON.stringify({
-          error: "AI gateway key is not configured. Please contact support.",
+          error: "AI API key is not configured. Please contact support.",
         }),
         {
           status: 500,
@@ -203,48 +204,44 @@ Use this history to assess the TREND over the past ~4 weeks as supporting eviden
 
 First validate all metrics are within reasonable ranges. If any data appears questionable, flag it for verification. If all data looks good, provide your coaching assessment (3-4 sentences). Lead with goal proximity and trajectory, supported by month-long trend context. Treat small metric fluctuations within noise thresholds as normal variability. Vary your structure and focus from previous analyses.`;
 
-    console.log("Calling Lovable AI Gateway...");
+    console.log("Calling Anthropic API...");
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
+        "x-api-key": claudeApiKey,
+        "anthropic-version": "2023-06-01",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: MODEL,
+        max_tokens: 1024,
+        system: systemPrompt,
         messages: [
-          { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
       }),
     });
 
-    console.log("AI Gateway response status:", response.status);
+    console.log("Anthropic API response status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("AI Gateway error response:", errorText);
+      console.error("Anthropic API error response:", errorText);
       
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "The AI analysis is temporarily unavailable. Please try again later." }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "The AI analysis is busy right now. Please wait a moment and try again." }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      throw new Error(`AI Gateway error: ${response.status} - ${errorText}`);
+      throw new Error(`Anthropic API error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    console.log("AI Gateway response:", JSON.stringify(data, null, 2));
+    console.log("Anthropic API response received");
 
-    const analysis = data.choices?.[0]?.message?.content;
+    const analysis = data.content?.[0]?.text;
 
     if (!analysis) {
       console.error("No analysis content in response");
