@@ -56,7 +56,7 @@ const chatRequestSchema = z.object({
     .optional(),
   history: z.array(z.object({
     week_end_date: z.string(),
-    weight_lbs: z.number().nullable().optional(),
+    weight: z.number().nullable().optional(),
     body_fat_percentage: z.number().nullable().optional(),
     skin_fold_mm: z.number().nullable().optional(),
     avg_daily_calories: z.number().nullable().optional(),
@@ -266,7 +266,7 @@ ${
   history && history.length > 0
     ? `FULL WEEKLY HISTORY (most recent first):
 Week Ending | Weight | Body Fat | Skin Fold | Calories | Exercise
-${history.map((h) => `${h.week_end_date} | ${h.weight_lbs ?? 'N/A'} lbs | ${h.body_fat_percentage ?? 'N/A'}% | ${h.skin_fold_mm ?? 'N/A'} mm | ${h.avg_daily_calories ?? 'N/A'} cal | ${h.avg_exercise_min_per_day ?? 'N/A'} min`).join("\n")}`
+${history.map((h) => `${h.week_end_date} | ${h.weight ?? 'N/A'} lbs | ${h.body_fat_percentage ?? 'N/A'}% | ${h.skin_fold_mm ?? 'N/A'} mm | ${h.avg_daily_calories ?? 'N/A'} cal | ${h.avg_exercise_min_per_day ?? 'N/A'} min`).join("\n")}`
     : "No historical data available yet."
 }`;
 
