@@ -286,6 +286,19 @@ ${history.map((h) => `${h.week_end_date} | ${h.weight ?? 'N/A'} lbs | ${h.body_f
     if (!response.ok) {
       const errorText = await response.text();
       console.error("AI Gateway error response:", errorText);
+
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "The AI coach is temporarily unavailable. Please try again later." }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "The AI coach is busy right now. Please wait a moment and try again." }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
       throw new Error(`AI Gateway error: ${response.status} - ${errorText}`);
     }
 
