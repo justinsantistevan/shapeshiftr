@@ -1,47 +1,62 @@
 
 
-## Pass Full History to AI Coach and Progress Analysis
+## Fix: Remove Pre-computed Change Values from Both Edge Functions
 
-Currently, both AI features only receive the user's current metrics and a single comparison point (~4 weeks ago). This update sends all historical weekly entries to both edge functions so the AI can discuss long-term trends, week-over-week changes, and any specific past data.
+### Root Cause
+
+The `analyze-progress` edge function still injects pre-computed 4-week `change`, `direction`, and `comparisonDate` values directly into the AI prompt (lines 164-179). The AI sees explicit numbers like "(0.5lbs down)" and uses those instead of computing comparisons from the history table. The `chat-coach` function was partially fixed but the `stats` schema still accepts `change`/`direction` fields.
+
+Both the Progress Analysis output AND the AI Coach are anchoring on these pre-computed values because the AI treats them as authoritative.
 
 ### Changes
 
-**1. `src/components/ProgressAnalysis.tsx`** -- Fetch all historical entries and pass to both function calls
+**1. `supabase/functions/analyze-progress/index.ts`** -- Remove change values from prompt, show only current metrics
 
-- Before calling `analyze-progress` or `chat-coach`, query `weekly_fitness_entries` for the current user, selecting all metric columns + `week_end_date`, ordered by date descending.
-- Add the resulting array as a `history` field in the request body for both the `analyze-progress` call (line 55) and the `chat-coach` call (line 207).
+- Remove the `formatChange` helper function (lines 156-162)
+- Remove the `comparisonContext` variable (lines 164-166) and `hasComparisonData` check (lines 168-170)
+- Rewrite the user prompt (lines 172-179) to show ONLY current metric values (no change/direction parentheticals)
+- The AI should derive ALL comparisons from the FULL WEEKLY HISTORY table, which is already being injected
+- Keep the `metricSchema` accepting `change`/`direction` in Zod (to avoid breaking validation of the incoming `stats` object from the client), but simply don't use those fields in the prompt
 
-**2. `supabase/functions/analyze-progress/index.ts`** -- Accept history, update prompt for month-focused trend analysis
+**2. `supabase/functions/chat-coach/index.ts`** -- Remove `change`/`direction` from Zod metricSchema
 
-- Add `history` to the Zod schema as an optional array of objects with `week_end_date`, `weight`, `body_fat_percentage`, `skin_fold_mm`, `avg_daily_calories`, `avg_exercise_min_per_day` (all nullable).
-- Inject the history into the user prompt as a formatted table under a "FULL WEEKLY HISTORY" heading.
-- **Update the prompt instructions** to shift from a discrete 4-week comparison to a continuous month-long trend assessment:
-  - The AI should analyze progress over the past ~4 weeks as a trend (are metrics trending in the right direction? plateauing? fluctuating?)
-  - This week's data should be contextualized within that month-long trajectory, not just compared to a single snapshot from 4 weeks ago
-  - The AI should still focus on the past month as the primary analysis window, but can reference longer-term trends when relevant
-  - It should NOT overemphasize week-to-week changes; instead assess the overall direction and momentum over the month
-  - Update the DATA CONTEXT section to explain it now has full history and should use it for trend analysis
+- Simplify `metricSchema` (lines 17-24) to only require `current` and `unit` (make `change` and `direction` optional so the incoming data doesn't fail validation)
+- Confirm the system prompt only shows current values (already done)
+- Bump `PROMPT_VERSION` to `v1.6` to force fresh deployment
 
-**3. `supabase/functions/chat-coach/index.ts`** -- Accept history, inject into system prompt
+**3. `supabase/functions/analyze-progress/index.ts`** -- Also strip `comparisonDate`/`comparisonDaysAgo` from schema usage
 
-- Add `history` to the Zod schema (same shape as above).
-- Inject the full history table into the system prompt's "Current User Context" section.
-- Add a note in the USER CONTEXT section that the AI has access to full weekly history and can reference any past week, identify multi-week trends, discuss plateaus, etc.
-- Bump `PROMPT_VERSION` from `v1.3` to `v1.4`.
+- Make `comparisonDate` and `comparisonDaysAgo` optional in the schema (already optional) but ensure they are not used in the prompt at all
+
+### What the updated analyze-progress prompt will look like
+
+```text
+CURRENT METRICS:
+Weight: 156 lbs
+Body Fat: 14.5%
+Exercise: 58 min/day
+Skin Fold: 21 mm
+Daily Calories: 2110 cal
+
+MY TARGETS:
+...
+
+FULL WEEKLY HISTORY (most recent first):
+Week Ending | Weight | Body Fat | Skin Fold | Calories | Exercise
+2026-03-01 | 156 lbs | 14.5% | 21 mm | 2110 cal | 58 min
+2026-02-22 | 156.5 lbs | 13.8% | 21 mm | 2147 cal | 69 min
+...
+
+Use this history to assess the TREND over the past ~4 weeks...
+```
+
+No pre-computed change values anywhere. The AI must look at the history table rows and calculate differences itself.
 
 ### Technical Details
 
-| File | Key Changes |
-|------|------------|
-| `src/components/ProgressAnalysis.tsx` | Add Supabase query for all `weekly_fitness_entries`; pass `history` array to both `analyze-progress` and `chat-coach` invoke calls |
-| `supabase/functions/analyze-progress/index.ts` | Add `history` to Zod schema; inject as formatted table in user prompt; rewrite prompt to emphasize month-long trend analysis over discrete comparison |
-| `supabase/functions/chat-coach/index.ts` | Add `history` to Zod schema; inject as formatted table in system prompt; bump version to v1.4 |
+| File | Changes |
+|------|---------|
+| `supabase/functions/analyze-progress/index.ts` | Remove `formatChange`, `comparisonContext`, `hasComparisonData`. Rewrite user prompt to show only current values. Keep Zod schema accepting `change`/`direction` (unused). |
+| `supabase/functions/chat-coach/index.ts` | Make `change`/`direction` optional in `metricSchema`. Bump `PROMPT_VERSION` to `v1.6`. |
 
-### Prompt Philosophy Change (Progress Analysis only)
-
-The Progress Analysis prompt will shift from "compare current vs. 4 weeks ago" to "assess the trend over the past month." Specifically:
-- Use the past 4 weeks of data points to identify direction and momentum
-- Frame this week's metrics within that trajectory (e.g., "Your weight has been steadily declining over the past month, dropping from 168 to 163 lbs")
-- Still keep the analysis focused on the past month (not all-time history) unless a longer pattern is especially relevant
-- Avoid overweighting any single week-to-week change
-
+After these changes, you will need to **publish the app** to deploy the updated edge functions.
