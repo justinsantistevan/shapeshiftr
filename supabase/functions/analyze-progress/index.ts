@@ -7,8 +7,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 // @ts-ignore - Deno global is available in Deno runtime
-const claudeApiKey = Deno.env.get("CLAUDE_API_KEY");
-const MODEL = "claude-haiku-4-5-20251001";
+const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
 // Input validation schema
 const metricSchema = z.object({
@@ -35,14 +34,18 @@ const analyzeRequestSchema = z.object({
     goal_avg_daily_calories: z.number().nullable().optional(),
     goal_avg_exercise_min_per_day: z.number().nullable().optional(),
   }),
-  history: z.array(z.object({
-    week_end_date: z.string(),
-    weight: z.number().nullable().optional(),
-    body_fat_percentage: z.number().nullable().optional(),
-    skin_fold_mm: z.number().nullable().optional(),
-    avg_daily_calories: z.number().nullable().optional(),
-    avg_exercise_min_per_day: z.number().nullable().optional(),
-  })).optional(),
+  history: z
+    .array(
+      z.object({
+        week_end_date: z.string(),
+        weight: z.number().nullable().optional(),
+        body_fat_percentage: z.number().nullable().optional(),
+        skin_fold_mm: z.number().nullable().optional(),
+        avg_daily_calories: z.number().nullable().optional(),
+        avg_exercise_min_per_day: z.number().nullable().optional(),
+      }),
+    )
+    .optional(),
 });
 
 const corsHeaders = {
@@ -57,7 +60,7 @@ serve(async (req) => {
 
   try {
     const rawData = await req.json();
-    console.log("Received analysis request - PROMPT v1.8 (goal-focused with trend context)");
+    console.log("Received analysis request - PROMPT v1.5 (goal-focused with trend context)");
 
     // Validate input
     const validationResult = analyzeRequestSchema.safeParse(rawData);
@@ -80,11 +83,11 @@ serve(async (req) => {
     console.log("User goals:", goals);
     console.log("History entries:", history?.length ?? 0);
 
-    if (!claudeApiKey) {
-      console.error("CLAUDE_API_KEY is not configured");
+    if (!lovableApiKey) {
+      console.error("LOVABLE_API_KEY is not configured");
       return new Response(
         JSON.stringify({
-          error: "AI API key is not configured. Please contact support.",
+          error: "AI gateway key is not configured. Please contact support.",
         }),
         {
           status: 500,
@@ -194,54 +197,60 @@ ${goals.goal_skin_fold_mm ? `Skin Fold: ${goals.goal_skin_fold_mm} mm (current g
 ${goals.goal_avg_daily_calories ? `Daily Calories: ${goals.goal_avg_daily_calories} cal (current gap: ${Math.abs(stats.calories.current - goals.goal_avg_daily_calories)} cal ${stats.calories.current > goals.goal_avg_daily_calories ? "above" : "below"} target)` : "Daily Calories: no goal set"}
 ${goals.goal_avg_exercise_min_per_day ? `Exercise: ${goals.goal_avg_exercise_min_per_day} min/day (current gap: ${Math.abs(stats.exercise.current - goals.goal_avg_exercise_min_per_day)} min ${stats.exercise.current < goals.goal_avg_exercise_min_per_day ? "below" : "above"} target)` : "Exercise: no goal set"}
 
-${history && history.length > 0
-  ? `FULL WEEKLY HISTORY (most recent first, use to assess month-long trends as supporting context):
+${
+  history && history.length > 0
+    ? `FULL WEEKLY HISTORY (most recent first, use to assess month-long trends as supporting context):
 Week Ending | Weight | Body Fat | Skin Fold | Calories | Exercise
-${history.map((h) => `${h.week_end_date} | ${h.weight ?? 'N/A'} lbs | ${h.body_fat_percentage ?? 'N/A'}% | ${h.skin_fold_mm ?? 'N/A'} mm | ${h.avg_daily_calories ?? 'N/A'} cal | ${h.avg_exercise_min_per_day ?? 'N/A'} min`).join("\n")}
+${history.map((h) => `${h.week_end_date} | ${h.weight ?? "N/A"} lbs | ${h.body_fat_percentage ?? "N/A"}% | ${h.skin_fold_mm ?? "N/A"} mm | ${h.avg_daily_calories ?? "N/A"} cal | ${h.avg_exercise_min_per_day ?? "N/A"} min`).join("\n")}
 
 Use this history to assess the TREND over the past ~4 weeks as supporting evidence for goal trajectory. Do not overemphasize any single week-to-week change. Remember: weight changes under 1.5 lbs, body fat under 0.8%, and skin fold under 2mm are measurement noise.`
-  : "No historical data available yet — focus on current metrics vs. goals."}
+    : "No historical data available yet — focus on current metrics vs. goals."
+}
 
 First validate all metrics are within reasonable ranges. If any data appears questionable, flag it for verification. If all data looks good, provide your coaching assessment (3-4 sentences). Lead with goal proximity and trajectory, supported by month-long trend context. Treat small metric fluctuations within noise thresholds as normal variability. Vary your structure and focus from previous analyses.`;
 
-    console.log("Calling Anthropic API...");
+    console.log("Calling Lovable AI Gateway...");
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        "x-api-key": claudeApiKey,
-        "anthropic-version": "2023-06-01",
+        Authorization: `Bearer ${lovableApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 1024,
-        system: systemPrompt,
+        model: "google/gemini-2.5-flash",
         messages: [
+          { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
       }),
     });
 
-    console.log("Anthropic API response status:", response.status);
+    console.log("AI Gateway response status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Anthropic API error response:", errorText);
-      
+      console.error("AI Gateway error response:", errorText);
+
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "The AI analysis is temporarily unavailable. Please try again later." }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: "The AI analysis is busy right now. Please wait a moment and try again." }),
           { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      throw new Error(`Anthropic API error: ${response.status} - ${errorText}`);
+      throw new Error(`AI Gateway error: ${response.status} - ${errorText}`);
     }
 
     const data = await response.json();
-    console.log("Anthropic API response received");
+    console.log("AI Gateway response:", JSON.stringify(data, null, 2));
 
-    const analysis = data.content?.[0]?.text;
+    const analysis = data.choices?.[0]?.message?.content;
 
     if (!analysis) {
       console.error("No analysis content in response");
