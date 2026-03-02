@@ -11,7 +11,7 @@ const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
 // Model and prompt version tracking
 const MODEL = "google/gemini-2.5-flash";
-const PROMPT_VERSION = "v1.3";
+const PROMPT_VERSION = "v1.4";
 
 // Input validation schema
 const metricSchema = z
@@ -54,6 +54,14 @@ const chatRequestSchema = z.object({
       }),
     )
     .optional(),
+  history: z.array(z.object({
+    week_end_date: z.string(),
+    weight_lbs: z.number().nullable().optional(),
+    body_fat_percentage: z.number().nullable().optional(),
+    skin_fold_mm: z.number().nullable().optional(),
+    avg_daily_calories: z.number().nullable().optional(),
+    avg_exercise_min_per_day: z.number().nullable().optional(),
+  })).optional(),
 });
 
 const corsHeaders = {
@@ -86,7 +94,7 @@ serve(async (req) => {
       );
     }
 
-    const { message, stats, goals, affirmations, conversationHistory } = validationResult.data;
+    const { message, stats, goals, affirmations, conversationHistory, history } = validationResult.data;
     console.log("Chat coach called with validated message");
 
     if (!lovableApiKey) {
@@ -105,7 +113,7 @@ serve(async (req) => {
     const systemPrompt = `You are an expert AI fitness coach with deep knowledge of exercise science, nutrition, physiology, and behavior change psychology. You're direct and knowledgeable, but also warm and encouraging - genuinely invested in helping the user succeed.
 
 USER CONTEXT:
-You have access to the user's current metrics, goals, and affirmations. "Change" values represent differences from a comparison period. The ideal comparison is 4 weeks (28-34 days) ago, but if no data exists in that range, the comparison uses the most recent available data that is at least 28 days old (e.g., weight 163 lbs with -3 lbs change = 166 lbs at the comparison point). Reference these naturally when relevant to personalize advice.
+You have access to the user's current metrics, goals, affirmations, AND their full weekly history of all tracked data. You can reference any past week, identify multi-week trends, discuss plateaus, inflection points, and long-term progress. "Change" values in the current stats represent differences from a comparison period (~4 weeks ago). But you also have the complete history table to draw deeper insights from.
 
 IMPORTANT - HANDLING MISSING COMPARISON DATA:
 If change values show "N/A" or are null, this means there's insufficient historical data (less than 28 days) for comparison. In these cases:
@@ -252,6 +260,14 @@ ${
     ? `User's Personal Affirmations:
 ${affirmations.map((a: { text: string }) => `- ${a.text}`).join("\n")}`
     : ""
+}
+
+${
+  history && history.length > 0
+    ? `FULL WEEKLY HISTORY (most recent first):
+Week Ending | Weight | Body Fat | Skin Fold | Calories | Exercise
+${history.map((h) => `${h.week_end_date} | ${h.weight_lbs ?? 'N/A'} lbs | ${h.body_fat_percentage ?? 'N/A'}% | ${h.skin_fold_mm ?? 'N/A'} mm | ${h.avg_daily_calories ?? 'N/A'} cal | ${h.avg_exercise_min_per_day ?? 'N/A'} min`).join("\n")}`
+    : "No historical data available yet."
 }`;
 
     const messages = [

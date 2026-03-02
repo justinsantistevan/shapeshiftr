@@ -34,6 +34,14 @@ const analyzeRequestSchema = z.object({
     goal_avg_daily_calories: z.number().nullable().optional(),
     goal_avg_exercise_min_per_day: z.number().nullable().optional(),
   }),
+  history: z.array(z.object({
+    week_end_date: z.string(),
+    weight_lbs: z.number().nullable().optional(),
+    body_fat_percentage: z.number().nullable().optional(),
+    skin_fold_mm: z.number().nullable().optional(),
+    avg_daily_calories: z.number().nullable().optional(),
+    avg_exercise_min_per_day: z.number().nullable().optional(),
+  })).optional(),
 });
 
 const corsHeaders = {
@@ -66,9 +74,10 @@ serve(async (req) => {
       );
     }
 
-    const { stats, goals } = validationResult.data;
+    const { stats, goals, history } = validationResult.data;
     console.log("Analyzing progress with validated stats");
     console.log("User goals:", goals);
+    console.log("History entries:", history?.length ?? 0);
 
     if (!lovableApiKey) {
       console.error("LOVABLE_API_KEY is not configured");
@@ -90,6 +99,15 @@ CORE PRINCIPLES:
 - Focus on actionable behaviors (exercise routines, nutrition habits, recovery) NOT outcomes (don't say "focus on reducing body fat")
 - Prioritize metrics showing concerning trends (moving away from goals or stagnant)
 - Be specific with numbers when illustrating points
+
+ANALYSIS APPROACH - MONTH-LONG TREND FOCUS:
+You have access to the user's full weekly history. Your primary analysis window is the past ~4 weeks. Rather than comparing this week to a single snapshot from 4 weeks ago, analyze the TREND over the past month:
+- Are metrics steadily improving, plateauing, fluctuating, or regressing?
+- Frame this week's data as the latest point in a month-long trajectory (e.g., "Your weight has been steadily declining over the past month, dropping from 168 to 163 lbs")
+- Identify momentum and direction — is progress accelerating, decelerating, or stalling?
+- Do NOT overemphasize a single week-to-week change. A one-week bump in weight amid a 4-week downtrend is noise, not a reversal.
+- You CAN reference longer-term trends when they add meaningful context (e.g., "You've lost 12 lbs since you started tracking in August")
+- When the user has fewer than 4 weeks of data, acknowledge that trend analysis is limited and focus on current metrics vs. goals
 
 DATA VALIDATION:
 Before providing coaching, check if any metrics fall outside reasonable ranges. If they do, flag the data issue clearly and ask the user to verify their measurements before proceeding with analysis.
@@ -113,25 +131,6 @@ If ANY metric violates these ranges, respond with:
 
 Only proceed with normal coaching if all metrics are within reasonable ranges.
 
-DATA CONTEXT:
-The "change" values represent the difference between current metrics and metrics from a comparison period. The ideal comparison is 4 weeks (28-34 days) ago, but if no data exists in that range, the comparison uses the most recent available data that is at least 28 days old. For example, if current weight is 163 lbs with a change of -3 lbs, the user weighed 166 lbs at the comparison point.
-
-IMPORTANT - HANDLING MISSING COMPARISON DATA:
-If change values show "N/A", this means there's insufficient historical data (less than 28 days) for comparison. In these cases:
-- Acknowledge that trend analysis isn't possible yet due to limited data history
-- Focus on analyzing current metrics against the user's goals
-- Provide baseline recommendations and guidance for establishing healthy habits
-- Encourage the user to continue tracking so future comparisons will be available
-- Be supportive and frame this as a starting point, not a limitation
-
-IMPORTANT - COMPARISON CONTEXTUALIZATION:
-When providing analysis, you will receive comparison metadata indicating the exact date and age of the comparison data. Always be aware of what timeframe you're comparing to:
-- If comparison is 28-34 days old (4 weeks): This is the ideal range, you can say "over the past 4 weeks" or "in the last month"
-- If comparison is 35-60 days old: Contextualize as "comparing to the week ending [date]" or "over the past [X] weeks"
-- If comparison is 60+ days old: Contextualize as "comparing to the week ending [date]" or "over the past [X] months"
-- Always use "week ending" (not "week of") when referencing specific dates, since user data represents the week ending on a particular Sunday
-- Be natural and conversational when contextualizing - don't make it sound like an error
-
 VARY YOUR APPROACH each time - rotate through different structures:
 1. Lead with the biggest concern, then highlight a win
 2. Start with overall momentum assessment, then drill into specifics
@@ -150,6 +149,7 @@ COACHING STYLE:
 RULES:
 - If your response includes numbers such as percentage changes, round to 2 decimal places, e.g., 3.03% instead of 3.002700001%
 - Don't return text that calls explicit attention to your data validation or sanity checks, unless there is a problem. e.g.,never return "It looks like all your data is within reasonable ranges."
+- Always use "week ending" (not "week of") when referencing specific dates, since user data represents the week ending on a particular Sunday
 
 Adapt your tone based on overall progress: celebratory for strong progress, motivational for struggles, strategically encouraging for mixed results.`;
 
@@ -185,7 +185,15 @@ ${goals.goal_skin_fold_mm ? `Skin Fold: ${goals.goal_skin_fold_mm} mm` : ""}
 ${goals.goal_avg_daily_calories ? `Daily Calories: ${goals.goal_avg_daily_calories} cal` : ""}
 ${goals.goal_avg_exercise_min_per_day ? `Exercise: ${goals.goal_avg_exercise_min_per_day} min/day` : ""}
 
-First validate all metrics are within reasonable ranges. If any data appears questionable, flag it for verification. If all data looks good, provide your coaching assessment (3-4 sentences). Vary your structure and focus from previous analyses.`;
+${history && history.length > 0
+  ? `FULL WEEKLY HISTORY (most recent first):
+Week Ending | Weight | Body Fat | Skin Fold | Calories | Exercise
+${history.map((h) => `${h.week_end_date} | ${h.weight_lbs ?? 'N/A'} lbs | ${h.body_fat_percentage ?? 'N/A'}% | ${h.skin_fold_mm ?? 'N/A'} mm | ${h.avg_daily_calories ?? 'N/A'} cal | ${h.avg_exercise_min_per_day ?? 'N/A'} min`).join("\n")}
+
+Use this history to assess the TREND over the past ~4 weeks. Frame this week's data within that month-long trajectory. Do not overemphasize any single week-to-week change.`
+  : "No historical data available yet — focus on current metrics vs. goals."}
+
+First validate all metrics are within reasonable ranges. If any data appears questionable, flag it for verification. If all data looks good, provide your coaching assessment (3-4 sentences) focused on the month-long trend. Vary your structure and focus from previous analyses.`;
 
     console.log("Calling Lovable AI Gateway...");
 
