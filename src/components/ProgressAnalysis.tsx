@@ -72,14 +72,13 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
 
       if (error) throw error;
       if (data?.error) {
-        throw new Error(data.error);
+        setAnalysis(data.error);
+        return;
       }
       setAnalysis(data.analysis);
     } catch (error) {
       console.error('Error fetching progress analysis:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error('Detailed error:', errorMessage);
-      setAnalysis(`Unable to generate analysis: ${errorMessage}`);
+      setAnalysis("Unable to generate analysis right now. Please try again later.");
     } finally {
       setIsLoading(false);
     }
@@ -232,7 +231,17 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
 
       if (error) throw error;
       if (data?.error) {
-        throw new Error(data.error);
+        // Show the error as a friendly assistant message instead of throwing
+        const errorMessageId = crypto.randomUUID();
+        const errorResponse: ChatMessage = {
+          role: 'assistant',
+          content: data.error,
+          id: errorMessageId,
+          timestamp: new Date().toISOString()
+        };
+        setChatMessages(prev => [...prev, errorResponse]);
+        setIsChatLoading(false);
+        return;
       }
 
       const responseTime = Date.now() - startTime;
@@ -279,7 +288,7 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
       
       const errorResponse: ChatMessage = {
         role: 'assistant',
-        content: `Sorry, I encountered an error: ${errorMessage}`,
+        content: "Sorry, I'm having trouble responding right now. Please try again later.",
         id: errorMessageId,
         timestamp: new Date().toISOString()
       };
