@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.update-goals]
 verify_jwt = false
+
+[functions.seed-demo-user]
+verify_jwt = false
