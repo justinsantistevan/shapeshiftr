@@ -11,7 +11,8 @@ const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
 // Model and prompt version tracking
 const MODEL = "google/gemini-2.5-flash";
-const PROMPT_VERSION = "v1.6";
+const PROMPT_VERSION = "v1.7";
+console.log(`[chat-coach] Loaded version ${PROMPT_VERSION}`);
 
 // Input validation schema
 const metricSchema = z
