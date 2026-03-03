@@ -47,7 +47,7 @@ export const ChatFeedback = ({
         disabled={isDisabled}
         className={`h-7 w-7 p-0 transition-colors ${
           currentFeedback === 'negative' 
-            ? 'text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-400' 
+            ? 'text-rose-500 hover:text-rose-600 dark:text-rose-500 dark:hover:text-rose-400' 
             : 'text-muted-foreground hover:text-foreground'
         }`}
         aria-label="Thumbs down"
