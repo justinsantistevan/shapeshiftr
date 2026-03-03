@@ -439,17 +439,25 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
           )}
 
           <div className="flex gap-2">
-            <Textarea
-              placeholder="Ask your fitness coach anything..."
-              value={userMessage}
-              onChange={(e) => setUserMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={isChatLoading}
-              className="min-h-[60px] text-base"
-            />
+            <div className="flex-1 space-y-1">
+              <Textarea
+                placeholder="Ask your fitness coach anything..."
+                value={userMessage}
+                onChange={(e) => setUserMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                disabled={isChatLoading}
+                className="min-h-[60px] text-base"
+                maxLength={5000}
+              />
+              {userMessage.length > 4500 && (
+                <p className="text-xs text-muted-foreground text-right">
+                  {userMessage.length} / 5000
+                </p>
+              )}
+            </div>
             <Button
               onClick={sendMessage}
-              disabled={!userMessage.trim() || isChatLoading}
+              disabled={!userMessage.trim() || userMessage.length > 5000 || isChatLoading}
               size="icon"
               className="h-[60px] w-[60px]"
             >
