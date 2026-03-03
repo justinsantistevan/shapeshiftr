@@ -31,6 +31,7 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
   const [analysis, setAnalysis] = useState<string>("");
   const [analysisMessageId, setAnalysisMessageId] = useState<string>("");
   const [analysisFeedback, setAnalysisFeedback] = useState<'positive' | 'negative' | 'none'>('none');
+  const [analysisTraceId, setAnalysisTraceId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [userMessage, setUserMessage] = useState("");
@@ -81,6 +82,7 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
       setAnalysis(data.analysis);
       setAnalysisMessageId(crypto.randomUUID());
       setAnalysisFeedback('none');
+      setAnalysisTraceId(data.langfuse_trace_id ?? null);
     } catch (error) {
       console.error('Error fetching progress analysis:', error);
       setAnalysis("Unable to generate analysis right now. Please try again later.");
@@ -93,7 +95,26 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
     _messageId: string,
     newFeedbackType: 'positive' | 'negative' | 'none'
   ) => {
+    const previousFeedback = analysisFeedback;
     setAnalysisFeedback(newFeedbackType);
+
+    if (!analysisTraceId) return;
+
+    try {
+      const scoreValue = newFeedbackType === 'positive' ? 1 : newFeedbackType === 'negative' ? -1 : 0;
+      const { error } = await supabase.functions.invoke('score-trace', {
+        body: { trace_id: analysisTraceId, value: scoreValue },
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error scoring analysis trace:', error);
+      setAnalysisFeedback(previousFeedback);
+      toast({
+        title: "Failed to save feedback",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   useEffect(() => {

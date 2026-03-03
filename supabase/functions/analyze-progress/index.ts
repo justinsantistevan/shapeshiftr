@@ -254,7 +254,7 @@ Provide your coaching assessment.`;
 
     console.log("Generated analysis:", analysis);
 
-    await traceLLMCall({
+    const traceId = await traceLLMCall({
       name: "analyze-progress",
       model: MODEL,
       systemPrompt,
@@ -267,7 +267,7 @@ Provide your coaching assessment.`;
       usage: data.usage,
     });
 
-    return new Response(JSON.stringify({ analysis }), {
+    return new Response(JSON.stringify({ analysis, langfuse_trace_id: traceId }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
