@@ -16,6 +16,7 @@ import { toast } from "@/hooks/use-toast";
 interface ProgressAnalysisProps {
   stats: FitnessStats | null;
   goals: UserGoals;
+  goalsLoaded?: boolean;
 }
 
 interface ChatMessage {
@@ -26,7 +27,7 @@ interface ChatMessage {
   timestamp?: string;
 }
 
-export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
+export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressAnalysisProps) => {
   const [analysis, setAnalysis] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -85,8 +86,10 @@ export const ProgressAnalysis = ({ stats, goals }: ProgressAnalysisProps) => {
   };
 
   useEffect(() => {
-    fetchAnalysis();
-  }, [stats, goals]);
+    if (goalsLoaded) {
+      fetchAnalysis();
+    }
+  }, [stats, goals, goalsLoaded]);
 
   useEffect(() => {
     if (scrollAreaRef.current) {

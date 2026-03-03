@@ -50,6 +50,7 @@ export function Dashboard({
   const [fitnessStats, setFitnessStats] = useState<FitnessStats | null>(null);
   const [isLoadingStats, setIsLoadingStats] = useState(true);
   const [userGoals, setUserGoals] = useState<UserGoals>({});
+  const [goalsLoaded, setGoalsLoaded] = useState(false);
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const fitnessAffirmationsRef = useRef<FitnessAffirmationsRef>(null);
   const metricsChartRef = useRef<MetricsChartRef>(null);
@@ -162,6 +163,8 @@ export function Dashboard({
       setUserGoals(goals);
     } catch (error) {
       console.error('Error fetching user goals:', error);
+    } finally {
+      setGoalsLoaded(true);
     }
   };
   useEffect(() => {
@@ -510,7 +513,7 @@ export function Dashboard({
       }}>
           <GlowingEffect spread={40} glow={true} disabled={false} proximity={64} inactiveZone={0.01} />
           <div className="relative z-10 bg-card rounded-xl">
-            <ProgressAnalysis stats={fitnessStats} goals={userGoals} />
+            <ProgressAnalysis stats={fitnessStats} goals={userGoals} goalsLoaded={goalsLoaded} />
           </div>
         </section>
 
