@@ -29,6 +29,8 @@ interface ChatMessage {
 
 export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressAnalysisProps) => {
   const [analysis, setAnalysis] = useState<string>("");
+  const [analysisMessageId, setAnalysisMessageId] = useState<string>("");
+  const [analysisFeedback, setAnalysisFeedback] = useState<'positive' | 'negative' | 'none'>('none');
   const [isLoading, setIsLoading] = useState(false);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [userMessage, setUserMessage] = useState("");
@@ -77,12 +79,21 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
         return;
       }
       setAnalysis(data.analysis);
+      setAnalysisMessageId(crypto.randomUUID());
+      setAnalysisFeedback('none');
     } catch (error) {
       console.error('Error fetching progress analysis:', error);
       setAnalysis("Unable to generate analysis right now. Please try again later.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleAnalysisFeedback = async (
+    _messageId: string,
+    newFeedbackType: 'positive' | 'negative' | 'none'
+  ) => {
+    setAnalysisFeedback(newFeedbackType);
   };
 
   useEffect(() => {
@@ -388,6 +399,15 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
               {analysis || "Loading your personalized progress analysis..."}
             </ReactMarkdown>
           </div>
+        )}
+
+        {!isLoading && analysis && analysisMessageId && (
+          <ChatFeedback
+            messageId={analysisMessageId}
+            currentFeedback={analysisFeedback}
+            onFeedbackChange={handleAnalysisFeedback}
+            isDisabled={isLoading}
+          />
         )}
 
         <Separator className="my-6" />
