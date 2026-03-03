@@ -28,28 +28,10 @@ export const calculateCropForFrontView = (
 
   // Find the highest point (fingertips/wrists/elbows/head)
   let topY = head.position.y;
-  let topWristUsed: typeof leftWrist = null;
-  let topElbow: typeof leftElbow = null;
-
-  if (leftWrist && leftWrist.position.y < topY) {
-    topY = leftWrist.position.y;
-    topWristUsed = leftWrist;
-    topElbow = leftElbow;
-  }
-  if (rightWrist && rightWrist.position.y < topY) {
-    topY = rightWrist.position.y;
-    topWristUsed = rightWrist;
-    topElbow = rightElbow;
-  }
+  if (leftWrist) topY = Math.min(topY, leftWrist.position.y);
+  if (rightWrist) topY = Math.min(topY, rightWrist.position.y);
   if (leftElbow) topY = Math.min(topY, leftElbow.position.y);
   if (rightElbow) topY = Math.min(topY, rightElbow.position.y);
-
-  // If a wrist is the topmost point (arm raised), extend upward
-  // to account for hand/fingers (~35% of forearm length)
-  if (topWristUsed && topElbow) {
-    const forearmLength = Math.abs(topWristUsed.position.y - topElbow.position.y);
-    topY -= forearmLength * 0.35;
-  }
 
   // Find the lowest point (feet/ankles)
   let bottomY;
@@ -134,28 +116,10 @@ export const calculateCropForSideView = (
 
   // Find the highest point (fingertips/wrists/elbows/head)
   let topY = head.position.y;
-  let topWristUsed: typeof leftWrist = null;
-  let topElbow: typeof leftElbow = null;
-
-  if (leftWrist && leftWrist.position.y < topY) {
-    topY = leftWrist.position.y;
-    topWristUsed = leftWrist;
-    topElbow = leftElbow;
-  }
-  if (rightWrist && rightWrist.position.y < topY) {
-    topY = rightWrist.position.y;
-    topWristUsed = rightWrist;
-    topElbow = rightElbow;
-  }
+  if (leftWrist) topY = Math.min(topY, leftWrist.position.y);
+  if (rightWrist) topY = Math.min(topY, rightWrist.position.y);
   if (leftElbow) topY = Math.min(topY, leftElbow.position.y);
   if (rightElbow) topY = Math.min(topY, rightElbow.position.y);
-
-  // If a wrist is the topmost point (arm raised), extend upward
-  // to account for hand/fingers (~35% of forearm length)
-  if (topWristUsed && topElbow) {
-    const forearmLength = Math.abs(topWristUsed.position.y - topElbow.position.y);
-    topY -= forearmLength * 0.35;
-  }
 
   // Find the lowest point (feet/ankles)
   let bottomY;

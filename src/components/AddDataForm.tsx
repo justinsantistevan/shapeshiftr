@@ -138,13 +138,11 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
         title: "Front photo processed",
         description: "Photo has been cropped and is ready to upload.",
       });
-    } else {
-      // Fallback: use original file if cropping fails
-      setFrontPhoto(file);
+    } else if (croppingError) {
       toast({
-        title: "Front photo added",
-        description: "Auto-crop couldn't process this photo, using original.",
-        variant: "default",
+        title: "Error processing front photo",
+        description: croppingError,
+        variant: "destructive",
       });
     }
 
@@ -167,13 +165,11 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
         title: "Side photo processed",
         description: "Photo has been cropped and is ready to upload.",
       });
-    } else {
-      // Fallback: use original file if cropping fails
-      setSidePhoto(file);
+    } else if (croppingError) {
       toast({
-        title: "Side photo added",
-        description: "Auto-crop couldn't process this photo, using original.",
-        variant: "default",
+        title: "Error processing side photo",
+        description: croppingError,
+        variant: "destructive",
       });
     }
 

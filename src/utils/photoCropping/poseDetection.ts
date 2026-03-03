@@ -103,10 +103,6 @@ export const detectPose = async (imageElement: HTMLImageElement): Promise<Pose |
 };
 
 // Get keypoint by name
-export const getKeypointByName = (
-  pose: Pose, name: string, minConfidence: number = 0.1
-): PoseKeypoint | null => {
-  const kp = pose.keypoints.find(kp => kp.part === name);
-  if (!kp || kp.score < minConfidence) return null;
-  return kp;
+export const getKeypointByName = (pose: Pose, name: string): PoseKeypoint | null => {
+  return pose.keypoints.find(kp => kp.part === name) || null;
 };
