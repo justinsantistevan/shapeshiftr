@@ -209,7 +209,19 @@ export async function scoreTrace(
 
   try {
     const auth = btoa(`${LANGFUSE_PUBLIC_KEY}:${LANGFUSE_SECRET_KEY}`);
-    const body: Record<string, unknown> = { traceId, name, value };
+
+    // Deterministic score ID so repeated feedback calls upsert rather than
+    // create new scores (which Langfuse would average, giving fractional values).
+    const idBytes = await crypto.subtle.digest(
+      "SHA-1",
+      new TextEncoder().encode(`${traceId}:${name}`),
+    );
+    const idHex = Array.from(new Uint8Array(idBytes))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    const scoreId = `${idHex.slice(0, 8)}-${idHex.slice(8, 12)}-4${idHex.slice(13, 16)}-${idHex.slice(16, 20)}-${idHex.slice(20, 32)}`;
+
+    const body: Record<string, unknown> = { id: scoreId, traceId, name, value };
     if (comment) body.comment = comment;
 
     const resp = await fetch(`${LANGFUSE_HOST}/api/public/scores`, {
