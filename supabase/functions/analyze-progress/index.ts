@@ -5,6 +5,7 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 // @ts-ignore - Deno imports are resolved at runtime
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import { fetchPrompt, traceLLMCall } from "../_shared/langfuse.ts";
 
 // @ts-ignore - Deno global is available in Deno runtime
 const claudeApiKey = Deno.env.get("CLAUDE_API_KEY");
@@ -97,7 +98,9 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are an expert fitness coach with deep knowledge of exercise science, nutrition, and behavior change. You're knowledgeable and direct, but also warm and supportive—you're on the user's side and genuinely want them to succeed.
+    const PROMPT_NAME = "analyze-progress-system";
+
+    const FALLBACK_SYSTEM_PROMPT = `You are an expert fitness coach with deep knowledge of exercise science, nutrition, and behavior change. You're knowledgeable and direct, but also warm and supportive—you're on the user's side and genuinely want them to succeed.
 
 CORE PRINCIPLES:
 - Base all advice on evidence-based fitness and nutrition science
@@ -157,6 +160,11 @@ RULES:
 - Don't call attention to data validation unless there is a problem
 - Always use "week ending" (not "week of") when referencing specific dates`;
 
+    // Fetch prompt from Langfuse (falls back to hardcoded)
+    const langfusePrompt = await fetchPrompt(PROMPT_NAME);
+    const systemPrompt = langfusePrompt?.text ?? FALLBACK_SYSTEM_PROMPT;
+    const promptVersion = langfusePrompt?.version;
+
     const userPrompt = `Analyze my fitness metrics and goals, then provide coaching:
 
 CURRENT METRICS:
@@ -186,6 +194,7 @@ Use this history to assess the TREND over the past ~4 weeks as supporting eviden
 Provide your coaching assessment (3-4 sentences). Lead with goal proximity and trajectory, supported by month-long trend context.`;
 
     console.log("Calling Anthropic API...");
+    const traceStartTime = Date.now();
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -202,11 +211,25 @@ Provide your coaching assessment (3-4 sentences). Lead with goal proximity and t
       }),
     });
 
+    const traceEndTime = Date.now();
     console.log("Anthropic API response status:", response.status);
 
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Anthropic API error response:", errorText);
+
+      await traceLLMCall({
+        name: "analyze-progress",
+        model: MODEL,
+        systemPrompt,
+        messages: [{ role: "user", content: userPrompt }],
+        output: null,
+        startTime: traceStartTime,
+        endTime: traceEndTime,
+        promptName: PROMPT_NAME,
+        promptVersion,
+        error: `Anthropic API error: ${response.status} - ${errorText}`,
+      });
 
       if (response.status === 429) {
         return new Response(
@@ -228,6 +251,19 @@ Provide your coaching assessment (3-4 sentences). Lead with goal proximity and t
     }
 
     console.log("Generated analysis:", analysis);
+
+    await traceLLMCall({
+      name: "analyze-progress",
+      model: MODEL,
+      systemPrompt,
+      messages: [{ role: "user", content: userPrompt }],
+      output: analysis,
+      startTime: traceStartTime,
+      endTime: traceEndTime,
+      promptName: PROMPT_NAME,
+      promptVersion,
+      usage: data.usage,
+    });
 
     return new Response(JSON.stringify({ analysis }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
