@@ -5,6 +5,8 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 // @ts-ignore - Deno imports are resolved at runtime
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+// @ts-ignore - Deno imports are resolved at runtime
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { fetchPrompt, traceLLMCall } from "../_shared/langfuse.ts";
 
 // @ts-ignore - Deno global is available in Deno runtime
@@ -61,6 +63,30 @@ serve(async (req) => {
   }
 
   try {
+    // Authenticate user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: authError } = await supabase.auth.getClaims(token);
+    if (authError || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const rawData = await req.json();
     console.log("Received analysis request - PROMPT v1.5 (goal-focused with trend context)");
 
