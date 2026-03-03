@@ -148,7 +148,7 @@ COACHING STYLE:
 - Balance encouragement with honest assessment
 - Always reference the user's specific goal numbers
 - Make 1-2 specific recommendations tied to the data
-- Keep total response to 3-4 sentences
+- Keep it brief and to the point: keep total response to 3-4 sentences
 - Be warm and supportive while staying direct and actionable
 
 RULES:
@@ -198,9 +198,7 @@ Provide your coaching assessment (3-4 sentences). Lead with goal proximity and t
         model: MODEL,
         max_tokens: 1024,
         system: systemPrompt,
-        messages: [
-          { role: "user", content: userPrompt },
-        ],
+        messages: [{ role: "user", content: userPrompt }],
       }),
     });
 
