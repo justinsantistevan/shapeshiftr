@@ -155,7 +155,7 @@ export const calculateCropForSideView = (
     let handExtension: number;
     if (correspondingElbowY !== null) {
       const forearmLength = Math.abs(correspondingElbowY - highestWristY);
-      handExtension = forearmLength * 0.35;
+      handExtension = forearmLength * 0.40;
     } else {
       handExtension = bodyHeight * 0.08;
     }
