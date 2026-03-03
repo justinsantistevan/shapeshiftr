@@ -1,57 +1,31 @@
 
 
-## Fix: Side View Fingertip Compensation
+## Fix: Update Langfuse Host to US Region
 
 ### Problem
-PoseNet detects wrists but not fingertips. In raised-arm side-view poses, the crop top boundary is set at the wrist with only 10% body-height padding, which isn't enough to include fingertips.
+The Langfuse integration is failing with 401 "Invalid credentials. Confirm that you've configured the correct host." This is because the host is hardcoded to `https://cloud.langfuse.com` (EU region), but your Langfuse project is in the **US region**.
 
-### Scope
-Only `calculateCropForSideView` in `src/utils/photoCropping/cropCalculations.ts` will be modified. Front view logic stays untouched.
+### Solution
+Update the `LANGFUSE_HOST` constant in `supabase/functions/_shared/langfuse.ts`.
 
 ### Change
-After the existing `topY` calculation (lines 118-122) and `bodyHeight` calculation (line 138), add fingertip compensation logic:
 
-1. Track which wrist is highest and its corresponding elbow
-2. If a wrist is the topmost (or near-topmost) keypoint, estimate fingertip position:
-   - **Primary**: Extend upward by 35% of the forearm length (elbow-to-wrist distance) -- anatomically accurate hand-to-forearm ratio
-   - **Fallback** (no elbow detected): Extend upward by 8% of body height
-3. Update `topY` to the estimated fingertip position
+**File: `supabase/functions/_shared/langfuse.ts`** (line 8)
 
-### Technical Detail
-
-The compensation block will be inserted after `bodyHeight` is computed (after line 138), and before the padding calculation (line 142). It will look like:
-
-```text
-// Fingertip compensation for raised arms (PoseNet doesn't detect fingertips)
-let highestWristY = Infinity;
-let correspondingElbowY: number | null = null;
-
-if (leftWrist && leftWrist.position.y < highestWristY) {
-  highestWristY = leftWrist.position.y;
-  correspondingElbowY = leftElbow ? leftElbow.position.y : null;
-}
-if (rightWrist && rightWrist.position.y < highestWristY) {
-  highestWristY = rightWrist.position.y;
-  correspondingElbowY = rightElbow ? rightElbow.position.y : null;
-}
-
-if (highestWristY <= topY + 5) {
-  let handExtension: number;
-  if (correspondingElbowY !== null) {
-    const forearmLength = Math.abs(correspondingElbowY - highestWristY);
-    handExtension = forearmLength * 0.35;
-  } else {
-    handExtension = bodyHeight * 0.08;
-  }
-  topY = highestWristY - handExtension;
-  console.log('Fingertip compensation applied, new topY:', topY);
-}
+Change:
+```
+const LANGFUSE_HOST = "https://cloud.langfuse.com";
+```
+To:
+```
+const LANGFUSE_HOST = "https://us.cloud.langfuse.com";
 ```
 
-Then recalculate `bodyHeight` after the adjustment so padding scales correctly:
+### Verification
+After deploying, trigger an LLM call (e.g., use Ask Coach or load the dashboard to trigger analyze-progress). Then check:
+1. Edge function logs should show `[langfuse] Trace recorded: ...` instead of the 401 error
+2. Traces should appear in your Langfuse dashboard at https://us.cloud.langfuse.com
 
-```text
-const adjustedBodyHeight = bottomY - topY;
-```
+### Additional Check
+If it still fails after this fix, the `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY` secrets may need to be re-set. You can verify them in your Langfuse project under Settings > API Keys.
 
-The rest of the function (padding, aspect ratio, centering) will use `adjustedBodyHeight` instead of `bodyHeight`.
