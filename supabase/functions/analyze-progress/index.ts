@@ -72,7 +72,9 @@ serve(async (req) => {
       });
     }
 
+    // @ts-ignore - Deno global is available in Deno runtime
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    // @ts-ignore - Deno global is available in Deno runtime
     const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey, {
       global: { headers: { Authorization: authHeader } },
@@ -191,7 +193,7 @@ RULES:
     const systemPrompt = langfusePrompt?.text ?? FALLBACK_SYSTEM_PROMPT;
     const promptVersion = langfusePrompt?.version;
 
-    const userPrompt = `Analyze my fitness metrics and goals, then provide coaching:
+    const userPrompt = `Here are my current fitness metrics and goals:
 
 CURRENT METRICS:
 Weight: ${stats.weight.current} ${stats.weight.unit}
@@ -200,7 +202,7 @@ Exercise: ${stats.exercise.current} ${stats.exercise.unit}/day
 Skin Fold: ${stats.skinFold.current} ${stats.skinFold.unit}
 Daily Calories: ${stats.calories.current} ${stats.calories.unit}
 
-MY TARGETS (anchor your analysis on these):
+MY TARGETS:
 ${goals.goal_weight ? `Weight: ${goals.goal_weight} lbs (current gap: ${Math.abs(stats.weight.current - goals.goal_weight).toFixed(1)} lbs ${stats.weight.current > goals.goal_weight ? "above" : "below"} target)` : "Weight: no goal set"}
 ${goals.goal_body_fat_percentage ? `Body Fat: ${goals.goal_body_fat_percentage}% (current gap: ${Math.abs(stats.bodyFat.current - goals.goal_body_fat_percentage).toFixed(1)}% ${stats.bodyFat.current > goals.goal_body_fat_percentage ? "above" : "below"} target)` : "Body Fat: no goal set"}
 ${goals.goal_skin_fold_mm ? `Skin Fold: ${goals.goal_skin_fold_mm} mm (current gap: ${Math.abs(stats.skinFold.current - goals.goal_skin_fold_mm).toFixed(1)} mm ${stats.skinFold.current > goals.goal_skin_fold_mm ? "above" : "below"} target)` : "Skin Fold: no goal set"}
@@ -211,13 +213,11 @@ ${
   history && history.length > 0
     ? `FULL WEEKLY HISTORY (most recent first):
 Week Ending | Weight | Body Fat | Skin Fold | Calories | Exercise
-${history.map((h) => `${h.week_end_date} | ${h.weight ?? "N/A"} lbs | ${h.body_fat_percentage ?? "N/A"}% | ${h.skin_fold_mm ?? "N/A"} mm | ${h.avg_daily_calories ?? "N/A"} cal | ${h.avg_exercise_min_per_day ?? "N/A"} min`).join("\n")}
-
-Use this history to assess the TREND over the past ~4 weeks as supporting evidence for goal trajectory.`
-    : "No historical data available yet — focus on current metrics vs. goals."
+${history.map((h) => `${h.week_end_date} | ${h.weight ?? "N/A"} lbs | ${h.body_fat_percentage ?? "N/A"}% | ${h.skin_fold_mm ?? "N/A"} mm | ${h.avg_daily_calories ?? "N/A"} cal | ${h.avg_exercise_min_per_day ?? "N/A"} min`).join("\n")}`
+    : "No historical data available yet."
 }
 
-Provide your coaching assessment (3-4 sentences). Lead with goal proximity and trajectory, supported by month-long trend context.`;
+Provide your coaching assessment.`;
 
     console.log("Calling Anthropic API...");
     const traceStartTime = Date.now();
