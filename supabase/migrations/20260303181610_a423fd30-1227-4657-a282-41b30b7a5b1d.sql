@@ -1,0 +1,1 @@
+ALTER TABLE public.coach_chat_logs ADD COLUMN IF NOT EXISTS langfuse_trace_id text NULL;
