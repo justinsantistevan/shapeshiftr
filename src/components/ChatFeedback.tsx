@@ -33,7 +33,7 @@ export const ChatFeedback = ({
         disabled={isDisabled}
         className={`h-7 w-7 p-0 transition-colors ${
           currentFeedback === 'positive' 
-            ? 'text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400' 
+            ? 'text-emerald-500 hover:text-emerald-600' 
             : 'text-muted-foreground hover:text-foreground'
         }`}
         aria-label="Thumbs up"
