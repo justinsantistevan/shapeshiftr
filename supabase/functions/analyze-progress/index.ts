@@ -133,10 +133,10 @@ serve(async (req) => {
 FORMAT RULES (STRICT):
 - Use 2-3 short paragraphs separated by blank lines. Each paragraph should be 1-2 sentences.
 - Use **bold** for key numbers, metric names, and the weekly action. Use sparingly for emphasis, not on every number.
-- Keep sentences short and punchy. Maximum 20 words per sentence. Break up complex thoughts into separate sentences.
+- Keep sentences short and punchy. Maximum 25 words per sentence. Break up complex thoughts into separate sentences.
 - Never start with a header, title, or greeting like "Your Coaching Assessment".
 - Avoid em-dashes. Use commas, periods, or "to" for ranges (e.g., "4 to 6 weeks" not "4–6 weeks").
-- Total response must be under 80 words.
+- Total response must be under 100 words.
 
 CONTENT - Cover these three beats across 2-3 paragraphs:
 1. Overall position: How close to goals? Anchor on the biggest gap.
