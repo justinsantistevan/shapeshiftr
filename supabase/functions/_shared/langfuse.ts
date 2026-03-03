@@ -5,7 +5,7 @@
 const LANGFUSE_PUBLIC_KEY = Deno.env.get("LANGFUSE_PUBLIC_KEY");
 // @ts-ignore - Deno global is available in Deno runtime
 const LANGFUSE_SECRET_KEY = Deno.env.get("LANGFUSE_SECRET_KEY");
-const LANGFUSE_HOST = "https://cloud.langfuse.com";
+const LANGFUSE_HOST = "https://us.cloud.langfuse.com";
 
 // --- Prompt fetching with 5-minute in-memory cache ---
 

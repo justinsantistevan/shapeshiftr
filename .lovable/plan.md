@@ -1,15 +1,31 @@
 
 
-## Remove Seed Demo Edge Functions
+## Fix: Update Langfuse Host to US Region
 
-Since the demo user and photos are already set up, we can safely delete these two edge functions to prevent potential abuse.
+### Problem
+The Langfuse integration is failing with 401 "Invalid credentials. Confirm that you've configured the correct host." This is because the host is hardcoded to `https://cloud.langfuse.com` (EU region), but your Langfuse project is in the **US region**.
 
-### Changes
+### Solution
+Update the `LANGFUSE_HOST` constant in `supabase/functions/_shared/langfuse.ts`.
 
-1. **Delete `supabase/functions/seed-demo-user/index.ts`** - Remove the entire directory
-2. **Delete `supabase/functions/seed-demo-photos/index.ts`** - Remove the entire directory
-3. **Update `supabase/config.toml`** - Remove the `[functions.seed-demo-user]` and `[functions.seed-demo-photos]` sections
-4. **Delete deployed functions** from Supabase so they can no longer be called remotely
+### Change
 
-This is a straightforward cleanup with no impact on the running application since these functions are only used for one-time data seeding.
+**File: `supabase/functions/_shared/langfuse.ts`** (line 8)
+
+Change:
+```
+const LANGFUSE_HOST = "https://cloud.langfuse.com";
+```
+To:
+```
+const LANGFUSE_HOST = "https://us.cloud.langfuse.com";
+```
+
+### Verification
+After deploying, trigger an LLM call (e.g., use Ask Coach or load the dashboard to trigger analyze-progress). Then check:
+1. Edge function logs should show `[langfuse] Trace recorded: ...` instead of the 401 error
+2. Traces should appear in your Langfuse dashboard at https://us.cloud.langfuse.com
+
+### Additional Check
+If it still fails after this fix, the `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY` secrets may need to be re-set. You can verify them in your Langfuse project under Settings > API Keys.
 

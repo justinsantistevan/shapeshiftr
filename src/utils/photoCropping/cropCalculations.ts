@@ -138,10 +138,37 @@ export const calculateCropForSideView = (
   const bodyHeight = bottomY - topY;
   console.log('Body height calculated:', bodyHeight);
 
+  // Fingertip compensation for raised arms (PoseNet doesn't detect fingertips)
+  let highestWristY = Infinity;
+  let correspondingElbowY: number | null = null;
+
+  if (leftWrist && leftWrist.position.y < highestWristY) {
+    highestWristY = leftWrist.position.y;
+    correspondingElbowY = leftElbow ? leftElbow.position.y : null;
+  }
+  if (rightWrist && rightWrist.position.y < highestWristY) {
+    highestWristY = rightWrist.position.y;
+    correspondingElbowY = rightElbow ? rightElbow.position.y : null;
+  }
+
+  if (highestWristY <= topY + 5) {
+    let handExtension: number;
+    if (correspondingElbowY !== null) {
+      const forearmLength = Math.abs(correspondingElbowY - highestWristY);
+      handExtension = forearmLength * 0.40;
+    } else {
+      handExtension = bodyHeight * 0.08;
+    }
+    topY = highestWristY - handExtension;
+    console.log('Fingertip compensation applied, new topY:', topY);
+  }
+
+  const adjustedBodyHeight = bottomY - topY;
+
   // Side view padding
-  const topPadding = bodyHeight * 0.10;  // 10% for raised arm with hand/fingertips
-  const bottomPadding = bodyHeight * 0.10; // 10% for feet
-  const totalHeight = bodyHeight + topPadding + bottomPadding;
+  const topPadding = adjustedBodyHeight * 0.10;
+  const bottomPadding = adjustedBodyHeight * 0.10;
+  const totalHeight = adjustedBodyHeight + topPadding + bottomPadding;
 
   // Calculate width for 9:16 aspect ratio
   const targetWidth = totalHeight * (9 / 16);
