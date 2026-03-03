@@ -365,7 +365,7 @@ serve(async (req) => {
       throw new Error("Failed to generate reply");
     }
 
-    await traceLLMCall({
+    const langfuseTraceId = await traceLLMCall({
       name: "chat-coach",
       model: MODEL,
       systemPrompt,
@@ -398,6 +398,7 @@ serve(async (req) => {
         metadata: {
           llm_model: MODEL,
           system_prompt_version: promptVersion ?? "fallback",
+          langfuse_trace_id: langfuseTraceId ?? null,
           ...tokenUsage,
         },
       }),

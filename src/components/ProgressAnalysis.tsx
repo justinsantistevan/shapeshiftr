@@ -113,7 +113,8 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
     convPosition: number,
     tokensInput: number | null,
     tokensOutput: number | null,
-    tokensTotal: number | null
+    tokensTotal: number | null,
+    langfuseTraceId: string | null
   ) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -149,6 +150,7 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
           tokens_input: tokensInput,
           tokens_output: tokensOutput,
           tokens_total: tokensTotal,
+          langfuse_trace_id: langfuseTraceId,
         });
 
       if (error) {
@@ -180,6 +182,19 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
 
       if (error) throw error;
 
+      // Mirror feedback as a Langfuse score if we have a trace ID
+      const { data: logRow } = await supabase
+        .from('coach_chat_logs')
+        .select('langfuse_trace_id')
+        .eq('id', messageId)
+        .single();
+
+      if (logRow?.langfuse_trace_id) {
+        const scoreValue = newFeedbackType === 'positive' ? 1 : newFeedbackType === 'negative' ? -1 : 0;
+        await supabase.functions.invoke('score-trace', {
+          body: { trace_id: logRow.langfuse_trace_id, value: scoreValue },
+        });
+      }
 
     } catch (error) {
       console.error('Error updating feedback:', error);
@@ -280,7 +295,8 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
           currentPosition,
           data.metadata?.tokens_input || null,
           data.metadata?.tokens_output || null,
-          data.metadata?.tokens_total || null
+          data.metadata?.tokens_total || null,
+          data.metadata?.langfuse_trace_id || null
         );
 
     } catch (error) {
@@ -310,6 +326,7 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
           null,
           conversationId,
           currentPosition,
+          null,
           null,
           null,
           null

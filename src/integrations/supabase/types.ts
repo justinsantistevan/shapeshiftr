@@ -26,6 +26,7 @@ export type Database = {
           feedback_timestamp: string | null
           feedback_type: string
           id: string
+          langfuse_trace_id: string | null
           llm_model: string | null
           response_time_ms: number | null
           system_prompt_version: string
@@ -50,6 +51,7 @@ export type Database = {
           feedback_timestamp?: string | null
           feedback_type?: string
           id?: string
+          langfuse_trace_id?: string | null
           llm_model?: string | null
           response_time_ms?: number | null
           system_prompt_version?: string
@@ -74,6 +76,7 @@ export type Database = {
           feedback_timestamp?: string | null
           feedback_type?: string
           id?: string
+          langfuse_trace_id?: string | null
           llm_model?: string | null
           response_time_ms?: number | null
           system_prompt_version?: string

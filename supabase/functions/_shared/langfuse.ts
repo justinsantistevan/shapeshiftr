@@ -94,16 +94,18 @@ export interface LLMTraceParams {
 
 /**
  * Send a trace + generation to Langfuse's batch ingestion endpoint.
+ * Returns the traceId so callers can store it and attach scores later.
  * Non-fatal: errors are logged but never thrown.
  */
-export async function traceLLMCall(params: LLMTraceParams): Promise<void> {
+export async function traceLLMCall(params: LLMTraceParams): Promise<string | null> {
   if (!LANGFUSE_PUBLIC_KEY || !LANGFUSE_SECRET_KEY) {
     console.log("[langfuse] No credentials set, skipping trace");
-    return;
+    return null;
   }
 
+  const traceId = crypto.randomUUID();
+
   try {
-    const traceId = crypto.randomUUID();
     const generationId = crypto.randomUUID();
 
     const events = [
@@ -184,5 +186,48 @@ export async function traceLLMCall(params: LLMTraceParams): Promise<void> {
     }
   } catch (e) {
     console.error("[langfuse] Trace error (non-fatal):", e);
+  }
+
+  return traceId;
+}
+
+/**
+ * Attach a numeric score to an existing trace (e.g. user feedback).
+ * value: 1 = positive, -1 = negative, 0 = neutral/removed
+ * Non-fatal: errors are logged but never thrown.
+ */
+export async function scoreTrace(
+  traceId: string,
+  value: number,
+  name = "user-feedback",
+  comment?: string,
+): Promise<void> {
+  if (!LANGFUSE_PUBLIC_KEY || !LANGFUSE_SECRET_KEY) {
+    console.log("[langfuse] No credentials set, skipping score");
+    return;
+  }
+
+  try {
+    const auth = btoa(`${LANGFUSE_PUBLIC_KEY}:${LANGFUSE_SECRET_KEY}`);
+    const body: Record<string, unknown> = { traceId, name, value };
+    if (comment) body.comment = comment;
+
+    const resp = await fetch(`${LANGFUSE_HOST}/api/public/scores`, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!resp.ok) {
+      const text = await resp.text();
+      console.error(`[langfuse] Score failed (${resp.status}):`, text);
+    } else {
+      console.log(`[langfuse] Score posted: ${name}=${value} for trace ${traceId}`);
+    }
+  } catch (e) {
+    console.error("[langfuse] Score error (non-fatal):", e);
   }
 }
