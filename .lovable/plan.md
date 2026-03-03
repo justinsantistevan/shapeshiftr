@@ -1,31 +1,28 @@
 
 
-## Fix: Update Langfuse Host to US Region
+## Add Thumbs Up/Down Feedback UI to Progress Analysis
 
-### Problem
-The Langfuse integration is failing with 401 "Invalid credentials. Confirm that you've configured the correct host." This is because the host is hardcoded to `https://cloud.langfuse.com` (EU region), but your Langfuse project is in the **US region**.
+### Scope
+Front-end only. No edge function or logging changes.
 
-### Solution
-Update the `LANGFUSE_HOST` constant in `supabase/functions/_shared/langfuse.ts`.
+### Changes
 
-### Change
+**File: `src/components/ProgressAnalysis.tsx`**
 
-**File: `supabase/functions/_shared/langfuse.ts`** (line 8)
+- Add state: `analysisMessageId` (string), `analysisFeedback` ('positive' | 'negative' | 'none')
+- Generate a new `analysisMessageId` via `crypto.randomUUID()` each time `fetchAnalysis` completes successfully
+- Initialize `analysisFeedback` to `'none'` on each new fetch
+- Add `handleAnalysisFeedback` handler that updates local state only (no DB calls for now)
+- Render `<ChatFeedback>` below the analysis `ReactMarkdown` block, before the `<Separator>`:
 
-Change:
 ```
-const LANGFUSE_HOST = "https://cloud.langfuse.com";
-```
-To:
-```
-const LANGFUSE_HOST = "https://us.cloud.langfuse.com";
+<ChatFeedback
+  messageId={analysisMessageId}
+  currentFeedback={analysisFeedback}
+  onFeedbackChange={handleAnalysisFeedback}
+  isDisabled={isLoading}
+/>
 ```
 
-### Verification
-After deploying, trigger an LLM call (e.g., use Ask Coach or load the dashboard to trigger analyze-progress). Then check:
-1. Edge function logs should show `[langfuse] Trace recorded: ...` instead of the 401 error
-2. Traces should appear in your Langfuse dashboard at https://us.cloud.langfuse.com
-
-### Additional Check
-If it still fails after this fix, the `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY` secrets may need to be re-set. You can verify them in your Langfuse project under Settings > API Keys.
+That's it — the feedback buttons will appear and toggle visually. You can wire up persistence and edge function metadata later.
 
