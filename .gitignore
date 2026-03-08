@@ -30,3 +30,9 @@ dist-ssr
 
 # SpecStory AI interaction history
 .specstory/
+
+# Docs (internal use only)
+docs/
+
+# Scripts (internal use only)
+scripts/
