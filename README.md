@@ -28,7 +28,7 @@ Track five key fitness metrics on a weekly basis:
 
 ### 3. AI-Powered Coaching
 
-Two distinct AI coaching features powered by Claude Haiku 4.5 via Supabase Edge Functions, with all prompts managed and versioned in Langfuse:
+Two distinct AI coaching features delivered via Supabase Edge Functions, with all prompts managed and versioned in Langfuse:
 
 #### Progress Analysis
 
@@ -90,7 +90,7 @@ Two distinct AI coaching features powered by Claude Haiku 4.5 via Supabase Edge 
 - **Authentication**: Supabase Auth
 - **Storage**: Supabase Storage for progress photos
 - **Edge Functions**: Supabase Edge Functions (Deno)
-- **AI Model**: Claude Haiku 4.5 (`claude-haiku-4-5-20251001`) via Anthropic API
+- **AI Models**: Gemini 3.1 Flash-Lite (chat coach) and Claude Haiku 4.5 (progress analysis, LLM judges) via Anthropic and Google AI APIs
 - **Observability**: Langfuse (traces, prompt management, eval scores, user feedback)
 
 ### Database Schema
@@ -140,7 +140,7 @@ Two distinct AI coaching features powered by Claude Haiku 4.5 via Supabase Edge 
 #### `analyze-progress`
 
 - **Purpose**: Analyzes user fitness trends and provides coaching insights
-- **Model**: Claude Haiku 4.5
+- **Model**: Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
 - **Input**: Current fitness stats, goals, and gap analysis
 - **Output**: 2-3 paragraph coaching analysis (<100 words)
 - **Features**:
@@ -153,7 +153,7 @@ Two distinct AI coaching features powered by Claude Haiku 4.5 via Supabase Edge 
 #### `chat-coach`
 
 - **Purpose**: Interactive conversational fitness coaching
-- **Model**: Claude Haiku 4.5
+- **Model**: Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite-preview`)
 - **Input**: User message, conversation history, full weekly metrics table, goals, affirmations
 - **Output**: Concise coaching responses (2-4 sentences, max 200 words)
 - **Features**:
@@ -220,7 +220,7 @@ ShapeShiftr's AI coaching is designed with safety as the top priority. The syste
 
 ### Prompt-Level Safety Guardrails
 
-The `chat-coach-system` prompt (managed in Langfuse, currently v3) encodes the following safety rules:
+The `chat-coach-system` prompt (managed in Langfuse) encodes the following safety rules:
 
 **Medical Deferral** — For pregnancy, postpartum, and active injuries, the coach defers entirely to the user's healthcare provider. No conditional advice ("if your doctor says it's okay...") and no asking what the provider has said (which creates an opportunity for fabricated clearance).
 
@@ -248,7 +248,7 @@ Values outside these ranges are flagged as anomalies and the user is advised to 
 
 ### LLM-as-Judge Evaluators
 
-Three LLM judges (all running Claude Haiku 4.5) evaluate every coach response against specific criteria. These judges run both offline during eval development and in production via Langfuse evaluator prompts on live traces.
+Three LLM judges (all running Claude Haiku 4.5, the model they were calibrated on) evaluate every coach response against specific criteria. These judges run both offline during eval development and in production via Langfuse evaluator prompts on live traces.
 
 | Judge | Criteria | What it checks |
 |-------|----------|----------------|
@@ -286,8 +286,8 @@ Two system prompts are versioned and labeled in Langfuse:
 
 | Prompt | Current Version | Description |
 |--------|----------------|-------------|
-| `chat-coach-system` | v3 (staging) | Chat coach system prompt with safety boundaries, arithmetic rules, output length constraints |
-| `analyze-progress-system` | v1 (production) | Progress analysis system prompt with validation rules |
+| `chat-coach-system` | v6 (production) | Chat coach system prompt with safety boundaries, arithmetic rules, output length constraints, metrics-relevance guard |
+| `analyze-progress-system` | v5 (production) | Progress analysis system prompt with validation rules |
 
 Prompts use a label-based deployment model: `production` for live traffic, `staging` for A/B testing. Edge functions fetch prompts at runtime with a 5-minute in-memory cache, falling back to hardcoded versions if Langfuse is unavailable.
 
@@ -330,7 +330,7 @@ Synthetic Dataset (Langfuse)
 ### Anthropic
 
 - **Model**: `claude-haiku-4-5-20251001` (Claude Haiku 4.5)
-- **Use Cases**: Chat coaching, progress analysis, LLM judge evaluations
+- **Use Cases**: Progress analysis, LLM-as-judge evaluators
 - **SDK**: `@anthropic-ai/sdk`
 
 ### Langfuse
@@ -339,10 +339,10 @@ Synthetic Dataset (Langfuse)
 - **Use Cases**: Prompt versioning, LLM tracing, eval scoring, user feedback, production evaluators
 - **SDK**: `langfuse` (Node.js) + REST API for edge functions
 
-### Google AI (optional)
+### Google AI
 
 - **Model**: `gemini-3.1-flash-lite-preview` (Gemini 3.1 Flash-Lite)
-- **Use Cases**: Alternative coach model for eval comparison
+- **Use Cases**: Chat coach (primary model — better eval scores, 40% lower latency, ~25x lower cost vs Haiku)
 - **SDK**: `@google/generative-ai`
 
 ### Supabase
@@ -372,7 +372,7 @@ SUPABASE_DB_URL=your_supabase_db_connection_string
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
 
-# Optional: Google AI (for Gemini model comparison in evals)
+# Google AI (Chat Coach)
 GOOGLE_API_KEY=your_google_api_key
 ```
 
