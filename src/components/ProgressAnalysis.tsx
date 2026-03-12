@@ -124,11 +124,20 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
   }, [stats, goals, goalsLoaded]);
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    if (!scrollAreaRef.current) return;
+    const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+    if (!scrollContainer) return;
+
+    const lastMsg = chatMessages[chatMessages.length - 1];
+    if (lastMsg?.role === 'assistant') {
+      // Scroll so the assistant message starts at the top of the viewport
+      const lastEl = scrollContainer.querySelector('[data-last-assistant]');
+      if (lastEl) {
+        lastEl.scrollIntoView({ block: 'start' });
       }
+    } else {
+      // For user messages or loading state, scroll to bottom
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
     }
   }, [chatMessages, isChatLoading]);
 
@@ -454,8 +463,10 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
           {(chatMessages.length > 0 || isChatLoading) && (
             <ScrollArea ref={scrollAreaRef} className="h-64 pr-4">
               <div className="space-y-3">
-                {chatMessages.map((msg) => (
-                  <div key={msg.id} className="space-y-2">
+                {chatMessages.map((msg, idx) => {
+                  const isLastAssistant = msg.role === 'assistant' && idx === chatMessages.length - 1;
+                  return (
+                  <div key={msg.id} className="space-y-2" {...(isLastAssistant ? { 'data-last-assistant': '' } : {})}>
                     <div
                       className={`p-3 rounded-lg ${
                         msg.role === 'user'
@@ -485,7 +496,8 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
                       />
                     )}
                   </div>
-                ))}
+                  );
+                })}
                 {isChatLoading && (
                   <div className="flex items-center gap-2 p-3 rounded-lg bg-muted mr-4">
                     <Sparkles className="h-4 w-4 text-primary animate-spin" />
