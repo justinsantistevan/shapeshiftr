@@ -147,6 +147,12 @@ export async function traceLLMCall(params: LLMTraceParams): Promise<string | nul
             ],
           },
           output: params.output || undefined,
+          metadata: {
+            ...(params.metadata || {}),
+            ...(params.promptName
+              ? { promptName: params.promptName, promptVersion: params.promptVersion }
+              : {}),
+          },
           usage: params.usage
             ? {
                 input: params.usage.input_tokens,

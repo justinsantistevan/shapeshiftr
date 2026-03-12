@@ -419,6 +419,7 @@ serve(async (req) => {
       promptName: PROMPT_NAME,
       promptVersion,
       usage: usageForTrace,
+      metadata: { user_context: dynamicContext },
     });
 
     const tokenUsage = usageMeta
