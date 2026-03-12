@@ -342,7 +342,7 @@ Synthetic Dataset (Langfuse)
 ### Google AI
 
 - **Model**: `gemini-3.1-flash-lite-preview` (Gemini 3.1 Flash-Lite)
-- **Use Cases**: Chat coach (primary model — better eval scores, 40% lower latency, ~25x lower cost vs Haiku)
+- **Use Cases**: Chat coach (primary model — better eval scores, 40% lower latency, ~4x lower cost vs Haiku)
 - **SDK**: `@google/generative-ai`
 
 ### Supabase
