@@ -118,6 +118,9 @@ export async function traceLLMCall(params: LLMTraceParams): Promise<string | nul
           name: params.name,
           input: {
             user_message: params.messages[params.messages.length - 1]?.content ?? "",
+            conversation_history: params.messages.length > 1
+              ? params.messages.slice(0, -1).filter((m) => m.role !== "system")
+              : [],
             messages: [
               { role: "system", content: params.systemPrompt },
               ...params.messages,
