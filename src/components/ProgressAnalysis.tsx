@@ -130,10 +130,11 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
 
     const lastMsg = chatMessages[chatMessages.length - 1];
     if (lastMsg?.role === 'assistant') {
-      // Scroll so the assistant message starts at the top of the viewport
-      const lastEl = scrollContainer.querySelector('[data-last-assistant]');
+      // Scroll the inner container so the assistant message starts at the top,
+      // without affecting the outer page scroll position
+      const lastEl = scrollContainer.querySelector('[data-last-assistant]') as HTMLElement | null;
       if (lastEl) {
-        lastEl.scrollIntoView({ block: 'start' });
+        scrollContainer.scrollTop = lastEl.offsetTop;
       }
     } else {
       // For user messages or loading state, scroll to bottom
