@@ -176,7 +176,11 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
     setIsCroppingSide(false);
   };
 
-  const uploadPhoto = async (file: File, photoType: "front" | "side"): Promise<string | null> => {
+  const uploadPhoto = async (file: File, photoType: "front" | "side"): Promise<{
+    storagePath: string;
+    signedUrl: string;
+    expiresAt: string;
+  } | null> => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -189,17 +193,21 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
     if (uploadError) {
       throw uploadError;
     }
-    
+
     // Get signed URL for private bucket access (expires in 1 year)
     const { data: signedData, error: signedError } = await supabase.storage
       .from("fitness-photos")
       .createSignedUrl(fileName, 31536000); // 1 year expiry
-    
+
     if (signedError || !signedData) {
       throw signedError || new Error("Failed to create signed URL");
     }
-    
-    return signedData.signedUrl;
+
+    return {
+      storagePath: `fitness-photos/${fileName}`,
+      signedUrl: signedData.signedUrl,
+      expiresAt: new Date(Date.now() + 31536000 * 1000).toISOString(),
+    };
   };
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
@@ -217,13 +225,13 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
       }
 
       // Upload photos if provided
-      let frontPhotoUrl = null;
-      let sidePhotoUrl = null;
+      let frontPhotoResult = null;
+      let sidePhotoResult = null;
       if (frontPhoto) {
-        frontPhotoUrl = await uploadPhoto(frontPhoto, "front");
+        frontPhotoResult = await uploadPhoto(frontPhoto, "front");
       }
       if (sidePhoto) {
-        sidePhotoUrl = await uploadPhoto(sidePhoto, "side");
+        sidePhotoResult = await uploadPhoto(sidePhoto, "side");
       }
 
       // Check if entry already exists
@@ -250,9 +258,17 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
         insertData.avg_exercise_min_per_day = parseInt(values.avg_exercise_min_per_day);
       if (values.notes) insertData.notes = values.notes;
 
-      // Always update photos if new ones are uploaded
-      if (frontPhotoUrl) insertData.front_photo_url = frontPhotoUrl;
-      if (sidePhotoUrl) insertData.side_photo_url = sidePhotoUrl;
+      // Always update photos if new ones are uploaded (store path + cached signed URL)
+      if (frontPhotoResult) {
+        insertData.front_photo_url = frontPhotoResult.storagePath;
+        insertData.front_signed_url = frontPhotoResult.signedUrl;
+        insertData.front_signed_url_expires_at = frontPhotoResult.expiresAt;
+      }
+      if (sidePhotoResult) {
+        insertData.side_photo_url = sidePhotoResult.storagePath;
+        insertData.side_signed_url = sidePhotoResult.signedUrl;
+        insertData.side_signed_url_expires_at = sidePhotoResult.expiresAt;
+      }
       const { error } = await supabase.from("weekly_fitness_entries").upsert(insertData, {
         onConflict: "user_id,week_end_date",
       });

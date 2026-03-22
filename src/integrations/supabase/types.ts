@@ -186,9 +186,13 @@ export type Database = {
           body_fat_percentage: number | null
           created_at: string
           front_photo_url: string | null
+          front_signed_url: string | null
+          front_signed_url_expires_at: string | null
           id: string
           notes: string | null
           side_photo_url: string | null
+          side_signed_url: string | null
+          side_signed_url_expires_at: string | null
           skin_fold_mm: number | null
           updated_at: string
           user_id: string
@@ -201,9 +205,13 @@ export type Database = {
           body_fat_percentage?: number | null
           created_at?: string
           front_photo_url?: string | null
+          front_signed_url?: string | null
+          front_signed_url_expires_at?: string | null
           id?: string
           notes?: string | null
           side_photo_url?: string | null
+          side_signed_url?: string | null
+          side_signed_url_expires_at?: string | null
           skin_fold_mm?: number | null
           updated_at?: string
           user_id: string
@@ -216,9 +224,13 @@ export type Database = {
           body_fat_percentage?: number | null
           created_at?: string
           front_photo_url?: string | null
+          front_signed_url?: string | null
+          front_signed_url_expires_at?: string | null
           id?: string
           notes?: string | null
           side_photo_url?: string | null
+          side_signed_url?: string | null
+          side_signed_url_expires_at?: string | null
           skin_fold_mm?: number | null
           updated_at?: string
           user_id?: string

@@ -29,20 +29,29 @@ export function Dashboard({
   const [showGoalsForm, setShowGoalsForm] = useState(false);
   const [showAffirmationsManager, setShowAffirmationsManager] = useState(false);
   const [fitnessPhotos, setFitnessPhotos] = useState<Array<{
-    front_photo_url?: string;
-    side_photo_url?: string;
+    id: string;
+    front_photo_url?: string | null;
+    side_photo_url?: string | null;
+    front_signed_url?: string | null;
+    front_signed_url_expires_at?: string | null;
+    side_signed_url?: string | null;
+    side_signed_url_expires_at?: string | null;
     week_end_date: string;
   }>>([]);
   const [isCompareMode, setIsCompareMode] = useState(false);
   const [selectedPhotos, setSelectedPhotos] = useState<{
     before?: {
-      front_photo_url?: string;
-      side_photo_url?: string;
+      front_photo_url?: string | null;
+      side_photo_url?: string | null;
+      front_signed_url?: string | null;
+      side_signed_url?: string | null;
       week_end_date: string;
     };
     after?: {
-      front_photo_url?: string;
-      side_photo_url?: string;
+      front_photo_url?: string | null;
+      side_photo_url?: string | null;
+      front_signed_url?: string | null;
+      side_signed_url?: string | null;
       week_end_date: string;
     };
   }>({});
@@ -73,6 +82,77 @@ export function Dashboard({
       });
     }
   };
+  const isSignedUrlValid = (expiresAt: string | null | undefined): boolean => {
+    if (!expiresAt) return false;
+    // Consider expired if within 24 hours of expiry
+    return new Date(expiresAt).getTime() > Date.now() + 24 * 60 * 60 * 1000;
+  };
+
+  const generateAndCacheSignedUrl = async (
+    entryId: string,
+    photoUrl: string,
+    photoType: 'front' | 'side'
+  ): Promise<string | null> => {
+    try {
+      const pathMatch = photoUrl.match(/fitness-photos\/(.+)$/);
+      const storagePath = pathMatch ? pathMatch[1] : null;
+      if (!storagePath) return null;
+
+      const { data: signedData, error: signedError } = await supabase.storage
+        .from('fitness-photos')
+        .createSignedUrl(storagePath, 31536000); // 1 year
+
+      if (signedError || !signedData) {
+        console.error(`Error creating signed URL for ${photoType} photo:`, signedError);
+        return null;
+      }
+
+      const expiresAt = new Date(Date.now() + 31536000 * 1000).toISOString();
+      const urlField = photoType === 'front' ? 'front_signed_url' : 'side_signed_url';
+      const expiryField = photoType === 'front' ? 'front_signed_url_expires_at' : 'side_signed_url_expires_at';
+
+      await supabase
+        .from('weekly_fitness_entries')
+        .update({ [urlField]: signedData.signedUrl, [expiryField]: expiresAt })
+        .eq('id', entryId);
+
+      return signedData.signedUrl;
+    } catch (e) {
+      console.error(`Error processing ${photoType} photo URL:`, e);
+      return null;
+    }
+  };
+
+  const resolveSignedUrlsForSlide = async (index: number) => {
+    const entry = fitnessPhotos[index];
+    if (!entry) return;
+
+    let updated = false;
+    const updatedEntry = { ...entry };
+
+    if (entry.front_photo_url && !isSignedUrlValid(entry.front_signed_url_expires_at)) {
+      const url = await generateAndCacheSignedUrl(entry.id, entry.front_photo_url, 'front');
+      if (url) {
+        updatedEntry.front_signed_url = url;
+        updatedEntry.front_signed_url_expires_at = new Date(Date.now() + 31536000 * 1000).toISOString();
+        updated = true;
+      }
+    }
+
+    if (entry.side_photo_url && !isSignedUrlValid(entry.side_signed_url_expires_at)) {
+      const url = await generateAndCacheSignedUrl(entry.id, entry.side_photo_url, 'side');
+      if (url) {
+        updatedEntry.side_signed_url = url;
+        updatedEntry.side_signed_url_expires_at = new Date(Date.now() + 31536000 * 1000).toISOString();
+        updated = true;
+      }
+    }
+
+    if (updated) {
+      setFitnessPhotos(prev => prev.map((p, i) => i === index ? updatedEntry : p));
+    }
+  };
+
   const fetchFitnessPhotos = async () => {
     try {
       const {
@@ -84,64 +164,12 @@ export function Dashboard({
       const {
         data,
         error
-      } = await supabase.from('weekly_fitness_entries').select('front_photo_url, side_photo_url, week_end_date').eq('user_id', user.id).or('front_photo_url.not.is.null,side_photo_url.not.is.null').order('week_end_date', {
+      } = await supabase.from('weekly_fitness_entries').select('id, front_photo_url, side_photo_url, front_signed_url, front_signed_url_expires_at, side_signed_url, side_signed_url_expires_at, week_end_date').eq('user_id', user.id).or('front_photo_url.not.is.null,side_photo_url.not.is.null').order('week_end_date', {
         ascending: true
       });
       if (error) throw error;
-      
-      // Convert any existing public URLs to signed URLs for private bucket access
-      const photosWithSignedUrls = await Promise.all((data || []).map(async (entry) => {
-        const updatedEntry = { ...entry };
-        
-        // Only process if URLs exist and need to be converted
-        if (entry.front_photo_url) {
-          try {
-            // Extract the full path after 'fitness-photos/' from the URL
-            const pathMatch = entry.front_photo_url.match(/fitness-photos\/(.+)$/);
-            const storagePath = pathMatch ? pathMatch[1] : null;
-            
-            if (storagePath) {
-              const { data: signedData, error: signedError } = await supabase.storage
-                .from('fitness-photos')
-                .createSignedUrl(storagePath, 31536000); // 1 year expiry
-              
-              if (signedError) {
-                console.error('Error creating signed URL for front photo:', signedError, 'Path:', storagePath);
-              } else if (signedData) {
-                updatedEntry.front_photo_url = signedData.signedUrl;
-              }
-            }
-          } catch (e) {
-            console.error('Error processing front photo URL:', e);
-          }
-        }
-        
-        if (entry.side_photo_url) {
-          try {
-            // Extract the full path after 'fitness-photos/' from the URL
-            const pathMatch = entry.side_photo_url.match(/fitness-photos\/(.+)$/);
-            const storagePath = pathMatch ? pathMatch[1] : null;
-            
-            if (storagePath) {
-              const { data: signedData, error: signedError } = await supabase.storage
-                .from('fitness-photos')
-                .createSignedUrl(storagePath, 31536000); // 1 year expiry
-              
-              if (signedError) {
-                console.error('Error creating signed URL for side photo:', signedError, 'Path:', storagePath);
-              } else if (signedData) {
-                updatedEntry.side_photo_url = signedData.signedUrl;
-              }
-            }
-          } catch (e) {
-            console.error('Error processing side photo URL:', e);
-          }
-        }
-        
-        return updatedEntry;
-      }));
-      
-      setFitnessPhotos(photosWithSignedUrls);
+
+      setFitnessPhotos(data || []);
     } catch (error) {
       console.error('Error fetching fitness photos:', error);
     }
@@ -183,15 +211,33 @@ export function Dashboard({
     };
   }, []);
 
-  // Set carousel to show most recent photos when data is loaded
+  // Set carousel to show most recent photos and lazy-load signed URLs
   useEffect(() => {
     if (carouselApi && fitnessPhotos.length > 0) {
+      const lastIndex = fitnessPhotos.length - 1;
       // Use setTimeout to ensure carousel is ready after state update
       setTimeout(() => {
-        carouselApi.scrollTo(fitnessPhotos.length - 1);
+        carouselApi.scrollTo(lastIndex);
       }, 100);
+
+      // Resolve signed URLs for the initial visible slide and adjacent
+      for (let i = Math.max(0, lastIndex - 1); i <= lastIndex; i++) {
+        resolveSignedUrlsForSlide(i);
+      }
+
+      // Resolve adjacent slides on carousel scroll
+      const onSelect = () => {
+        const current = carouselApi.selectedScrollSnap();
+        for (let i = Math.max(0, current - 1); i <= Math.min(fitnessPhotos.length - 1, current + 1); i++) {
+          resolveSignedUrlsForSlide(i);
+        }
+      };
+      carouselApi.on('select', onSelect);
+      return () => {
+        carouselApi.off('select', onSelect);
+      };
     }
-  }, [carouselApi, fitnessPhotos]);
+  }, [carouselApi, fitnessPhotos.length]);
   const handleDataAdded = () => {
     fetchFitnessPhotos(); // Refresh photos when new data is added
     fetchFitnessStats(); // Refresh stats when new data is added
@@ -214,10 +260,14 @@ export function Dashboard({
     setIsCompareMode(true);
     setSelectionStep('before');
     setSelectedPhotos({});
+    // Resolve signed URLs for all photos when entering compare mode (thumbnails need them)
+    fitnessPhotos.forEach((_, i) => resolveSignedUrlsForSlide(i));
   };
   const handlePhotoSelect = (photo: {
-    front_photo_url?: string;
-    side_photo_url?: string;
+    front_photo_url?: string | null;
+    side_photo_url?: string | null;
+    front_signed_url?: string | null;
+    side_signed_url?: string | null;
     week_end_date: string;
   }) => {
     if (selectionStep === 'before') {
@@ -540,11 +590,11 @@ export function Dashboard({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <h4 className="text-sm font-medium text-center">Front View</h4>
-                            {entry.front_photo_url && <img src={entry.front_photo_url} alt={`Front view - ${entry.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                            {(entry.front_signed_url || entry.front_photo_url) && <img src={entry.front_signed_url || entry.front_photo_url || ''} alt={`Front view - ${entry.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" loading="lazy" />}
                           </div>
                           <div className="space-y-2">
                             <h4 className="text-sm font-medium text-center">Side View</h4>
-                            {entry.side_photo_url && <img src={entry.side_photo_url} alt={`Side view - ${entry.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                            {(entry.side_signed_url || entry.side_photo_url) && <img src={entry.side_signed_url || entry.side_photo_url || ''} alt={`Side view - ${entry.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" loading="lazy" />}
                           </div>
                         </div>
                         <p className="text-center text-sm text-muted-foreground mt-2">
@@ -569,7 +619,7 @@ export function Dashboard({
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium text-center text-primary">Before</h5>
-                        {selectedPhotos.before.front_photo_url && <img src={selectedPhotos.before.front_photo_url} alt={`Before front - ${selectedPhotos.before.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                        {(selectedPhotos.before.front_signed_url || selectedPhotos.before.front_photo_url) && <img src={selectedPhotos.before.front_signed_url || selectedPhotos.before.front_photo_url || ''} alt={`Before front - ${selectedPhotos.before.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
                           {(() => {
                       const [year, month, day] = selectedPhotos.before.week_end_date.split('-').map(Number);
@@ -584,7 +634,7 @@ export function Dashboard({
                       </div>
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium text-center text-secondary">After</h5>
-                        {selectedPhotos.after.front_photo_url && <img src={selectedPhotos.after.front_photo_url} alt={`After front - ${selectedPhotos.after.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                        {(selectedPhotos.after.front_signed_url || selectedPhotos.after.front_photo_url) && <img src={selectedPhotos.after.front_signed_url || selectedPhotos.after.front_photo_url || ''} alt={`After front - ${selectedPhotos.after.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
                           {(() => {
                       const [year, month, day] = selectedPhotos.after.week_end_date.split('-').map(Number);
@@ -606,7 +656,7 @@ export function Dashboard({
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium text-center text-primary">Before</h5>
-                        {selectedPhotos.before.side_photo_url && <img src={selectedPhotos.before.side_photo_url} alt={`Before side - ${selectedPhotos.before.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                        {(selectedPhotos.before.side_signed_url || selectedPhotos.before.side_photo_url) && <img src={selectedPhotos.before.side_signed_url || selectedPhotos.before.side_photo_url || ''} alt={`Before side - ${selectedPhotos.before.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
                           {(() => {
                       const [year, month, day] = selectedPhotos.before.week_end_date.split('-').map(Number);
@@ -621,7 +671,7 @@ export function Dashboard({
                       </div>
                       <div className="space-y-2">
                         <h5 className="text-sm font-medium text-center text-secondary">After</h5>
-                        {selectedPhotos.after.side_photo_url && <img src={selectedPhotos.after.side_photo_url} alt={`After side - ${selectedPhotos.after.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
+                        {(selectedPhotos.after.side_signed_url || selectedPhotos.after.side_photo_url) && <img src={selectedPhotos.after.side_signed_url || selectedPhotos.after.side_photo_url || ''} alt={`After side - ${selectedPhotos.after.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded-lg" />}
                         <p className="text-center text-xs text-muted-foreground">
                           {(() => {
                       const [year, month, day] = selectedPhotos.after.week_end_date.split('-').map(Number);
@@ -645,11 +695,11 @@ export function Dashboard({
                         <div className="grid grid-cols-2 gap-2">
                           <div className="space-y-1">
                             <h5 className="text-xs font-medium text-center">Front</h5>
-                            {entry.front_photo_url && <img src={entry.front_photo_url} alt={`Front - ${entry.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded" />}
+                            {(entry.front_signed_url || entry.front_photo_url) && <img src={entry.front_signed_url || entry.front_photo_url || ''} alt={`Front - ${entry.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded" loading="lazy" />}
                           </div>
                           <div className="space-y-1">
                             <h5 className="text-xs font-medium text-center">Side</h5>
-                            {entry.side_photo_url && <img src={entry.side_photo_url} alt={`Side - ${entry.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded" />}
+                            {(entry.side_signed_url || entry.side_photo_url) && <img src={entry.side_signed_url || entry.side_photo_url || ''} alt={`Side - ${entry.week_end_date}`} className="w-full aspect-[9/16] object-cover rounded" loading="lazy" />}
                           </div>
                         </div>
                         <p className="text-center text-xs text-muted-foreground mt-1">
