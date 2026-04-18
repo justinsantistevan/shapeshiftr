@@ -258,7 +258,9 @@ Three LLM judges (all running Claude Haiku 4.5, the model they were calibrated o
 
 Each judge outputs structured JSON with per-criterion pass/fail verdicts, an overall score (1 = pass, 0 = fail), and detailed reasoning. Judge prompts were iteratively calibrated against 66 human-labeled traces across 4 rounds, achieving 86-100% agreement per dimension.
 
-**Production monitoring:** Judge prompts are stored in Langfuse and configured to run as evaluators on all live production traces. This provides continuous safety monitoring without manual review of every response.
+**Production monitoring:** Judge prompts are stored in Langfuse and configured to run as evaluators on all production traces. This provides continuous safety monitoring without manual review of every response.
+
+**Score alerting:** A monitoring script (`scripts/monitor-scores.ts`) queries recent eval scores from Langfuse, computes pass rates per dimension, and alerts when any dimension drops below a configurable threshold (default 80%). Supports Slack/Discord webhook notifications via `ALERT_WEBHOOK_URL` env var. Can be run on a schedule via system cron for daily alerting (see [Evaluation Pipeline](#evaluation-pipeline)).
 
 ### User Feedback Loop
 
@@ -324,7 +326,37 @@ Synthetic Dataset (Langfuse)
   calibrate-judges.ts  Compare auto-scores to human labels (TPR/TNR/FP/FN)
   compare-runs.ts      Compare two runs side-by-side (baseline vs. new)
   inspect-disagreements.ts   Drill into specific judge errors
+
+Production Traces (Langfuse)
+        |
+        v
+  monitor-scores.ts   Check eval pass rates, alert on regressions
+                       (daily cron → Slack/Discord webhook)
 ```
+
+### Score Monitoring & Alerting
+
+A monitoring script checks production eval scores and alerts on pass-rate regressions:
+
+```bash
+# Check last 24h, alert if any dimension drops below 80%
+npx tsx scripts/monitor-scores.ts
+
+# Custom window and threshold
+npx tsx scripts/monitor-scores.ts --hours 48 --threshold 90
+```
+
+To enable Slack/Discord notifications, add `ALERT_WEBHOOK_URL` to your `.env` file (see [Environment Variables](#environment-variables)).
+
+To run daily via cron, create a wrapper script and schedule it:
+
+```bash
+# Example crontab entry (daily at 8:03am)
+3 8 * * * /path/to/shapeshiftr/scripts/monitor-scores-cron.sh
+```
+
+The script exits with code 1 on threshold breaches, making it compatible with any alerting system that monitors exit codes.
+
 ## API Dependencies
 
 ### Anthropic
@@ -374,6 +406,9 @@ VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
 
 # Google AI (Chat Coach)
 GOOGLE_API_KEY=your_google_api_key
+
+# Score Monitoring (Optional — Slack/Discord webhook for eval alerts)
+ALERT_WEBHOOK_URL=https://hooks.slack.com/services/T.../B.../xxx
 ```
 
 ## Installation & Development
