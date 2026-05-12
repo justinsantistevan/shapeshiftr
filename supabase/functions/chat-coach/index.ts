@@ -12,7 +12,7 @@ import { fetchPrompt, traceLLMCall } from "../_shared/langfuse.ts";
 // @ts-ignore - Deno global is available in Deno runtime
 const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
 
-const MODEL = "gemini-3.1-flash-lite-preview";
+const MODEL = "gemini-3.1-flash-lite";
 const PROMPT_NAME = "chat-coach-system";
 
 // Fallback prompt matching Langfuse chat-coach-system v6 (used if Langfuse is unavailable)

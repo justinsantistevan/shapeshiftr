@@ -153,7 +153,7 @@ Two distinct AI coaching features delivered via Supabase Edge Functions, with al
 #### `chat-coach`
 
 - **Purpose**: Interactive conversational fitness coaching
-- **Model**: Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite-preview`)
+- **Model**: Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`)
 - **Input**: User message, conversation history, full weekly metrics table, goals, affirmations
 - **Output**: Concise coaching responses (2-4 sentences, max 200 words)
 - **Features**:
@@ -373,7 +373,7 @@ The script exits with code 1 on threshold breaches, making it compatible with an
 
 ### Google AI
 
-- **Model**: `gemini-3.1-flash-lite-preview` (Gemini 3.1 Flash-Lite)
+- **Model**: `gemini-3.1-flash-lite` (Gemini 3.1 Flash-Lite)
 - **Use Cases**: Chat coach (primary model — better eval scores, 40% lower latency, ~4x lower cost vs Haiku)
 - **SDK**: `@google/generative-ai`
 
