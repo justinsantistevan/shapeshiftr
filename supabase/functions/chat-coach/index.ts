@@ -8,11 +8,14 @@ import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 // @ts-ignore - Deno imports are resolved at runtime
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { fetchPrompt, traceLLMCall } from "../_shared/langfuse.ts";
+import { generateCoachReply } from "./gemini.ts";
+import { CoachError, coachErrorResponse } from "./errors.ts";
+import { withDeadline } from "./deadline.ts";
 
 // @ts-ignore - Deno global is available in Deno runtime
 const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
 
-const MODEL = "gemini-3.1-flash-lite";
+const MODEL = Deno.env.get("CHAT_COACH_MODEL")?.trim() || "gemini-3.5-flash-lite";
 const PROMPT_NAME = "chat-coach-system";
 
 // Fallback prompt matching Langfuse chat-coach-system v6 (used if Langfuse is unavailable)
@@ -253,207 +256,166 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const deadline = Date.now() + 30_000;
   try {
-    // Authenticate user
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
+    return await withDeadline(async signal => {
+      // Authenticate user
+      const authHeader = req.headers.get('Authorization');
+      if (!authHeader?.startsWith('Bearer ')) {
+        throw new CoachError('SESSION_EXPIRED');
+      }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claimsData, error: authError } = await supabase.auth.getClaims(token);
-    if (authError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const rawData = await req.json();
-    console.log("Received chat request");
-
-    // Validate input
-    const validationResult = chatRequestSchema.safeParse(rawData);
-    if (!validationResult.success) {
-      console.error("Validation errors:", validationResult.error.format());
-      return new Response(
-        JSON.stringify({
-          error: "Invalid request. Message must be between 1-5000 characters.",
-          details: validationResult.error.format(),
-        }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+      const supabase = createClient(supabaseUrl, supabaseKey, {
+        global: {
+          headers: { Authorization: authHeader },
+          fetch: (input, init) => fetch(input, { ...init, signal }),
         },
-      );
-    }
+      });
 
-    const { message, stats, goals, affirmations, conversationHistory, history } = validationResult.data;
-    console.log("Chat coach called with validated message");
+      const token = authHeader.replace('Bearer ', '');
+      const { data: claimsData, error: authError } = await supabase.auth.getClaims(token);
+      if (authError || !claimsData?.claims) {
+        throw new CoachError('SESSION_EXPIRED');
+      }
 
-    if (!geminiApiKey) {
-      console.error("GEMINI_API_KEY is not configured");
-      return new Response(
-        JSON.stringify({
-          error: "AI API key is not configured. Please contact support.",
-        }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        },
-      );
-    }
+      const rawData = await req.json().catch(() => { throw new CoachError('INVALID_REQUEST'); });
+      console.log("Received chat request");
 
-    // Fetch static instructions from Langfuse (falls back to hardcoded)
-    const langfusePrompt = await fetchPrompt(PROMPT_NAME);
-    const staticInstructions = langfusePrompt?.text ?? FALLBACK_STATIC_INSTRUCTIONS;
-    const promptVersion = langfusePrompt?.version;
+      // Validate input
+      const validationResult = chatRequestSchema.safeParse(rawData);
+      if (!validationResult.success) {
+        throw new CoachError('INVALID_REQUEST');
+      }
 
-    // Build dynamic context from runtime data
-    const dynamicContext = buildUserContext({ stats, goals, affirmations, history });
+      const { message, stats, goals, affirmations, conversationHistory, history } = validationResult.data;
+      console.log("Chat coach called with validated message");
 
-    // Combine static instructions + dynamic context
-    const systemPrompt = staticInstructions + "\n\n" + dynamicContext;
+      if (!geminiApiKey) {
+        throw new CoachError('COACH_UNAVAILABLE');
+      }
 
-    // Build messages array for Gemini (map "assistant" role to "model")
-    const geminiHistory = (conversationHistory || [])
-      .filter((m: { role: string }) => m.role !== "system")
-      .map((m: { role: string; content: string }) => ({
-        role: m.role === "assistant" ? "model" : m.role,
-        parts: [{ text: m.content }],
-      }));
+      // Fetch static instructions from Langfuse (falls back to hardcoded)
+      const langfusePrompt = await withDeadline(
+        signal => fetchPrompt(PROMPT_NAME, "production", signal),
+        Math.min(deadline, Date.now() + 2_000),
+      ).catch(() => null);
+      const staticInstructions = langfusePrompt?.text ?? FALLBACK_STATIC_INSTRUCTIONS;
+      const promptVersion = langfusePrompt?.version;
 
-    const geminiContents = [
-      ...geminiHistory,
-      { role: "user", parts: [{ text: message }] },
-    ];
+      // Build dynamic context from runtime data
+      const dynamicContext = buildUserContext({ stats, goals, affirmations, history });
 
-    // Also keep a flat messages array for Langfuse tracing
-    const traceMessages = [
-      ...(conversationHistory || []).filter((m: { role: string }) => m.role !== "system"),
-      { role: "user", content: message },
-    ];
+      // Combine static instructions + dynamic context
+      const systemPrompt = staticInstructions + "\n\n" + dynamicContext;
 
-    console.log("Calling Google Generative AI API for chat...");
-    const traceStartTime = Date.now();
+      // Build messages array for Gemini (map "assistant" role to "model")
+      const geminiHistory = (conversationHistory || [])
+        .filter((m: { role: string }) => m.role !== "system")
+        .map((m: { role: string; content: string }) => ({
+          role: m.role === "assistant" ? "model" : m.role,
+          parts: [{ text: m.content }],
+        }));
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${geminiApiKey}`;
-    const response = await fetch(geminiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt }] },
-        contents: geminiContents,
-        generationConfig: { maxOutputTokens: 1024 },
-      }),
-    });
+      const geminiContents = [
+        ...geminiHistory,
+        { role: "user", parts: [{ text: message }] },
+      ];
 
-    const traceEndTime = Date.now();
-    console.log("Google AI API response status:", response.status);
+      // Also keep a flat messages array for Langfuse tracing
+      const traceMessages = [
+        ...(conversationHistory || []).filter((m: { role: string }) => m.role !== "system"),
+        { role: "user", content: message },
+      ];
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Google AI API error response:", errorText);
+      console.log("Calling Google Generative AI API for chat...");
+      const traceStartTime = Date.now();
 
-      await traceLLMCall({
+      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${geminiApiKey}`;
+      let data;
+      try {
+        data = await generateCoachReply(geminiUrl, {
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents: geminiContents,
+          generationConfig: { maxOutputTokens: 1024 },
+        }, { deadline: Math.min(deadline - 1_500, Date.now() + 25_000) });
+      } catch (error) {
+        await withDeadline(signal => traceLLMCall({
+          name: "chat-coach", model: MODEL, systemPrompt,
+          messages: traceMessages, output: null,
+          startTime: traceStartTime, endTime: Date.now(),
+          promptName: PROMPT_NAME, promptVersion,
+          error: error instanceof CoachError ? error.code : "COACH_UNAVAILABLE",
+        }, signal), Math.min(deadline, Date.now() + 1_500)).catch(() => null);
+        throw error;
+      }
+      const traceEndTime = Date.now();
+
+      console.log("Chat response received");
+      if (data.usageMetadata) {
+        console.log("Token usage:", data.usageMetadata);
+      }
+
+      const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!reply) {
+        console.error("No reply content in response");
+        throw new Error("Failed to generate reply");
+      }
+
+      // Map Gemini usage to the format Langfuse expects
+      const usageMeta = data.usageMetadata;
+      const usageForTrace = usageMeta
+        ? {
+            input_tokens: usageMeta.promptTokenCount || 0,
+            output_tokens: usageMeta.candidatesTokenCount || 0,
+          }
+        : undefined;
+
+      const langfuseTraceId = await withDeadline(signal => traceLLMCall({
         name: "chat-coach",
         model: MODEL,
         systemPrompt,
         messages: traceMessages as Array<{ role: string; content: string }>,
-        output: null,
+        output: reply,
         startTime: traceStartTime,
         endTime: traceEndTime,
         promptName: PROMPT_NAME,
         promptVersion,
-        error: `Google AI API error: ${response.status} - ${errorText}`,
-      });
+        usage: usageForTrace,
+        metadata: { user_context: dynamicContext },
+      }, signal), Math.min(deadline, Date.now() + 1_500)).catch(() => null);
 
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "The AI coach is busy right now. Please wait a moment and try again." }),
-          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-        );
-      }
-      throw new Error(`Google AI API error: ${response.status} - ${errorText}`);
-    }
+      const tokenUsage = usageMeta
+        ? {
+            tokens_input: usageMeta.promptTokenCount || null,
+            tokens_output: usageMeta.candidatesTokenCount || null,
+            tokens_total: usageMeta.totalTokenCount || null,
+          }
+        : {
+            tokens_input: null,
+            tokens_output: null,
+            tokens_total: null,
+          };
 
-    const data = await response.json();
-    console.log("Chat response received");
-    if (data.usageMetadata) {
-      console.log("Token usage:", data.usageMetadata);
-    }
-
-    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!reply) {
-      console.error("No reply content in response");
-      throw new Error("Failed to generate reply");
-    }
-
-    // Map Gemini usage to the format Langfuse expects
-    const usageMeta = data.usageMetadata;
-    const usageForTrace = usageMeta
-      ? {
-          input_tokens: usageMeta.promptTokenCount || 0,
-          output_tokens: usageMeta.candidatesTokenCount || 0,
-        }
-      : undefined;
-
-    const langfuseTraceId = await traceLLMCall({
-      name: "chat-coach",
-      model: MODEL,
-      systemPrompt,
-      messages: traceMessages as Array<{ role: string; content: string }>,
-      output: reply,
-      startTime: traceStartTime,
-      endTime: traceEndTime,
-      promptName: PROMPT_NAME,
-      promptVersion,
-      usage: usageForTrace,
-      metadata: { user_context: dynamicContext },
-    });
-
-    const tokenUsage = usageMeta
-      ? {
-          tokens_input: usageMeta.promptTokenCount || null,
-          tokens_output: usageMeta.candidatesTokenCount || null,
-          tokens_total: usageMeta.totalTokenCount || null,
-        }
-      : {
-          tokens_input: null,
-          tokens_output: null,
-          tokens_total: null,
-        };
-
-    return new Response(
-      JSON.stringify({
-        reply,
-        metadata: {
-          llm_model: MODEL,
-          system_prompt_version: promptVersion ?? "fallback",
-          langfuse_trace_id: langfuseTraceId ?? null,
-          ...tokenUsage,
+      return new Response(
+        JSON.stringify({
+          reply,
+          metadata: {
+            llm_model: MODEL,
+            system_prompt_version: promptVersion ?? "fallback",
+            langfuse_trace_id: langfuseTraceId ?? null,
+            ...tokenUsage,
+          },
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
         },
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      },
-    );
+      );
+    }, deadline);
   } catch (error) {
-    console.error("Error in chat-coach function:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.error("chat-coach failed:", error instanceof CoachError ? error.code : "COACH_UNAVAILABLE");
+    return coachErrorResponse(error, corsHeaders);
   }
 });

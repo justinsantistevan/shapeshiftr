@@ -25,6 +25,7 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 export async function fetchPrompt(
   name: string,
   label = "production",
+  signal?: AbortSignal,
 ): Promise<{ text: string; version: number } | null> {
   if (!LANGFUSE_PUBLIC_KEY || !LANGFUSE_SECRET_KEY) {
     console.log("[langfuse] No credentials set, skipping prompt fetch");
@@ -44,6 +45,7 @@ export async function fetchPrompt(
     const url = `${LANGFUSE_HOST}/api/public/v2/prompts/${encodeURIComponent(name)}?label=${encodeURIComponent(label)}`;
 
     const resp = await fetch(url, {
+      signal,
       headers: { Authorization: `Basic ${auth}` },
     });
 
@@ -97,7 +99,7 @@ export interface LLMTraceParams {
  * Returns the traceId so callers can store it and attach scores later.
  * Non-fatal: errors are logged but never thrown.
  */
-export async function traceLLMCall(params: LLMTraceParams): Promise<string | null> {
+export async function traceLLMCall(params: LLMTraceParams, signal?: AbortSignal): Promise<string | null> {
   if (!LANGFUSE_PUBLIC_KEY || !LANGFUSE_SECRET_KEY) {
     console.log("[langfuse] No credentials set, skipping trace");
     return null;
@@ -180,6 +182,7 @@ export async function traceLLMCall(params: LLMTraceParams): Promise<string | nul
 
     const auth = btoa(`${LANGFUSE_PUBLIC_KEY}:${LANGFUSE_SECRET_KEY}`);
     const resp = await fetch(`${LANGFUSE_HOST}/api/public/ingestion`, {
+      signal,
       method: "POST",
       headers: {
         Authorization: `Basic ${auth}`,

@@ -153,7 +153,7 @@ Two distinct AI coaching features delivered via Supabase Edge Functions, with al
 #### `chat-coach`
 
 - **Purpose**: Interactive conversational fitness coaching
-- **Model**: Gemini 3.1 Flash-Lite (`gemini-3.1-flash-lite`)
+- **Model**: Gemini 3.5 Flash-Lite (`gemini-3.5-flash-lite`), overridable with the Edge Function environment variable `CHAT_COACH_MODEL`
 - **Input**: User message, conversation history, full weekly metrics table, goals, affirmations
 - **Output**: Concise coaching responses (2-4 sentences, max 200 words)
 - **Features**:
@@ -162,6 +162,21 @@ Two distinct AI coaching features delivered via Supabase Edge Functions, with al
   - Security redirect protocol for off-topic/adversarial inputs
   - Safety boundaries (medical deferral, body image referrals, harmful framing prohibition)
   - Langfuse tracing with user feedback loop
+
+Chat requests have a 30-second overall deadline (including authentication and optional
+Langfuse work), with up to 25 seconds for Google. Transient network errors and HTTP
+408/500/502/503/504 are retried at most twice using exponential backoff plus jitter.
+`Retry-After` seconds and HTTP dates are respected. HTTP 429 is retried only with an
+explicit `Retry-After` and no daily/zero/billing quota indicators; unknown or hard
+quota failures, authentication failures, and invalid requests are not retried.
+Langfuse prompt retrieval is capped at 2 seconds (then uses the fallback prompt),
+and trace submission at 1.5 seconds. The API returns safe `code`/`error` envelopes
+with non-2xx status codes; Ask Coach maps these to overload, session, and input
+messages without exposing upstream diagnostics.
+
+Local regression tests: `npm test` (Node/tsx; no Deno installation required).
+These exercise the bundled handler with mocked network/auth boundaries, not live
+Google model availability or a deployed Supabase runtime.
 
 #### `score-trace`
 
@@ -373,8 +388,8 @@ The script exits with code 1 on threshold breaches, making it compatible with an
 
 ### Google AI
 
-- **Model**: `gemini-3.1-flash-lite` (Gemini 3.1 Flash-Lite)
-- **Use Cases**: Chat coach (primary model — better eval scores, 40% lower latency, ~4x lower cost vs Haiku)
+- **Model**: `gemini-3.5-flash-lite` (Gemini 3.5 Flash-Lite); `CHAT_COACH_MODEL` overrides the chat-coach default
+- **Use Cases**: Chat coach
 - **SDK**: `@google/generative-ai`
 
 ### Supabase

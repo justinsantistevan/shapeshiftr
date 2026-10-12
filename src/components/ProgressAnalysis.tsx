@@ -12,6 +12,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import ReactMarkdown from "react-markdown";
 import { ChatFeedback } from "./ChatFeedback";
 import { toast } from "@/hooks/use-toast";
+import { getCoachErrorMessage, requireCoachReply } from "@/lib/coachErrors";
 
 interface ProgressAnalysisProps {
   stats: FitnessStats | null;
@@ -278,7 +279,7 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
 
     try {
       const history = await fetchHistory();
-      const { data, error } = await supabase.functions.invoke('chat-coach', {
+      const { data: responseData, error } = await supabase.functions.invoke('chat-coach', {
         body: { 
           message: userMsgContent,
           stats,
@@ -289,20 +290,7 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
         }
       });
 
-      if (error) throw error;
-      if (data?.error) {
-        // Show the error as a friendly assistant message instead of throwing
-        const errorMessageId = crypto.randomUUID();
-        const errorResponse: ChatMessage = {
-          role: 'assistant',
-          content: data.error,
-          id: errorMessageId,
-          timestamp: new Date().toISOString()
-        };
-        setChatMessages(prev => [...prev, errorResponse]);
-        setIsChatLoading(false);
-        return;
-      }
+      const data = requireCoachReply(responseData, error);
 
       const responseTime = Date.now() - startTime;
       const assistantMessageId = crypto.randomUUID();
@@ -342,14 +330,13 @@ export const ProgressAnalysis = ({ stats, goals, goalsLoaded = true }: ProgressA
         );
 
     } catch (error) {
-      console.error('Error in chat:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = await getCoachErrorMessage(error);
       const responseTime = Date.now() - startTime;
       const errorMessageId = crypto.randomUUID();
       
       const errorResponse: ChatMessage = {
         role: 'assistant',
-        content: "Sorry, I'm having trouble responding right now. Please try again later.",
+        content: errorMessage,
         id: errorMessageId,
         timestamp: new Date().toISOString()
       };
