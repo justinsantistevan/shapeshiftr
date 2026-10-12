@@ -1,0 +1,200 @@
+{
+  "lockfile-version": 1,
+  "manifest": {
+    "schema-version": "1.12.0",
+    "install": {
+      "deno": {
+        "pkg-path": "deno"
+      },
+      "nodejs": {
+        "pkg-path": "nodejs_22"
+      }
+    },
+    "hook": {
+      "on-activate": "  cd \"$FLOX_ENV_PROJECT\" || return 1\n  mkdir -p \"$FLOX_ENV_CACHE\" || return 1\n  # Include the runtime and platform so native npm packages refresh when needed.\n  deps_key=\"$(node --input-type=module -e '\n    import { createHash } from \"node:crypto\";\n    import { readFileSync } from \"node:fs\";\n    const hash = createHash(\"sha256\");\n    for (const file of [\"package.json\", \"package-lock.json\"]) {\n      hash.update(readFileSync(file));\n    }\n    hash.update(process.version + process.platform + process.arch);\n    console.log(hash.digest(\"hex\"));\n  ')\" || return 1\n  stamp=\"$FLOX_ENV_CACHE/npm-deps.sha256\"\n  previous_key=\"$(cat \"$stamp\" 2>/dev/null || true)\"\n  if [ ! -d node_modules ] || [ \"$deps_key\" != \"$previous_key\" ]; then\n    npm ci --no-fund --no-audit >&2 || return 1\n    printf '%s\\n' \"$deps_key\" > \"$stamp\" || return 1\n  fi\n"
+    },
+    "options": {}
+  },
+  "packages": [
+    {
+      "attr_path": "deno",
+      "broken": false,
+      "derivation": "/nix/store/dkwa70by66pv79248402mcndva3ykrw3-deno-2.9.7.drv",
+      "description": "Secure runtime for JavaScript and TypeScript",
+      "install_id": "deno",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6510408d147d8c5e6d76043e899e9251756f6a75",
+      "name": "deno-2.9.7",
+      "pname": "deno",
+      "rev": "6510408d147d8c5e6d76043e899e9251756f6a75",
+      "rev_count": 1089111,
+      "rev_date": "2026-10-10T01:01:48Z",
+      "scrape_date": "2026-10-11T05:00:24.757859Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.9.7",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "denort": "/nix/store/l377ncs4dsdmfr36yjkvxk4lqsk6hfqr-deno-2.9.7-denort",
+        "libdenort": "/nix/store/zzq283zwa8hs1i9xfshwviffmbzqizhi-deno-2.9.7-libdenort",
+        "out": "/nix/store/4jixsxbkgx6wv22kx7s4nnpp4fbmy65l-deno-2.9.7"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "deno",
+      "broken": false,
+      "derivation": "/nix/store/w5qjys9b39hbfilql3cx4jvnmanrxj8x-deno-2.9.7.drv",
+      "description": "Secure runtime for JavaScript and TypeScript",
+      "install_id": "deno",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6510408d147d8c5e6d76043e899e9251756f6a75",
+      "name": "deno-2.9.7",
+      "pname": "deno",
+      "rev": "6510408d147d8c5e6d76043e899e9251756f6a75",
+      "rev_count": 1089111,
+      "rev_date": "2026-10-10T01:01:48Z",
+      "scrape_date": "2026-10-11T05:32:39.905381Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.9.7",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "denort": "/nix/store/1v2vnwkksgxhsbwhn00rjsn2gbiq8l9v-deno-2.9.7-denort",
+        "libdenort": "/nix/store/sp1c5a36z1kfnszdkacyr873f8yw25qm-deno-2.9.7-libdenort",
+        "out": "/nix/store/q56058iwni5cb6m7rwy76dqdbnwfvbk9-deno-2.9.7"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "deno",
+      "broken": false,
+      "derivation": "/nix/store/vb81nwrqzxx5ihm93a0nbr7alb5g6321-deno-2.9.7.drv",
+      "description": "Secure runtime for JavaScript and TypeScript",
+      "install_id": "deno",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6510408d147d8c5e6d76043e899e9251756f6a75",
+      "name": "deno-2.9.7",
+      "pname": "deno",
+      "rev": "6510408d147d8c5e6d76043e899e9251756f6a75",
+      "rev_count": 1089111,
+      "rev_date": "2026-10-10T01:01:48Z",
+      "scrape_date": "2026-10-11T06:09:24.057975Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "2.9.7",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "denort": "/nix/store/m0c2qmm4dbkj812q22g0ic88a24lh4xj-deno-2.9.7-denort",
+        "libdenort": "/nix/store/k7y3nh2c3ym5hn53k3zgn8jbm29jr351-deno-2.9.7-libdenort",
+        "out": "/nix/store/q4f99ywwv55mlmqllaly912qi5jzf19g-deno-2.9.7"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs_22",
+      "broken": false,
+      "derivation": "/nix/store/7vsxz0ym0rqw8h3zws2cr5cz8dqw6zcx-nodejs-22.23.3.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6510408d147d8c5e6d76043e899e9251756f6a75",
+      "name": "nodejs-22.23.3",
+      "pname": "nodejs_22",
+      "rev": "6510408d147d8c5e6d76043e899e9251756f6a75",
+      "rev_count": 1089111,
+      "rev_date": "2026-10-10T01:01:48Z",
+      "scrape_date": "2026-10-11T05:00:49.414784Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "22.23.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/31a8g9hg40fh1gs7241pyszrq8a4bajb-nodejs-22.23.3"
+      },
+      "system": "aarch64-darwin",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs_22",
+      "broken": false,
+      "derivation": "/nix/store/95zv0vbm6i5dvqgbw2d0wvsjaa1wp529-nodejs-22.23.3.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6510408d147d8c5e6d76043e899e9251756f6a75",
+      "name": "nodejs-22.23.3",
+      "pname": "nodejs_22",
+      "rev": "6510408d147d8c5e6d76043e899e9251756f6a75",
+      "rev_count": 1089111,
+      "rev_date": "2026-10-10T01:01:48Z",
+      "scrape_date": "2026-10-11T05:33:16.882930Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "22.23.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/1nzpiv2idya913acb1wd1ydxvd2dw0pz-nodejs-22.23.3"
+      },
+      "system": "aarch64-linux",
+      "group": "toplevel",
+      "priority": 5
+    },
+    {
+      "attr_path": "nodejs_22",
+      "broken": false,
+      "derivation": "/nix/store/in13n1y5f4gnka3sf7vciws70j7hz075-nodejs-22.23.3.drv",
+      "description": "Event-driven I/O framework for the V8 JavaScript engine",
+      "install_id": "nodejs",
+      "license": "MIT",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=6510408d147d8c5e6d76043e899e9251756f6a75",
+      "name": "nodejs-22.23.3",
+      "pname": "nodejs_22",
+      "rev": "6510408d147d8c5e6d76043e899e9251756f6a75",
+      "rev_count": 1089111,
+      "rev_date": "2026-10-10T01:01:48Z",
+      "scrape_date": "2026-10-11T06:10:04.296437Z",
+      "stabilities": [
+        "unstable"
+      ],
+      "unfree": false,
+      "version": "22.23.3",
+      "outputs_to_install": [
+        "out"
+      ],
+      "outputs": {
+        "out": "/nix/store/qshvhyv92g772jjsm2zrgzxc4ai4iqfx-nodejs-22.23.3"
+      },
+      "system": "x86_64-linux",
+      "group": "toplevel",
+      "priority": 5
+    }
+  ]
+}

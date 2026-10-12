@@ -14,8 +14,8 @@ dist-ssr
 
 # Environment variables
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*
@@ -32,7 +32,12 @@ dist-ssr
 .specstory/
 
 # Docs (internal use only)
-docs/
+docs/*
+!docs/flox.md
 
 # Scripts (internal use only)
 scripts/
+
+# Local agent settings (may contain credentials)
+.claude/settings.local.json
+.claude/settings.json

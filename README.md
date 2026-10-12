@@ -384,79 +384,93 @@ The script exits with code 1 on threshold breaches, making it compatible with an
 
 ## Environment Variables
 
-### Required Variables
+The frontend currently connects to the hosted Supabase project using the URL and
+public anon key in `src/integrations/supabase/client.ts`. These values are intended
+for browser use; database and storage access must remain protected by Supabase
+Row Level Security. `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` are not
+currently read by that client. To target another project, update the client with
+that project's URL and public anon/publishable key.
 
-```env
-# Anthropic API (Edge Functions + Eval Scripts)
-ANTHROPIC_API_KEY=your_anthropic_api_key
+Private API keys belong in Supabase Edge Function secrets or a local ignored
+`.env` for internal scripts. Never prefix private keys with `VITE_`, because Vite
+exposes those variables to browser code. Never put a service-role key or database
+password in frontend code, the Flox manifest, or committed files.
 
-# Langfuse (Edge Functions + Eval Scripts)
-LANGFUSE_PUBLIC_KEY=your_langfuse_public_key
-LANGFUSE_SECRET_KEY=your_langfuse_secret_key
+| Location | Variables |
+| --- | --- |
+| Supabase Edge Function secrets | `CLAUDE_API_KEY` (progress analysis), `GEMINI_API_KEY` (chat coach), `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` |
+| Supabase function runtime | `SUPABASE_URL`, `SUPABASE_ANON_KEY` (provided by Supabase) |
+| Local internal scripts | `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`, `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`; optional `ALERT_WEBHOOK_URL` |
 
-# Supabase Configuration
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-SUPABASE_DB_URL=your_supabase_db_connection_string
-
-# Vite Environment Variables (Frontend)
-VITE_SUPABASE_URL=your_supabase_project_url
-VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
-
-# Google AI (Chat Coach)
-GOOGLE_API_KEY=your_google_api_key
-
-# Score Monitoring (Optional — Slack/Discord webhook for eval alerts)
-ALERT_WEBHOOK_URL=https://hooks.slack.com/services/T.../B.../xxx
-```
+[`.env.example`](.env.example) contains placeholders for local script settings.
+Only copy it to `.env` if you need those scripts; keep your existing `.env` intact.
+Local `.env` files are ignored by Git, and Flox does not source or upload them.
 
 ## Installation & Development
 
 ### Prerequisites
 
-- Node.js 18+ and npm
-- Supabase account (or Lovable Cloud enabled)
-- Git
+- [Flox](https://flox.dev/docs/install-flox/install) and Git
+- Access to the hosted Supabase project for authenticated app features
+
+Flox supplies Node.js 22 (including npm) and Deno. The checked-in Flox lockfile
+locks the resolved versions for Apple Silicon macOS and ARM64/x86-64 Linux.
 
 ### Setup Steps
 
-1. **Clone the repository**
+1. **Clone the current main branch**
 
    ```sh
-   git clone <YOUR_GIT_URL>
-   cd <YOUR_PROJECT_NAME>
+   git clone https://github.com/justinsantistevan/shapeshiftr.git
+   cd shapeshiftr
+   git switch main
    ```
 
-2. **Install dependencies**
+   The hosted database uses `week_end_date`. Older branches that query
+   `week_start_date` will fail to load fitness entries.
+
+2. **Activate the environment**
 
    ```sh
-   npm install
+   flox activate
    ```
 
-3. **Configure environment variables**
-   Create a `.env` file in the project root:
+   Activation installs npm dependencies from `package-lock.json` on first use,
+   when `node_modules` is missing, or when the package files/runtime/platform
+   change. It skips installation otherwise. No `flox init` is needed after cloning.
 
-   ```env
-   VITE_SUPABASE_URL=your_supabase_project_url
-   VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
-   ```
-
-4. **Set up Supabase**
-   - Create a new Supabase project
-   - Run database migrations from `supabase/migrations/`
-   - Enable Row Level Security on all tables
-   - Create storage bucket for progress photos
-   - Configure Edge Functions with `ANTHROPIC_API_KEY` and Langfuse keys
-
-5. **Start development server**
+3. **Start the development server**
 
    ```sh
    npm run dev
    ```
 
-6. **Access the app**
-   Open `http://localhost:5173` in your browser
+   Open `http://localhost:3000` and sign in with your existing account.
+   Local development connects to the hosted backend; saving or deleting data
+   affects that backend.
+
+4. **Build and check the app**
+
+   ```sh
+   npm run build
+   npm run lint
+   ```
+
+   Lint currently reports existing application errors. A successful build is not
+   a clean lint result. You can also run commands without entering a shell:
+
+   ```sh
+   flox activate -- npm run build
+   flox activate -- npm run dev
+   ```
+
+See [the Flox setup guide](docs/flox.md) for dependency updates, secrets,
+troubleshooting, supported platforms, and the GitHub Desktop commit workflow.
+
+For a separate Supabase project, provision its schema, RLS policies, storage,
+and Edge Functions deliberately, and set the Edge Function secrets listed
+above. Flox does not provision or migrate a database. Do not rerun historical
+migrations against the existing hosted project to fix an outdated local branch.
 
 ## User Workflows
 
@@ -520,8 +534,12 @@ ALERT_WEBHOOK_URL=https://hooks.slack.com/services/T.../B.../xxx
 
 ### Via Lovable Platform
 
+Pushing code to GitHub syncs it with the connected Lovable branch; it does not
+automatically publish a new live snapshot. See [Lovable Git sync](https://docs.lovable.dev/integrations/github)
+and [publishing](https://docs.lovable.dev/features/publish).
+
 1. Open [Lovable Project](https://lovable.dev/projects/c1e25c55-4a52-4f6a-8bbf-62dc3f19aaa3)
-2. Click **Share → Publish**
+2. Click **Publish**, then **Publish changes** for an already published app
 3. Your app will be deployed to a Lovable subdomain
 
 ### Custom Domain
@@ -534,8 +552,8 @@ ALERT_WEBHOOK_URL=https://hooks.slack.com/services/T.../B.../xxx
 ### Manual Deployment
 
 ```sh
-# Build for production
-npm run build
+# Build for production using the local Flox environment
+flox activate -- npm run build
 
 # Deploy dist/ folder to hosting provider
 # (Vercel, Netlify, Cloudflare Pages, etc.)
