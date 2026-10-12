@@ -28,9 +28,9 @@ function harness(payload = { content: [{ type: 'text', text: 'Keep going.' }], s
     Request, Response, Headers, crypto, btoa, console: { log() {}, error() {} },
   });
   const metric = { current: 160, change: 1, direction: 'down', unit: 'lbs' };
-  return { requests, call: () => handler(new Request('https://example.test/analyze-progress', {
+  return { requests, call: (body?: unknown) => handler(new Request('https://example.test/analyze-progress', {
     method: 'POST', headers: { Authorization: 'Bearer test-token' },
-    body: JSON.stringify({ stats: { weight: metric, bodyFat: { ...metric, current: 15, unit: '%' }, exercise: { ...metric, current: 45, unit: 'min' }, skinFold: { ...metric, current: 20, unit: 'mm' }, calories: { ...metric, current: 1800, unit: 'cal' } }, goals: {} }),
+    body: JSON.stringify(body ?? { stats: { weight: metric, bodyFat: { ...metric, current: 15, unit: '%' }, exercise: { ...metric, current: 45, unit: 'min' }, skinFold: { ...metric, current: 20, unit: 'mm' }, calories: { ...metric, current: 1800, unit: 'cal' } }, goals: {} }),
   })) };
 }
 test('progress analysis requests Haiku 5.5 and preserves its response contract', async () => {
@@ -56,5 +56,56 @@ test('analysis does not present refusals or truncated output as a completed asse
     const data = await response.json();
     assert.equal(data.analysis, undefined);
     assert.equal(data.error, 'Failed to generate a complete analysis');
+  }
+});
+
+function partialRequest() {
+  const missing: { current: number | null; change: number | null; direction: string; unit: string } = { current: null, change: null, direction: 'neutral', unit: 'min' };
+  return { stats: { weight: { current: 180, change: null, direction: 'neutral', unit: 'lbs' }, bodyFat: { current: 22, change: null, direction: 'neutral', unit: '%' }, exercise: missing, skinFold: { ...missing, unit: 'mm' }, calories: { ...missing, unit: 'cal' } }, goals: { goal_weight: 170, goal_body_fat_percentage: 20, goal_skin_fold_mm: 15, goal_avg_exercise_min_per_day: 30 } };
+}
+test('partial weekly metrics reach the provider rather than failing validation', async () => {
+  const app = harness();
+  const response = await app.call(partialRequest());
+  assert.equal(response.status, 200, JSON.stringify(await response.clone().json()));
+  assert.equal((await response.json()).analysis, 'Keep going.');
+  assert.equal(app.requests.length, 1);
+});
+test('partial metrics stay missing and do not produce fabricated gaps or trends', async () => {
+  const app = harness();
+  await app.call(partialRequest());
+  const prompt = (app.requests[0].messages as Array<{ content: string }>)[0].content;
+  assert.match(prompt, /Weight: 180 lbs/);
+  assert.match(prompt, /Body Fat: 22\s*%/);
+  assert.match(prompt, /Exercise: not recorded/);
+  assert.match(prompt, /Skin Fold: not recorded/);
+  assert.match(prompt, /current gap: 10.0 lbs above target/);
+  assert.match(prompt, /gap unavailable/);
+  assert.match(prompt, /Weight: comparison unavailable/);
+  assert.doesNotMatch(prompt, /null|Exercise: 0|Skin Fold: 0/);
+  assert.match(app.requests[0].system as string, /Missing measurements are unknown, not zero/);
+});
+test('recorded zero and sparse dated history remain distinct from missing values', async () => {
+  const body = partialRequest();
+  body.stats.exercise = { current: 0, change: 0, direction: 'neutral', unit: 'min' };
+  const app = harness();
+  const response = await app.call({ ...body, stats: { ...body.stats, weight: { ...body.stats.weight, change: -4 }, comparisonDate: '2026-08-17', comparisonDaysAgo: 56 }, history: [
+    { week_end_date: '2026-10-12', weight: 180, body_fat_percentage: 22, avg_exercise_min_per_day: 0, skin_fold_mm: null },
+    { week_end_date: '2026-08-17', weight: 184, body_fat_percentage: null, avg_exercise_min_per_day: 0 },
+  ] });
+  assert.equal(response.status, 200);
+  const prompt = (app.requests[0].messages as Array<{ content: string }>)[0].content;
+  assert.match(prompt, /Exercise: 0 min\/day/);
+  assert.match(prompt, /current gap: 30.0 min\/day below target/);
+  assert.match(prompt, /Weight: signed change -4 lbs since week ending 2026-08-17, over 56 days/);
+  assert.match(prompt, /Body Fat: comparison unavailable/);
+  assert.match(prompt, /2026-08-17 \| 184 lbs \| N\/A%/);
+});
+test('nullable metrics do not weaken validation of malformed or incomplete metric objects', async () => {
+  for (const metric of [{ current: '180', change: null, direction: 'neutral', unit: 'lbs' }, { current: 180, direction: 'neutral', unit: 'lbs' }]) {
+    const body = partialRequest();
+    const app = harness();
+    const response = await app.call({ ...body, stats: { ...body.stats, weight: metric } });
+    assert.equal(response.status, 400);
+    assert.equal(app.requests.length, 0);
   }
 });

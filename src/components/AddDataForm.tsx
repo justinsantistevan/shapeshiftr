@@ -306,7 +306,13 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
   };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={cn("sm:max-w-[425px] max-h-[90vh] overflow-y-auto", shouldWiggle && "animate-wiggle")}>
+      <DialogContent
+        className={cn(
+          // Anchor mobile dialogs inside the visible viewport, not Safari's larger layout viewport.
+          "sm:max-w-[425px] top-[calc(1rem+env(safe-area-inset-top))] translate-y-0 max-h-[calc(100dvh-2rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] overflow-y-auto overscroll-contain pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:top-[50%] sm:translate-y-[-50%]",
+          shouldWiggle && "animate-wiggle",
+        )}
+      >
         <DialogHeader>
           <DialogTitle className="pt-1">Add Fitness Data</DialogTitle>
           <DialogDescription>Track your weekly fitness metrics. One entry per week.</DialogDescription>

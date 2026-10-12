@@ -15,8 +15,8 @@ const MODEL = "claude-haiku-5-5";
 
 // Input validation schema
 const metricSchema = z.object({
-  current: z.number(),
-  change: z.number(),
+  current: z.number().finite().nullable(),
+  change: z.number().finite().nullable(),
   direction: z.string(),
   unit: z.string(),
 });
@@ -166,24 +166,35 @@ RULES:
 
     // Fetch prompt from Langfuse (falls back to hardcoded)
     const langfusePrompt = await fetchPrompt(PROMPT_NAME);
-    const systemPrompt = langfusePrompt?.text ?? FALLBACK_SYSTEM_PROMPT;
+    // Apply grounding rules even when Langfuse supplies the system prompt.
+    const systemPrompt = `${langfusePrompt?.text ?? FALLBACK_SYSTEM_PROMPT}\n\nDATA AVAILABILITY RULES:\nMissing measurements are unknown, not zero. Analyze only recorded metrics. Do not calculate gaps or infer activity, intake, or trends for missing values. A neutral direction with an unavailable change is not evidence of stability. Use dated, non-missing observations for comparisons; state the actual interval, never label a longer comparison as four weeks. If there is no usable baseline, focus on current recorded metrics and goals and say momentum cannot yet be assessed.`;
     const promptVersion = langfusePrompt?.version;
 
+    const metrics = [
+      { name: "Weight", metric: stats.weight, goal: goals.goal_weight, unit: "lbs" },
+      { name: "Body Fat", metric: stats.bodyFat, goal: goals.goal_body_fat_percentage, unit: "%" },
+      { name: "Exercise", metric: stats.exercise, goal: goals.goal_avg_exercise_min_per_day, unit: "min/day" },
+      { name: "Skin Fold", metric: stats.skinFold, goal: goals.goal_skin_fold_mm, unit: "mm" },
+      { name: "Daily Calories", metric: stats.calories, goal: goals.goal_avg_daily_calories, unit: "cal" },
+    ];
     const userPrompt = `Here are my current fitness metrics and goals:
 
 CURRENT METRICS:
-Weight: ${stats.weight.current} ${stats.weight.unit}
-Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit}
-Exercise: ${stats.exercise.current} ${stats.exercise.unit}/day
-Skin Fold: ${stats.skinFold.current} ${stats.skinFold.unit}
-Daily Calories: ${stats.calories.current} ${stats.calories.unit}
+${metrics.map(({ name, metric, unit }) => `${name}: ${metric.current === null ? "not recorded" : `${metric.current} ${unit}`}`).join("\n")}
 
 MY TARGETS:
-${goals.goal_weight ? `Weight: ${goals.goal_weight} lbs (current gap: ${Math.abs(stats.weight.current - goals.goal_weight).toFixed(1)} lbs ${stats.weight.current > goals.goal_weight ? "above" : "below"} target)` : "Weight: no goal set"}
-${goals.goal_body_fat_percentage ? `Body Fat: ${goals.goal_body_fat_percentage}% (current gap: ${Math.abs(stats.bodyFat.current - goals.goal_body_fat_percentage).toFixed(1)}% ${stats.bodyFat.current > goals.goal_body_fat_percentage ? "above" : "below"} target)` : "Body Fat: no goal set"}
-${goals.goal_skin_fold_mm ? `Skin Fold: ${goals.goal_skin_fold_mm} mm (current gap: ${Math.abs(stats.skinFold.current - goals.goal_skin_fold_mm).toFixed(1)} mm ${stats.skinFold.current > goals.goal_skin_fold_mm ? "above" : "below"} target)` : "Skin Fold: no goal set"}
-${goals.goal_avg_daily_calories ? `Daily Calories: ${goals.goal_avg_daily_calories} cal (current gap: ${Math.abs(stats.calories.current - goals.goal_avg_daily_calories)} cal ${stats.calories.current > goals.goal_avg_daily_calories ? "above" : "below"} target)` : "Daily Calories: no goal set"}
-${goals.goal_avg_exercise_min_per_day ? `Exercise: ${goals.goal_avg_exercise_min_per_day} min/day (current gap: ${Math.abs(stats.exercise.current - goals.goal_avg_exercise_min_per_day)} min ${stats.exercise.current < goals.goal_avg_exercise_min_per_day ? "below" : "above"} target)` : "Exercise: no goal set"}
+${metrics.map(({ name, metric, goal, unit }) => {
+  if (goal == null) return `${name}: no goal set`;
+  if (metric.current === null) return `${name}: ${goal} ${unit} (gap unavailable, current measurement not recorded)`;
+  const position = metric.current === goal ? "at" : metric.current > goal ? "above" : "below";
+  return `${name}: ${goal} ${unit} (current gap: ${Math.abs(metric.current - goal).toFixed(1)} ${unit} ${position} target)`;
+}).join("\n")}
+
+REPORTED COMPARISONS:
+${metrics.map(({ name, metric, unit }) => {
+  if (metric.current === null || metric.change === null || !stats.comparisonDate || stats.comparisonDaysAgo == null) return `${name}: comparison unavailable`;
+  return `${name}: signed change ${metric.change} ${unit} since week ending ${stats.comparisonDate}, over ${stats.comparisonDaysAgo} days (not necessarily four weeks)`;
+}).join("\n")}
 
 ${
   history && history.length > 0
