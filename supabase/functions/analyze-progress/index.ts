@@ -11,7 +11,7 @@ import { fetchPrompt, traceLLMCall } from "../_shared/langfuse.ts";
 
 // @ts-ignore - Deno global is available in Deno runtime
 const claudeApiKey = Deno.env.get("CLAUDE_API_KEY");
-const MODEL = "claude-haiku-4-5-20251001";
+const MODEL = "claude-haiku-5-5";
 
 // Input validation schema
 const metricSchema = z.object({
@@ -207,7 +207,9 @@ Provide your coaching assessment.`;
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 300,
+        // Haiku 5.5 thinks by default; reserve room for thinking plus the short answer.
+        max_tokens: 2048,
+        output_config: { effort: "low" },
         system: systemPrompt,
         messages: [{ role: "user", content: userPrompt }],
       }),
@@ -245,7 +247,14 @@ Provide your coaching assessment.`;
     const data = await response.json();
     console.log("Anthropic API response received");
 
-    const analysis = data.content?.[0]?.text;
+    if (data.stop_reason === "refusal" || data.stop_reason === "max_tokens") {
+      throw new Error("Failed to generate a complete analysis");
+    }
+
+    const analysis = data.content
+      ?.filter((block: { type: string; text?: string }) => block.type === "text" && typeof block.text === "string")
+      .map((block: { text: string }) => block.text)
+      .join("\n\n").trim();
 
     if (!analysis) {
       console.error("No analysis content in response");

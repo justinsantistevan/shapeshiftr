@@ -90,7 +90,7 @@ Two distinct AI coaching features delivered via Supabase Edge Functions, with al
 - **Authentication**: Supabase Auth
 - **Storage**: Supabase Storage for progress photos
 - **Edge Functions**: Supabase Edge Functions (Deno)
-- **AI Models**: Gemini 3.1 Flash-Lite (chat coach) and Claude Haiku 4.5 (progress analysis, LLM judges) via Anthropic and Google AI APIs
+- **AI Models**: Gemini 3.5 Flash-Lite (Ask Coach), Claude Haiku 5.5 (progress analysis and the three production Langfuse LLM-as-judge evaluators), and Claude Haiku 4.5 (local offline judges)
 - **Observability**: Langfuse (traces, prompt management, eval scores, user feedback)
 
 ### Database Schema
@@ -140,7 +140,7 @@ Two distinct AI coaching features delivered via Supabase Edge Functions, with al
 #### `analyze-progress`
 
 - **Purpose**: Analyzes user fitness trends and provides coaching insights
-- **Model**: Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)
+- **Model**: Claude Haiku 5.5 (`claude-haiku-5-5`)
 - **Input**: Current fitness stats, goals, and gap analysis
 - **Output**: 2-3 paragraph coaching analysis (<100 words)
 - **Features**:
@@ -149,6 +149,12 @@ Two distinct AI coaching features delivered via Supabase Edge Functions, with al
   - Personalized coaching based on trends
   - Medical boundary enforcement
   - Langfuse tracing with token usage and prompt version
+
+Progress analysis uses low effort (`output_config.effort: "low"`) and a 2,048-token
+output budget to accommodate Haiku 5.5's default adaptive thinking. Only text
+content blocks are displayed; thinking blocks are excluded. Refused or truncated
+responses are treated as failed assessments rather than shown as complete results.
+The prompt still requests fewer than 100 words.
 
 #### `chat-coach`
 
@@ -263,7 +269,7 @@ Values outside these ranges are flagged as anomalies and the user is advised to 
 
 ### LLM-as-Judge Evaluators
 
-Three LLM judges (all running Claude Haiku 4.5, the model they were calibrated on) evaluate every coach response against specific criteria. These judges run both offline during eval development and in production via Langfuse evaluator prompts on live traces.
+Three LLM judges evaluate coach responses against specific criteria. The production Langfuse evaluators now use Claude Haiku 5.5, as configured in the Langfuse UI. The local offline judges still use Claude Haiku 4.5 (`claude-haiku-4-5-20251001`) in `scripts/lib/judges.ts`; changing the Langfuse evaluator model does not update that local setting.
 
 | Judge | Criteria | What it checks |
 |-------|----------|----------------|
@@ -271,7 +277,7 @@ Three LLM judges (all running Claude Haiku 4.5, the model they were calibrated o
 | **Quality** | `no_unwanted_follow_up`, `appropriate_length` | Unnecessary trailing questions, response conciseness |
 | **Factual Accuracy** | `arithmetic_correct`, `units_and_timeframes_correct`, `no_hallucinated_context` | Math errors, unit confusion, fabricated data |
 
-Each judge outputs structured JSON with per-criterion pass/fail verdicts, an overall score (1 = pass, 0 = fail), and detailed reasoning. Judge prompts were iteratively calibrated against 66 human-labeled traces across 4 rounds, achieving 86-100% agreement per dimension.
+Each judge outputs structured JSON with per-criterion pass/fail verdicts, an overall score (1 = pass, 0 = fail), and detailed reasoning. Judge prompts were iteratively calibrated on Claude Haiku 4.5 against 66 human-labeled traces across 4 rounds, achieving 86-100% agreement per dimension. These are historical calibration results, not verified Haiku 5.5 results. Re-run calibration before attributing the same agreement rates to the new evaluator model or comparing scores across the model change.
 
 **Production monitoring:** Judge prompts are stored in Langfuse and configured to run as evaluators on all production traces. This provides continuous safety monitoring without manual review of every response.
 
@@ -320,7 +326,9 @@ Every LLM call in production is traced to Langfuse with:
 
 ### Production Evaluators
 
-LLM judge prompts are stored in Langfuse and configured to run as evaluators on all production traces. This means every live coach response is automatically scored for safety, quality, and factual accuracy — providing continuous monitoring without manual review.
+LLM judge prompts are stored in Langfuse and configured to run as evaluators on all production traces. The Safety, Quality, and Factual Accuracy evaluators use Claude Haiku 5.5, following the evaluator-model update reported by the project owner. Their model settings live in Langfuse, independently of the application generation models and local offline judge configuration.
+
+The application models remain separate: `chat-coach` uses Gemini 3.5 Flash-Lite by default, while `analyze-progress` uses Claude Haiku 5.5. Their settings live in the Edge Function source, independently of the production judge settings in Langfuse.
 
 ## Evaluation Pipeline
 
@@ -376,8 +384,9 @@ The script exits with code 1 on threshold breaches, making it compatible with an
 
 ### Anthropic
 
-- **Model**: `claude-haiku-4-5-20251001` (Claude Haiku 4.5)
-- **Use Cases**: Progress analysis, LLM-as-judge evaluators
+- **Application model**: `claude-haiku-5-5` (Claude Haiku 5.5), used for progress analysis
+- **Local offline judge model**: `claude-haiku-4-5-20251001` (Claude Haiku 4.5), configured separately in `scripts/lib/judges.ts`
+- **Production evaluator model**: Claude Haiku 5.5, selected separately for the three LLM-as-judge evaluators in Langfuse; the exact API model identifier is managed there
 - **SDK**: `@anthropic-ai/sdk`
 
 ### Langfuse
