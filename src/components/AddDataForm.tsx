@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { usePhotoCropping } from "@/hooks/usePhotoCropping";
+import { useModalViewport } from "@/hooks/useModalViewport";
 
 const formSchema = z.object({
   weight: z
@@ -57,6 +58,7 @@ interface AddDataFormProps {
   onSuccess: () => void;
 }
 export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps) {
+  const viewportStyle = useModalViewport(open);
   const [isLoading, setIsLoading] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [shouldWiggle, setShouldWiggle] = useState(false);
@@ -307,9 +309,10 @@ export function AddDataForm({ open, onOpenChange, onSuccess }: AddDataFormProps)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
+        style={viewportStyle}
         className={cn(
-          // Anchor mobile dialogs inside the visible viewport, not Safari's larger layout viewport.
-          "sm:max-w-[425px] top-[calc(1rem+env(safe-area-inset-top))] translate-y-0 max-h-[calc(100dvh-2rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] overflow-y-auto overscroll-contain pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:top-[50%] sm:translate-y-[-50%]",
+          // Use the visual rectangle for position AND size; dvh remains the fallback.
+          "sm:max-w-[425px] left-[calc(var(--modal-viewport-left,0px)+var(--modal-viewport-width,100%)/2)] w-[var(--modal-viewport-width,100%)] top-[calc(var(--modal-viewport-top,0px)+1rem+env(safe-area-inset-top))] translate-y-0 max-h-[calc(var(--modal-viewport-height,100dvh)-2rem-env(safe-area-inset-top)-env(safe-area-inset-bottom))] overflow-y-auto overscroll-contain pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:top-[calc(var(--modal-viewport-top,0px)+(var(--modal-viewport-height,100dvh)+env(safe-area-inset-top)-env(safe-area-inset-bottom))/2)] sm:translate-y-[-50%]",
           shouldWiggle && "animate-wiggle",
         )}
       >

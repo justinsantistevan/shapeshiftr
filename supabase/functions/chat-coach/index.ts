@@ -118,12 +118,12 @@ COACHING APPROACH:
 
 interface UserContextData {
   stats?: {
-    weight?: { current: number; unit: string };
-    bodyFat?: { current: number; unit: string };
-    exercise?: { current: number; unit: string };
-    skinFold?: { current: number; unit: string };
-    calories?: { current: number; unit: string };
-  };
+    weight?: { current: number | null; unit: string };
+    bodyFat?: { current: number | null; unit: string };
+    exercise?: { current: number | null; unit: string };
+    skinFold?: { current: number | null; unit: string };
+    calories?: { current: number | null; unit: string };
+  } | null;
   goals?: {
     goal_weight?: number | null;
     goal_body_fat_percentage?: number | null;
@@ -149,16 +149,17 @@ function buildUserContext(data: UserContextData): string {
 
   sections.push("Current User Context:");
 
-  if (stats && stats.weight && stats.bodyFat && stats.exercise && stats.skinFold && stats.calories) {
-    sections.push(`
-Current Week Metrics:
-Weight: ${stats.weight.current}${stats.weight.unit}
-Body Fat: ${stats.bodyFat.current}${stats.bodyFat.unit}
-Exercise: ${stats.exercise.current}${stats.exercise.unit}/day
-Skin Fold: ${stats.skinFold.current}${stats.skinFold.unit}
-Daily Calories: ${stats.calories.current}${stats.calories.unit}
-
-(For any comparisons or trend analysis, use the FULL WEEKLY HISTORY table below — it contains all historical data.)`);
+  // Include recorded metrics independently; missing measurements are not zero.
+  const metricLines = [
+    ['weight', 'Weight', ''], ['bodyFat', 'Body Fat', ''],
+    ['exercise', 'Exercise', '/day'], ['skinFold', 'Skin Fold', ''],
+    ['calories', 'Daily Calories', ''],
+  ].flatMap(([key, label, suffix]) => {
+    const metric = stats?.[key as keyof NonNullable<UserContextData['stats']>];
+    return metric?.current != null ? [`${label}: ${metric.current}${metric.unit}${suffix}`] : [];
+  });
+  if (metricLines.length > 0) {
+    sections.push(`Current Week Metrics:\n${metricLines.join("\n")}\n\n(For any comparisons or trend analysis, use the FULL WEEKLY HISTORY table below — it contains all historical data.)`);
   } else {
     sections.push("No current stats available");
   }
@@ -194,8 +195,9 @@ ${history.map((h) => `${h.week_end_date} | ${h.weight ?? "N/A"} lbs | ${h.body_f
 // Input validation schema
 const metricSchema = z
   .object({
-    current: z.number(),
-    change: z.number().optional(),
+    // FitnessTrend uses null for an unrecorded metric or unavailable comparison.
+    current: z.number().nullable(),
+    change: z.number().nullable().optional(),
     direction: z.string().optional(),
     unit: z.string(),
   })
@@ -213,6 +215,7 @@ const chatRequestSchema = z.object({
       comparisonDate: z.string().optional(),
       comparisonDaysAgo: z.number().optional(),
     })
+    .nullable()
     .optional(),
   goals: z
     .object({

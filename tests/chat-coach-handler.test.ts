@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { build } from 'esbuild';
 import { createRequire } from 'node:module';
 import vm from 'node:vm';
+import type { FitnessStats } from '../src/lib/fitnessCalculations.ts';
 
 const require = createRequire(import.meta.url);
 const bundle = await build({
@@ -49,6 +50,110 @@ test('handler uses new default model while preserving reply and metadata', async
   assert.match(app.requests[0].url, /models\/gemini-3\.5-flash-lite:generateContent/);
   const body = JSON.parse(app.requests[0].init!.body as string);
   assert.equal(body.contents.at(-1).parts[0].text, 'Advice please');
+});
+
+// Exercise the real frontend calculator, stubbing only its database/auth boundary.
+const fitnessBundle = await build({
+  entryPoints: ['src/lib/fitnessCalculations.ts'], bundle: true, write: false,
+  platform: 'node', format: 'cjs',
+  plugins: [{ name: 'fitness-data-test', setup(build) {
+    build.onResolve({ filter: /^@\/integrations\/supabase\/client$/ }, () => ({ path: 'client', namespace: 'fitness-stub' }));
+    build.onLoad({ filter: /.*/, namespace: 'fitness-stub' }, () => ({
+      contents: 'export const supabase = globalThis.fitnessClient;', loader: 'js',
+    }));
+  }}],
+});
+async function frontendStats(entries: Array<Record<string, unknown>>) {
+  const module = { exports: {} as { calculateFitnessStats: () => Promise<FitnessStats | null> } };
+  vm.runInNewContext(fitnessBundle.outputFiles[0].text, {
+    module, exports: module.exports, console,
+    fitnessClient: {
+      auth: { getUser: async () => ({ data: { user: { id: 'test-user' } } }) },
+      from: () => ({ select: () => ({ eq: () => ({ order: async () => ({ data: entries }) }) }) }),
+    },
+  });
+  return module.exports.calculateFitnessStats();
+}
+
+const screenshotMessage = 'Body fat doesn’t seem to be consistent, I can’t figure it out';
+const partialEntry = {
+  week_end_date: '2026-10-11', weight: 160, body_fat_percentage: 18,
+  skin_fold_mm: null, avg_daily_calories: null, avg_exercise_min_per_day: 0,
+};
+
+test('accepts the screenshot message with real frontend partial stats and no comparison week', async () => {
+  const stats = await frontendStats([partialEntry]);
+  assert.ok(stats);
+  assert.equal(stats.bodyFat.change, null);
+  assert.equal(stats.skinFold.current, null);
+  // This is the body sent by ProgressAnalysis.sendMessage, including UI message extras.
+  const app = harness();
+  const response = await app.call(JSON.stringify({
+    message: screenshotMessage, stats,
+    goals: { goal_weight: null, goal_avg_exercise_min_per_day: 0 }, affirmations: [],
+    conversationHistory: [{ role: 'user', content: 'Previous question', id: 'test-message', timestamp: '2026-10-11' }],
+    history: [partialEntry],
+  }));
+  assert.equal(response.status, 200);
+  const body = JSON.parse(app.requests[0].init!.body as string);
+  assert.equal(body.contents.at(-1).parts[0].text, screenshotMessage);
+  const context = body.system_instruction.parts[0].text;
+  assert.match(context, /Weight: 160lbs/);
+  assert.match(context, /Body Fat: 18%/);
+  assert.match(context, /Exercise: 0min\/day/);
+  assert.doesNotMatch(context, /nullmm|nullcal|Skin Fold: 0|Daily Calories: 0/);
+  assert.match(context, /N\/A mm \| N\/A cal/);
+});
+
+test('accepts the real frontend request when no fitness entries exist', async () => {
+  const stats = await frontendStats([]);
+  assert.equal(stats, null);
+  const app = harness();
+  const response = await app.call(JSON.stringify({
+    message: screenshotMessage, stats, goals: {}, affirmations: [], conversationHistory: [], history: [],
+  }));
+  assert.equal(response.status, 200);
+  const body = JSON.parse(app.requests[0].init!.body as string);
+  assert.match(body.system_instruction.parts[0].text, /No current stats available/);
+});
+
+test('isolates nullable fitness fields from already-supported nullable goal/history numbers', async () => {
+  for (const context of [
+    {},
+    { stats: { weight: { current: 160, change: null, unit: 'lbs' } } },
+    { stats: { skinFold: { current: null, unit: 'mm' } } },
+    { goals: { goal_weight: null }, history: [partialEntry] },
+  ]) {
+    const app = harness();
+    const response = await app.call(JSON.stringify({ message: screenshotMessage, ...context }));
+    assert.equal(response.status, 200, JSON.stringify(context));
+    assert.equal(app.requests.length, 1);
+  }
+});
+
+test('numeric strings and malformed optional context remain invalid without calling Google', async () => {
+  for (const context of [
+    { stats: 'invalid' },
+    { stats: { weight: { current: '160', unit: 'lbs' } } },
+    { stats: { weight: { current: 160, change: '0', unit: 'lbs' } } },
+    { goals: { goal_weight: '160' } },
+    { history: [{ ...partialEntry, weight: '160' }] },
+    { conversationHistory: [{ role: 'user', content: null }] },
+    { goals: null }, { history: null }, { conversationHistory: null },
+  ]) {
+    const app = harness();
+    const response = await app.call(JSON.stringify({ message: screenshotMessage, ...context }));
+    assert.equal(response.status, 400);
+    assert.equal((await response.json()).code, 'INVALID_REQUEST');
+    assert.equal(app.requests.length, 0);
+  }
+});
+
+test('message length boundaries remain enforced with nullable stats', async () => {
+  for (const [message, status] of [['', 400], ['x', 200], ['x'.repeat(5000), 200], ['x'.repeat(5001), 400]] as const) {
+    const app = harness();
+    assert.equal((await app.call(JSON.stringify({ message, stats: null }))).status, status);
+  }
 });
 
 test('handler supports CHAT_COACH_MODEL override', async () => {
