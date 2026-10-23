@@ -45,3 +45,7 @@ scripts/
 # Local tooling (contains credentials / machine-specific state)
 .mcp.json
 supabase/.temp/
+
+# Generated lockfiles not used by this project (npm: package-lock.json)
+deno.lock
+pnpm-lock.yaml
