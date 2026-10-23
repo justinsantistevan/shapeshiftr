@@ -41,3 +41,7 @@ scripts/
 # Local agent settings (may contain credentials)
 .claude/settings.local.json
 .claude/settings.json
+
+# Local tooling (contains credentials / machine-specific state)
+.mcp.json
+supabase/.temp/

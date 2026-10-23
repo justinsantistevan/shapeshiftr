@@ -1,5 +1,6 @@
 // Langfuse tracing + prompt management for Supabase Edge Functions
-// Uses Langfuse REST API directly (no npm dependencies needed)
+// Uses the Langfuse REST API directly (no npm dependencies needed):
+// traces go through OTLP/HTTP (v4 ingestion), scores through POST /api/public/scores.
 
 // @ts-ignore - Deno global is available in Deno runtime
 const LANGFUSE_PUBLIC_KEY = Deno.env.get("LANGFUSE_PUBLIC_KEY");
@@ -94,10 +95,44 @@ export interface LLMTraceParams {
   metadata?: Record<string, unknown>;
 }
 
+// --- OTLP/HTTP JSON helpers (Langfuse v4 ingestion) ---
+
+type OtlpAttribute = {
+  key: string;
+  value: { stringValue?: string; intValue?: string; boolValue?: boolean };
+};
+
+const strAttr = (key: string, value: string): OtlpAttribute => ({
+  key,
+  value: { stringValue: value },
+});
+
+const jsonAttr = (key: string, value: unknown): OtlpAttribute =>
+  strAttr(key, JSON.stringify(value));
+
+function randomHex(bytes: number): string {
+  return Array.from(crypto.getRandomValues(new Uint8Array(bytes)))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+const toNanos = (ms: number): string => (BigInt(Math.trunc(ms)) * 1_000_000n).toString();
+
+/** Metadata attributes: string values as-is, everything else JSON-encoded. */
+function metadataAttrs(prefix: string, metadata: Record<string, unknown>): OtlpAttribute[] {
+  return Object.entries(metadata)
+    .filter(([, v]) => v !== undefined && v !== null)
+    .map(([k, v]) => strAttr(`${prefix}.${k}`, typeof v === "string" ? v : JSON.stringify(v)));
+}
+
 /**
- * Send a trace + generation to Langfuse's batch ingestion endpoint.
- * Returns the traceId so callers can store it and attach scores later.
+ * Send a trace (root span + generation child) to Langfuse via OTLP/HTTP.
+ * Returns the trace ID (32-char hex) so callers can store it and attach scores later.
  * Non-fatal: errors are logged but never thrown.
+ *
+ * Trace-level attributes (trace name, metadata) are set on BOTH observations so
+ * they can be filtered/aggregated on either. Overall input/output live on the
+ * root observation.
  */
 export async function traceLLMCall(params: LLMTraceParams, signal?: AbortSignal): Promise<string | null> {
   if (!LANGFUSE_PUBLIC_KEY || !LANGFUSE_SECRET_KEY) {
@@ -105,90 +140,129 @@ export async function traceLLMCall(params: LLMTraceParams, signal?: AbortSignal)
     return null;
   }
 
-  const traceId = crypto.randomUUID();
+  const traceId = randomHex(16);
 
   try {
-    const generationId = crypto.randomUUID();
+    const rootSpanId = randomHex(8);
+    const generationSpanId = randomHex(8);
+    const fullMessages = [
+      { role: "system", content: params.systemPrompt },
+      ...params.messages,
+    ];
+    const metadata = { model: params.model, ...(params.metadata || {}) };
 
-    const events = [
-      {
-        id: crypto.randomUUID(),
-        type: "trace-create",
-        timestamp: new Date(params.startTime).toISOString(),
-        body: {
-          id: traceId,
-          name: params.name,
-          input: {
-            user_message: params.messages[params.messages.length - 1]?.content ?? "",
-            conversation_history: params.messages.length > 1
-              ? params.messages.slice(0, -1).filter((m) => m.role !== "system")
-              : [],
-            messages: [
-              { role: "system", content: params.systemPrompt },
-              ...params.messages,
-            ],
-          },
-          output: params.output ? { content: params.output } : undefined,
-          metadata: {
-            model: params.model,
-            ...params.metadata,
-          },
-        },
-      },
-      {
-        id: crypto.randomUUID(),
-        type: "generation-create",
-        timestamp: new Date(params.startTime).toISOString(),
-        body: {
-          id: generationId,
-          traceId,
-          name: `${params.name}-llm`,
-          model: params.model,
-          startTime: new Date(params.startTime).toISOString(),
-          endTime: new Date(params.endTime).toISOString(),
-          input: {
-            messages: [
-              { role: "system", content: params.systemPrompt },
-              ...params.messages,
-            ],
-          },
-          output: params.output || undefined,
-          metadata: {
-            ...(params.metadata || {}),
-            ...(params.promptName
-              ? { promptName: params.promptName, promptVersion: params.promptVersion }
-              : {}),
-          },
-          usage: params.usage
-            ? {
-                input: params.usage.input_tokens,
-                output: params.usage.output_tokens,
+    const traceAttrs: OtlpAttribute[] = [
+      strAttr("langfuse.trace.name", params.name),
+      ...metadataAttrs("langfuse.trace.metadata", metadata),
+    ];
+
+    const rootInput = {
+      user_message: params.messages[params.messages.length - 1]?.content ?? "",
+      conversation_history: params.messages.length > 1
+        ? params.messages.slice(0, -1).filter((m) => m.role !== "system")
+        : [],
+      messages: fullMessages,
+    };
+
+    const rootSpan = {
+      traceId,
+      spanId: rootSpanId,
+      name: params.name,
+      kind: 1,
+      startTimeUnixNano: toNanos(params.startTime),
+      endTimeUnixNano: toNanos(params.endTime),
+      attributes: [
+        strAttr("langfuse.observation.type", "span"),
+        ...traceAttrs,
+        jsonAttr("langfuse.observation.input", rootInput),
+        ...(params.output
+          ? [jsonAttr("langfuse.observation.output", { content: params.output })]
+          : []),
+        ...metadataAttrs("langfuse.observation.metadata", metadata),
+        ...(params.error
+          ? [
+              strAttr("langfuse.observation.level", "ERROR"),
+              strAttr("langfuse.observation.status_message", params.error),
+            ]
+          : []),
+      ],
+    };
+
+    const generationSpan = {
+      traceId,
+      spanId: generationSpanId,
+      parentSpanId: rootSpanId,
+      name: `${params.name}-llm`,
+      kind: 1,
+      startTimeUnixNano: toNanos(params.startTime),
+      endTimeUnixNano: toNanos(params.endTime),
+      attributes: [
+        strAttr("langfuse.observation.type", "generation"),
+        ...traceAttrs,
+        strAttr("langfuse.observation.model.name", params.model),
+        jsonAttr("langfuse.observation.input", { messages: fullMessages }),
+        ...(params.output
+          ? [strAttr("langfuse.observation.output", params.output)]
+          : []),
+        ...metadataAttrs("langfuse.observation.metadata", {
+          ...(params.metadata || {}),
+          ...(params.promptName
+            ? { promptName: params.promptName, promptVersion: params.promptVersion }
+            : {}),
+        }),
+        ...(params.usage
+          ? [
+              jsonAttr("langfuse.observation.usage_details", {
+                input: params.usage.input_tokens ?? 0,
+                output: params.usage.output_tokens ?? 0,
                 total:
                   (params.usage.input_tokens || 0) +
                   (params.usage.output_tokens || 0),
-              }
-            : undefined,
-          ...(params.promptName
-            ? {
-                promptName: params.promptName,
-                promptVersion: params.promptVersion,
-              }
-            : {}),
-          statusMessage: params.error || undefined,
-          level: params.error ? "ERROR" : "DEFAULT",
+              }),
+            ]
+          : []),
+        ...(params.promptName && params.promptVersion !== undefined
+          ? [
+              strAttr("langfuse.observation.prompt.name", params.promptName),
+              {
+                key: "langfuse.observation.prompt.version",
+                value: { intValue: String(params.promptVersion) },
+              },
+            ]
+          : []),
+        ...(params.error
+          ? [
+              strAttr("langfuse.observation.level", "ERROR"),
+              strAttr("langfuse.observation.status_message", params.error),
+            ]
+          : []),
+      ],
+    };
+
+    const body = {
+      resourceSpans: [
+        {
+          resource: { attributes: [strAttr("service.name", "shapeshiftr-edge")] },
+          scopeSpans: [
+            {
+              scope: { name: "shapeshiftr.langfuse" },
+              spans: [rootSpan, generationSpan],
+            },
+          ],
         },
-      },
-    ];
+      ],
+    };
 
     const auth = btoa(`${LANGFUSE_PUBLIC_KEY}:${LANGFUSE_SECRET_KEY}`);
-    const resp = await fetch(`${LANGFUSE_HOST}/api/public/ingestion`, {
+    const resp = await fetch(`${LANGFUSE_HOST}/api/public/otel/v1/traces`, {
       signal,
       method: "POST",
       headers: {
         Authorization: `Basic ${auth}`,
         "Content-Type": "application/json",
+        "x-langfuse-ingestion-version": "4",
       },
-      body: JSON.stringify({ batch: events }),
+      body: JSON.stringify(body),
     });
 
     if (!resp.ok) {
